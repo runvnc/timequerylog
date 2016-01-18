@@ -1,16 +1,23 @@
 import 'babel-core';
 import 'babel-polyfill';
+import {inspect} from 'util';
 import {stringify, parse} from 'JSONStream';
+import {createWriteStream} from 'fs';
+import {dirname} from 'path';
+import {sync as mkdirp} from 'mkdirp';
+import pathExists from 'path-exists';
 import moment from 'moment';
+import queue from 'queue';
 
 let cfg = {path:process.cwd()};
 let streams = {};
 let lastAccessTime = {};
+let q = queue({concurrency:1});
 
 setInterval( () => {
   for (let file in lastAccessTime) {
     let now = new Date().getTime();
-    if (now - lastAccessTime.getTime() > 20000) {
+    if (now - lastAccessTime[file].getTime() > 20000) {
       streams[file].close();
       delete streams[file];
       delete lastAccessTime[file];
@@ -23,52 +30,52 @@ export function config(cfg) {
 }
 
 export function whichFile(type, datetime) {
-  return `${cfg.path}/${type_GMT}/${moment(datetime).format('YY-MM-DD/hhA')}`; 
+  let gmt = moment(datetime).utcOffset(0);
+  return `${cfg.path}/${type}_GMT/${gmt.format('YY-MM-DD/hhA')}`; 
 }
 
 export function log(type,obj,time = new Date()) {
-  queue.push(cb => { dolog({type, obj, time}, cb);});  
+  q.push(cb => { dolog(type, obj, time, cb);});  
+  q.start(e=> { console.error('Error running queue: ', e)});
 }
 
 function getWriteStream(fname, cb) {
+  console.log(fname);
   if (streams[fname]) {
     lastAccessTime[fname] = new Date();
-    return streams[fname];
+    return cb(streams[fname]);
   }
-  let fileStream = createWriteStream(fname); 
-  let jsonStream = stringify();
-  jsonStream.pipe(fileStream);
-  streams[fname] = jsonStream;
-  lastAccessTime[fname] = new Date();
-  return jsonStream;
+  console.log('not found streams is', inspect(streams));
+  pathExists(dirname(fname), exists => {
+    if (!exists) mkdirp(dirname(fname)); 
+    let fileStream = createWriteStream(fname); 
+    let jsonStream = stringify();
+    jsonStream.pipe(fileStream);
+    streams[fname] = jsonStream;
+    lastAccessTime[fname] = new Date();
+    return cb(jsonStream);
+  });
 }
 
 function dolog(type, obj, time = new Date(), cb) {
   let fname = whichFile(type, time);
   let toWrite = {time, type};
-  for (let key of obj) toWrite[key] = obj[key];
+  for (let key in obj) toWrite[key] = obj[key];
   getWriteStream(fname, stream => {
     stream.write(toWrite);
     cb();
   }); 
 }
 
-/*
-function dolog(type, obj, time = new Date(), cb) {
-  let fname = whichFile(type, time);
-  let found = await exists(fname);
-  let str = JSON.stringify(obj);
-  if (!found) {
-    await appendFile(fname, `[${str}']'`);
-    return;   
-  }
-  let status = await stat(fname);
-  console.log(status);  
-}
-*/
-
 export function whichFiles(type, start, end) {
-
+  let endMS = moment(end).valueOf;
+  let st = moment(start);
+  let result = [];
+  for (let offset = 0; st.add(offset,'m').valueOf() <= endMS; offset+=30) {
+    let fname = whichFile(st.add(offset,'m').toDate());
+    if (!(fname in result)) result.push(fname);
+  }
+  return result;
 }
 
 export async function query(type, start, end, matchFunction) {
