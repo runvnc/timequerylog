@@ -13,11 +13,20 @@
     "JSONStream": "^1.0.7",
     "babel-core": "^6.3.26",
     "babel-polyfill": "^6.3.14",
+    "event-stream": "^3.3.2",
     "moment": "^2.11.1",
     "mz": "^2.1.0",
+    "path-exists": "^2.1.0",
     "queue": "^3.1.0"
   },
-  "keywords": [ "JSON", "log", "logging", "query", "time series", "hourly"],
+  "keywords": [
+    "JSON",
+    "log",
+    "logging",
+    "query",
+    "time series",
+    "hourly"
+  ],
   "devDependencies": {
     "babel-plugin-transform-es2015-template-literals": "^6.3.13",
     "babel-preset-es2015": "^6.3.13",
