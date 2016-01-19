@@ -105,10 +105,6 @@ function byTime(a, b) {
 }
 
 export async function whichFiles(type, start, end) {
-  // for each
-  // check if date is between start and end
-  // if so
-  // add to results
   let st = moment(start).valueOf();
   let en = moment(end).valueOf();
   let dirs = [];
@@ -118,7 +114,6 @@ export async function whichFiles(type, start, end) {
   dirs = dirs.sort(byDate) ;
   dirs = dirs.filter( d => moment(d+' +0000', 'YYYY-MM-DD Z').valueOf() >= st );
   if (dirs.length === 0) return [];
-  console.log('dirs is ', dirs);
 
   let result = [];
   for (let dir of dirs) {
@@ -127,20 +122,16 @@ export async function whichFiles(type, start, end) {
       files = files.sort(byTime);      
       files = files.filter( file => {
         let timeMS = moment(`${dir} ${file} +0000`,'YYYY-MM-DD hhA Z').valueOf();
-        console.log('timems is ', timeMS, ' st is ', st, ' en is ', en);
         return timeMS >= st && timeMS <= en; 
       });
-      console.log('files is now ', files);
       let paths = files.map( f => `${cfg.path}/${type}_GMT/${dir}/${f}` );
       Array.prototype.push.apply(result, paths);
-    } catch (e) { console.log('1m',e); return []; }
+    } catch (e) { console.error(e); return []; }
   }
-  console.log('whichfiles returning ', result);
   return result;
 }
 
 async function filterFile(fname, start, end, matchFunction) {
-  console.log('filter file fname = ', fname);
   let data = await new Promise( res => {
     try {
       let results = [];
@@ -148,17 +139,14 @@ async function filterFile(fname, start, end, matchFunction) {
       let stream = parse();
       file.pipe(stream);
       stream.pipe(mapSync( data => {
-        console.log('a');
-        console.log(data);
         data.time = new Date(data.time);
-        console.log(typeof data.time);
         if (data.time >= start && data.time <= end &&
             matchFunction(data)) {
           results.push(data)
           return data;
         }
       }));
-      stream.on('end', () => { console.log(1); res(results); console.log(2)});
+      stream.on('end', () => { res(results);});
     } catch (e) {
       console.error(inspect(e));
     }
@@ -174,10 +162,3 @@ export async function query(type, start, end, matchFunction) {
   }
   return results;
 }
-
-// query it
-// try to 
-// find order ids that are missing
-// in pnl report
-// show recent requests
-// color-coded

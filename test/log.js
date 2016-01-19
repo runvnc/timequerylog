@@ -36,7 +36,7 @@ var test = (function () {
                       _context.prev = 3;
                       _context.next = 6;
                       return (0, _log.query)('req', st, en, function (d) {
-                        return true;
+                        return d.url;
                       });
 
                     case 6:

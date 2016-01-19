@@ -11,7 +11,7 @@ async function test() {
     let st = moment("1995-12-25").toDate();
     let en = new Date();
     try {
-      let rows = await query('req', st, en, d => true);
+      let rows = await query('req', st, en, d => d.url);
       console.log('rows returned');
       console.log(inspect(rows));
     } catch (e) {
