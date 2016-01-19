@@ -161,10 +161,6 @@ var whichFiles = exports.whichFiles = (function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            // for each
-            // check if date is between start and end
-            // if so
-            // add to results
             st = (0, _moment2.default)(start).valueOf();
             en = (0, _moment2.default)(end).valueOf();
             dirs = [];
@@ -197,13 +193,11 @@ var whichFiles = exports.whichFiles = (function () {
             return _context2.abrupt('return', []);
 
           case 16:
-            console.log('dirs is ', dirs);
-
             result = [];
             _iteratorNormalCompletion = true;
             _didIteratorError = false;
             _iteratorError = undefined;
-            _context2.prev = 21;
+            _context2.prev = 20;
             _loop = regeneratorRuntime.mark(function _loop() {
               var dir, files, paths;
               return regeneratorRuntime.wrap(function _loop$(_context) {
@@ -221,101 +215,98 @@ var whichFiles = exports.whichFiles = (function () {
                       files = files.sort(byTime);
                       files = files.filter(function (file) {
                         var timeMS = (0, _moment2.default)(dir + ' ' + file + ' +0000', 'YYYY-MM-DD hhA Z').valueOf();
-                        console.log('timems is ', timeMS, ' st is ', st, ' en is ', en);
                         return timeMS >= st && timeMS <= en;
                       });
-                      console.log('files is now ', files);
                       paths = files.map(function (f) {
                         return cfg.path + '/' + type + '_GMT/' + dir + '/' + f;
                       });
 
                       Array.prototype.push.apply(result, paths);
-                      _context.next = 16;
+                      _context.next = 15;
                       break;
 
-                    case 12:
-                      _context.prev = 12;
+                    case 11:
+                      _context.prev = 11;
                       _context.t0 = _context['catch'](1);
-                      console.log('1m', _context.t0);return _context.abrupt('return', {
+                      console.error(_context.t0);return _context.abrupt('return', {
                         v: []
                       });
 
-                    case 16:
+                    case 15:
                     case 'end':
                       return _context.stop();
                   }
                 }
-              }, _loop, _this, [[1, 12]]);
+              }, _loop, _this, [[1, 11]]);
             });
             _iterator = dirs[Symbol.iterator]();
 
-          case 24:
+          case 23:
             if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-              _context2.next = 32;
+              _context2.next = 31;
               break;
             }
 
-            return _context2.delegateYield(_loop(), 't1', 26);
+            return _context2.delegateYield(_loop(), 't1', 25);
 
-          case 26:
+          case 25:
             _ret = _context2.t1;
 
             if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
-              _context2.next = 29;
+              _context2.next = 28;
               break;
             }
 
             return _context2.abrupt('return', _ret.v);
 
-          case 29:
+          case 28:
             _iteratorNormalCompletion = true;
-            _context2.next = 24;
+            _context2.next = 23;
             break;
 
-          case 32:
-            _context2.next = 38;
+          case 31:
+            _context2.next = 37;
             break;
 
-          case 34:
-            _context2.prev = 34;
-            _context2.t2 = _context2['catch'](21);
+          case 33:
+            _context2.prev = 33;
+            _context2.t2 = _context2['catch'](20);
             _didIteratorError = true;
             _iteratorError = _context2.t2;
 
-          case 38:
+          case 37:
+            _context2.prev = 37;
             _context2.prev = 38;
-            _context2.prev = 39;
 
             if (!_iteratorNormalCompletion && _iterator.return) {
               _iterator.return();
             }
 
-          case 41:
-            _context2.prev = 41;
+          case 40:
+            _context2.prev = 40;
 
             if (!_didIteratorError) {
-              _context2.next = 44;
+              _context2.next = 43;
               break;
             }
 
             throw _iteratorError;
 
+          case 43:
+            return _context2.finish(40);
+
           case 44:
-            return _context2.finish(41);
+            return _context2.finish(37);
 
           case 45:
-            return _context2.finish(38);
-
-          case 46:
-            console.log('whichfiles returning ', result);
             return _context2.abrupt('return', result);
 
-          case 48:
+          case 46:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee, this, [[3, 9], [21, 34, 38, 46], [39,, 41, 45]]);
+    }, _callee, this, [[3, 9], [20, 33, 37, 45], [38,, 40, 44]]);
   }));
 
   return function whichFiles(_x3, _x4, _x5) {
@@ -330,8 +321,7 @@ var filterFile = (function () {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            console.log('filter file fname = ', fname);
-            _context3.next = 3;
+            _context3.next = 2;
             return new Promise(function (res) {
               try {
                 (function () {
@@ -340,17 +330,14 @@ var filterFile = (function () {
                   var stream = (0, _JSONStream.parse)();
                   file.pipe(stream);
                   stream.pipe((0, _eventStream.mapSync)(function (data) {
-                    console.log('a');
-                    console.log(data);
                     data.time = new Date(data.time);
-                    console.log(_typeof(data.time));
                     if (data.time >= start && data.time <= end && matchFunction(data)) {
                       results.push(data);
                       return data;
                     }
                   }));
                   stream.on('end', function () {
-                    console.log(1);res(results);console.log(2);
+                    res(results);
                   });
                 })();
               } catch (e) {
@@ -358,11 +345,11 @@ var filterFile = (function () {
               }
             });
 
-          case 3:
+          case 2:
             data = _context3.sent;
             return _context3.abrupt('return', data);
 
-          case 5:
+          case 4:
           case 'end':
             return _context3.stop();
         }
@@ -465,10 +452,3 @@ var query = exports.query = (function () {
     return ref.apply(this, arguments);
   };
 })();
-
-// query it
-// try to
-// find order ids that are missing
-// in pnl report
-// show recent requests
-// color-coded

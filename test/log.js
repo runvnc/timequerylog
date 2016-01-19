@@ -59,7 +59,7 @@ var test = (function () {
                   }
                 }
               }, _callee, _this, [[3, 11]]);
-            })), 1000);
+            })), 10);
 
           case 3:
           case 'end':

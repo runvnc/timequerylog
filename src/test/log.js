@@ -17,7 +17,7 @@ async function test() {
     } catch (e) {
       console.error(e);
     }
-  }, 1000);
+  }, 10);
 }
 
 test().then(f=>console.log('done')).catch(e=>console.error(e));
