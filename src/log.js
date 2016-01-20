@@ -164,7 +164,7 @@ export async function query(type, start, end, matchFunction = (d => true)) {
   let files = await whichFiles(type, start, end);
   let results = [];
   for (let fname of files) {
-    results.push(await filterFile(fname, start, end, matchFunction));
+    Array.prototype.push.apply(results, await filterFile(fname, start, end, matchFunction));
   }
   return results;
 }

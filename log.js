@@ -392,68 +392,69 @@ var query = exports.query = (function () {
 
           case 9:
             if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
-              _context4.next = 19;
+              _context4.next = 20;
               break;
             }
 
             fname = _step2.value;
-            _context4.t0 = results;
-            _context4.next = 14;
+            _context4.t0 = Array.prototype.push;
+            _context4.t1 = results;
+            _context4.next = 15;
             return filterFile(fname, start, end, matchFunction);
 
-          case 14:
-            _context4.t1 = _context4.sent;
+          case 15:
+            _context4.t2 = _context4.sent;
 
-            _context4.t0.push.call(_context4.t0, _context4.t1);
+            _context4.t0.apply.call(_context4.t0, _context4.t1, _context4.t2);
 
-          case 16:
+          case 17:
             _iteratorNormalCompletion2 = true;
             _context4.next = 9;
             break;
 
-          case 19:
-            _context4.next = 25;
+          case 20:
+            _context4.next = 26;
             break;
 
-          case 21:
-            _context4.prev = 21;
-            _context4.t2 = _context4['catch'](7);
+          case 22:
+            _context4.prev = 22;
+            _context4.t3 = _context4['catch'](7);
             _didIteratorError2 = true;
-            _iteratorError2 = _context4.t2;
+            _iteratorError2 = _context4.t3;
 
-          case 25:
-            _context4.prev = 25;
+          case 26:
             _context4.prev = 26;
+            _context4.prev = 27;
 
             if (!_iteratorNormalCompletion2 && _iterator2.return) {
               _iterator2.return();
             }
 
-          case 28:
-            _context4.prev = 28;
+          case 29:
+            _context4.prev = 29;
 
             if (!_didIteratorError2) {
-              _context4.next = 31;
+              _context4.next = 32;
               break;
             }
 
             throw _iteratorError2;
 
-          case 31:
-            return _context4.finish(28);
-
           case 32:
-            return _context4.finish(25);
+            return _context4.finish(29);
 
           case 33:
-            return _context4.abrupt('return', results);
+            return _context4.finish(26);
 
           case 34:
+            return _context4.abrupt('return', results);
+
+          case 35:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee3, this, [[7, 21, 25, 33], [26,, 28, 32]]);
+    }, _callee3, this, [[7, 22, 26, 34], [27,, 29, 33]]);
   }));
 
   return function query(_x10, _x11, _x12, _x13) {
