@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.query = exports.whichFiles = undefined;
+exports.queryRecent = exports.query = exports.whichFiles = undefined;
 exports.config = config;
 exports.whichFile = whichFile;
 exports.log = log;
@@ -155,49 +155,53 @@ var whichFiles = exports.whichFiles = (function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(type, start, end) {
     var _this = this;
 
-    var st, en, dirs, result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step, _ret;
+    var startDate, endDate, st, en, dirs, result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step, _ret;
 
     return regeneratorRuntime.wrap(function _callee$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            st = (0, _moment2.default)(start).valueOf();
+            startDate = (0, _moment2.default)(start).startOf('day').valueOf();
+            endDate = (0, _moment2.default)(end).endOf('day').valueOf();
+            st = (0, _moment2.default)(start).startOf('hour').valueOf();
             en = (0, _moment2.default)(end).valueOf();
             dirs = [];
-            _context2.prev = 3;
-            _context2.next = 6;
+            _context2.prev = 5;
+            _context2.next = 8;
             return _fs2.default.readdir(cfg.path + '/' + type + '_GMT');
 
-          case 6:
+          case 8:
             dirs = _context2.sent;
-            _context2.next = 12;
+            _context2.next = 14;
             break;
 
-          case 9:
-            _context2.prev = 9;
-            _context2.t0 = _context2['catch'](3);
+          case 11:
+            _context2.prev = 11;
+            _context2.t0 = _context2['catch'](5);
             return _context2.abrupt('return', []);
 
-          case 12:
+          case 14:
 
             dirs = dirs.sort(byDate);
+
             dirs = dirs.filter(function (d) {
-              return (0, _moment2.default)(d + ' +0000', 'YYYY-MM-DD Z').valueOf() >= st;
+              var val = (0, _moment2.default)(d + ' +0000', 'YYYY-MM-DD Z').valueOf();
+              return val >= startDate && val <= endDate;
             });
 
             if (!(dirs.length === 0)) {
-              _context2.next = 16;
+              _context2.next = 18;
               break;
             }
 
             return _context2.abrupt('return', []);
 
-          case 16:
+          case 18:
             result = [];
             _iteratorNormalCompletion = true;
             _didIteratorError = false;
             _iteratorError = undefined;
-            _context2.prev = 20;
+            _context2.prev = 22;
             _loop = regeneratorRuntime.mark(function _loop() {
               var dir, files, paths;
               return regeneratorRuntime.wrap(function _loop$(_context) {
@@ -241,72 +245,72 @@ var whichFiles = exports.whichFiles = (function () {
             });
             _iterator = dirs[Symbol.iterator]();
 
-          case 23:
+          case 25:
             if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-              _context2.next = 31;
+              _context2.next = 33;
               break;
             }
 
-            return _context2.delegateYield(_loop(), 't1', 25);
+            return _context2.delegateYield(_loop(), 't1', 27);
 
-          case 25:
+          case 27:
             _ret = _context2.t1;
 
             if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
-              _context2.next = 28;
+              _context2.next = 30;
               break;
             }
 
             return _context2.abrupt('return', _ret.v);
 
-          case 28:
+          case 30:
             _iteratorNormalCompletion = true;
-            _context2.next = 23;
-            break;
-
-          case 31:
-            _context2.next = 37;
+            _context2.next = 25;
             break;
 
           case 33:
-            _context2.prev = 33;
-            _context2.t2 = _context2['catch'](20);
+            _context2.next = 39;
+            break;
+
+          case 35:
+            _context2.prev = 35;
+            _context2.t2 = _context2['catch'](22);
             _didIteratorError = true;
             _iteratorError = _context2.t2;
 
-          case 37:
-            _context2.prev = 37;
-            _context2.prev = 38;
+          case 39:
+            _context2.prev = 39;
+            _context2.prev = 40;
 
             if (!_iteratorNormalCompletion && _iterator.return) {
               _iterator.return();
             }
 
-          case 40:
-            _context2.prev = 40;
+          case 42:
+            _context2.prev = 42;
 
             if (!_didIteratorError) {
-              _context2.next = 43;
+              _context2.next = 45;
               break;
             }
 
             throw _iteratorError;
 
-          case 43:
-            return _context2.finish(40);
-
-          case 44:
-            return _context2.finish(37);
-
           case 45:
-            return _context2.abrupt('return', result);
+            return _context2.finish(42);
 
           case 46:
+            return _context2.finish(39);
+
+          case 47:
+            return _context2.abrupt('return', result);
+
+          case 48:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee, this, [[3, 9], [20, 33, 37, 45], [38,, 40, 44]]);
+    }, _callee, this, [[5, 11], [22, 35, 39, 47], [40,, 42, 46]]);
   }));
 
   return function whichFiles(_x3, _x4, _x5) {
@@ -363,7 +367,11 @@ var filterFile = (function () {
 })();
 
 var query = exports.query = (function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(type, start, end, matchFunction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(type, start, end) {
+    var matchFunction = arguments.length <= 3 || arguments[3] === undefined ? function (d) {
+      return true;
+    } : arguments[3];
+
     var files, results, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, fname;
 
     return regeneratorRuntime.wrap(function _callee3$(_context4) {
@@ -449,6 +457,39 @@ var query = exports.query = (function () {
   }));
 
   return function query(_x10, _x11, _x12, _x13) {
+    return ref.apply(this, arguments);
+  };
+})();
+
+function fmt(dt) {
+  return (0, _moment2.default)(dt).format('YYYY-MM-DD hh:mm:ss A');
+}
+
+var queryRecent = exports.queryRecent = (function () {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(type) {
+    var end, start, results;
+    return regeneratorRuntime.wrap(function _callee4$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            end = new Date();
+            start = (0, _moment2.default)(end).subtract(30, 'minutes').toDate();
+            _context5.next = 4;
+            return query(type, start, end);
+
+          case 4:
+            results = _context5.sent;
+            return _context5.abrupt('return', results);
+
+          case 6:
+          case 'end':
+            return _context5.stop();
+        }
+      }
+    }, _callee4, this);
+  }));
+
+  return function queryRecent(_x15) {
     return ref.apply(this, arguments);
   };
 })();

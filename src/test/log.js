@@ -1,5 +1,5 @@
 import 'babel-core';
-import {log, query} from '../log';
+import {log, query, queryRecent} from '../log';
 import moment from 'moment';
 import {inspect} from 'util';
 
@@ -11,8 +11,11 @@ async function test() {
     let st = moment("1995-12-25").toDate();
     let en = new Date();
     try {
-      let rows = await query('req', st, en, d => d.url);
+      let rows = await query('req', st, en);
       console.log('rows returned');
+      console.log(inspect(rows));
+      rows = await queryRecent('req');
+      console.log('queryRecent result:');
       console.log(inspect(rows));
     } catch (e) {
       console.error(e);

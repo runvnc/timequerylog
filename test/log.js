@@ -35,30 +35,36 @@ var test = (function () {
                       en = new Date();
                       _context.prev = 3;
                       _context.next = 6;
-                      return (0, _log.query)('req', st, en, function (d) {
-                        return d.url;
-                      });
+                      return (0, _log.query)('req', st, en);
 
                     case 6:
                       rows = _context.sent;
 
                       console.log('rows returned');
                       console.log((0, _util.inspect)(rows));
-                      _context.next = 14;
-                      break;
+                      _context.next = 11;
+                      return (0, _log.queryRecent)('req');
 
                     case 11:
-                      _context.prev = 11;
+                      rows = _context.sent;
+
+                      console.log('queryRecent result:');
+                      console.log((0, _util.inspect)(rows));
+                      _context.next = 19;
+                      break;
+
+                    case 16:
+                      _context.prev = 16;
                       _context.t0 = _context['catch'](3);
 
                       console.error(_context.t0);
 
-                    case 14:
+                    case 19:
                     case 'end':
                       return _context.stop();
                   }
                 }
-              }, _callee, _this, [[3, 11]]);
+              }, _callee, _this, [[3, 16]]);
             })), 10);
 
           case 3:

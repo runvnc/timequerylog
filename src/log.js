@@ -105,14 +105,20 @@ function byTime(a, b) {
 }
 
 export async function whichFiles(type, start, end) {
-  let st = moment(start).valueOf();
+  let startDate = moment(start).startOf('day').valueOf();
+  let endDate = moment(end).endOf('day').valueOf();
+  let st = moment(start).startOf('hour').valueOf();
   let en = moment(end).valueOf();
   let dirs = [];
   try { dirs = await fs.readdir(`${cfg.path}/${type}_GMT`); } 
   catch (e) { return []; }
 
   dirs = dirs.sort(byDate) ;
-  dirs = dirs.filter( d => moment(d+' +0000', 'YYYY-MM-DD Z').valueOf() >= st );
+  
+  dirs = dirs.filter( d => {
+    let val = moment(d+' +0000', 'YYYY-MM-DD Z').valueOf();
+    return val >= startDate && val <= endDate;
+  });
   if (dirs.length === 0) return [];
 
   let result = [];
@@ -154,11 +160,22 @@ async function filterFile(fname, start, end, matchFunction) {
   return data;
 }
  
-export async function query(type, start, end, matchFunction) {
+export async function query(type, start, end, matchFunction = (d => true)) {
   let files = await whichFiles(type, start, end);
   let results = [];
   for (let fname of files) {
     results.push(await filterFile(fname, start, end, matchFunction));
   }
+  return results;
+}
+
+function fmt(dt) {
+  return moment(dt).format('YYYY-MM-DD hh:mm:ss A');
+}
+
+export async function queryRecent(type) {
+  let end = new Date();
+  let start = moment(end).subtract(30, 'minutes').toDate();
+  let results = await query(type, start, end); 
   return results;
 }
