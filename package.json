@@ -2,7 +2,7 @@
   "name": "timequerylog",
   "version": "1.2.0",
   "description": "",
-  "main": "index.js",
+  "main": "log.js",
   "scripts": {
     "babel": "babel --presets es2015,stage-0 -d . src",
     "build": "npm run babel"
