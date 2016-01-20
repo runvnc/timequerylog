@@ -1,4 +1,4 @@
-Note: Requires babel-polyfill to be included in your project.
+Note: May require babel-polyfill or babel-runtime to be included in your project.
 
 JSON logging separated into a files per hour of day with simple query between start and end time with match function.
 
