@@ -7,7 +7,11 @@
     "babel": "babel --presets es2015,stage-0 -d . src",
     "build": "npm run babel"
   },
-  "author": "",
+  "author": "Jason Livesay",
+  "repository" : { 
+    "type" : "git", 
+    "url" : "https://github.com/runvnc/timequerylog.git"
+  },
   "license": "ISC",
   "dependencies": {
     "JSONStream": "^1.0.7",
