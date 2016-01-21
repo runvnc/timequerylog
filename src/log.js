@@ -115,12 +115,16 @@ export async function whichFiles(type, start, end) {
 
   dirs = dirs.sort(byDate) ;
   
-  dirs = dirs.filter( d => {
+  newDirs = dirs.filter( d => {
     let val = moment(d+' +0000', 'YYYY-MM-DD Z').valueOf();
     return val >= startDate && val <= endDate;
   });
-  if (dirs.length === 0) { console.error('No logs found in date/time range'); return [] };
-
+  if (newDirs.length === 0) { 
+    console.error('No logs found in date/time range: all dirs found='+JSON.stringify(dirs)+
+                  ' st='+startDate+' en='+endDate+' matching dirs='+JSON.stringify(newDirs)); 
+    return []
+  };
+  dir = newDirs;
   let result = [];
   for (let dir of dirs) {
     try {

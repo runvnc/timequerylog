@@ -184,26 +184,27 @@ var whichFiles = exports.whichFiles = (function () {
 
             dirs = dirs.sort(byDate);
 
-            dirs = dirs.filter(function (d) {
+            newDirs = dirs.filter(function (d) {
               var val = (0, _moment2.default)(d + ' +0000', 'YYYY-MM-DD Z').valueOf();
               return val >= startDate && val <= endDate;
             });
 
-            if (!(dirs.length === 0)) {
+            if (!(newDirs.length === 0)) {
               _context2.next = 20;
               break;
             }
 
-            console.error('No logs found in date/time range');return _context2.abrupt('return', []);
+            console.error('No logs found in date/time range: all dirs found=' + JSON.stringify(dirs) + ' st=' + startDate + ' en=' + endDate + ' matching dirs=' + JSON.stringify(newDirs));
+            return _context2.abrupt('return', []);
 
           case 20:
             ;
-
+            dir = newDirs;
             result = [];
             _iteratorNormalCompletion = true;
             _didIteratorError = false;
             _iteratorError = undefined;
-            _context2.prev = 25;
+            _context2.prev = 26;
             _loop = regeneratorRuntime.mark(function _loop() {
               var dir, files, paths;
               return regeneratorRuntime.wrap(function _loop$(_context) {
@@ -247,72 +248,72 @@ var whichFiles = exports.whichFiles = (function () {
             });
             _iterator = dirs[Symbol.iterator]();
 
-          case 28:
+          case 29:
             if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-              _context2.next = 36;
+              _context2.next = 37;
               break;
             }
 
-            return _context2.delegateYield(_loop(), 't1', 30);
+            return _context2.delegateYield(_loop(), 't1', 31);
 
-          case 30:
+          case 31:
             _ret = _context2.t1;
 
             if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
-              _context2.next = 33;
+              _context2.next = 34;
               break;
             }
 
             return _context2.abrupt('return', _ret.v);
 
-          case 33:
+          case 34:
             _iteratorNormalCompletion = true;
-            _context2.next = 28;
+            _context2.next = 29;
             break;
 
-          case 36:
-            _context2.next = 42;
+          case 37:
+            _context2.next = 43;
             break;
 
-          case 38:
-            _context2.prev = 38;
-            _context2.t2 = _context2['catch'](25);
+          case 39:
+            _context2.prev = 39;
+            _context2.t2 = _context2['catch'](26);
             _didIteratorError = true;
             _iteratorError = _context2.t2;
 
-          case 42:
-            _context2.prev = 42;
+          case 43:
             _context2.prev = 43;
+            _context2.prev = 44;
 
             if (!_iteratorNormalCompletion && _iterator.return) {
               _iterator.return();
             }
 
-          case 45:
-            _context2.prev = 45;
+          case 46:
+            _context2.prev = 46;
 
             if (!_didIteratorError) {
-              _context2.next = 48;
+              _context2.next = 49;
               break;
             }
 
             throw _iteratorError;
 
-          case 48:
-            return _context2.finish(45);
-
           case 49:
-            return _context2.finish(42);
+            return _context2.finish(46);
 
           case 50:
-            return _context2.abrupt('return', result);
+            return _context2.finish(43);
 
           case 51:
+            return _context2.abrupt('return', result);
+
+          case 52:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee, this, [[5, 11], [25, 38, 42, 50], [43,, 45, 49]]);
+    }, _callee, this, [[5, 11], [26, 39, 43, 51], [44,, 46, 50]]);
   }));
 
   return function whichFiles(_x3, _x4, _x5) {
