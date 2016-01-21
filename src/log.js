@@ -111,7 +111,7 @@ export async function whichFiles(type, start, end) {
   let en = moment(end).valueOf();
   let dirs = [];
   try { dirs = await fs.readdir(`${cfg.path}/${type}_GMT`); } 
-  catch (e) { return []; }
+  catch (e) { return [{error: 'Error reading dirlist: '+e.message}]; }
 
   dirs = dirs.sort(byDate) ;
   
@@ -119,7 +119,7 @@ export async function whichFiles(type, start, end) {
     let val = moment(d+' +0000', 'YYYY-MM-DD Z').valueOf();
     return val >= startDate && val <= endDate;
   });
-  if (dirs.length === 0) return [];
+  if (dirs.length === 0) return [{error: 'No logs found in date/time range'}];
 
   let result = [];
   for (let dir of dirs) {
@@ -132,7 +132,7 @@ export async function whichFiles(type, start, end) {
       });
       let paths = files.map( f => `${cfg.path}/${type}_GMT/${dir}/${f}` );
       Array.prototype.push.apply(result, paths);
-    } catch (e) { console.error(e); return []; }
+    } catch (e) { console.error(e); return [{error:'Error filtering log files: '+e.message}]; }
   }
   return result;
 }

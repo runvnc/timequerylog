@@ -178,7 +178,7 @@ var whichFiles = exports.whichFiles = (function () {
           case 11:
             _context2.prev = 11;
             _context2.t0 = _context2['catch'](5);
-            return _context2.abrupt('return', []);
+            return _context2.abrupt('return', [{ error: 'Error reading dirlist: ' + _context2.t0.message }]);
 
           case 14:
 
@@ -194,7 +194,7 @@ var whichFiles = exports.whichFiles = (function () {
               break;
             }
 
-            return _context2.abrupt('return', []);
+            return _context2.abrupt('return', [{ error: 'No logs found in date/time range' }]);
 
           case 18:
             result = [];
@@ -233,7 +233,7 @@ var whichFiles = exports.whichFiles = (function () {
                       _context.prev = 11;
                       _context.t0 = _context['catch'](1);
                       console.error(_context.t0);return _context.abrupt('return', {
-                        v: []
+                        v: [{ error: 'Error filtering log files: ' + _context.t0.message }]
                       });
 
                     case 15:
