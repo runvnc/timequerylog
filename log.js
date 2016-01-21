@@ -155,7 +155,7 @@ var whichFiles = exports.whichFiles = (function () {
   var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(type, start, end) {
     var _this = this;
 
-    var startDate, endDate, st, en, dirs, result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step, _ret;
+    var startDate, endDate, st, en, dirs, newDirs, result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step, _ret;
 
     return regeneratorRuntime.wrap(function _callee$(_context2) {
       while (1) {

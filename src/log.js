@@ -115,7 +115,7 @@ export async function whichFiles(type, start, end) {
 
   dirs = dirs.sort(byDate) ;
   
-  newDirs = dirs.filter( d => {
+  let newDirs = dirs.filter( d => {
     let val = moment(d+' +0000', 'YYYY-MM-DD Z').valueOf();
     return val >= startDate && val <= endDate;
   });
