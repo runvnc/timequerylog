@@ -172,15 +172,15 @@ var whichFiles = exports.whichFiles = (function () {
 
           case 8:
             dirs = _context2.sent;
-            _context2.next = 14;
+            _context2.next = 15;
             break;
 
           case 11:
             _context2.prev = 11;
             _context2.t0 = _context2['catch'](5);
-            return _context2.abrupt('return', [{ error: 'Error reading dirlist: ' + _context2.t0.message }]);
+            console.error('timequerylog error reading dirlist: ' + _context2.t0.message + ' cfg.path is ' + cfg.path);return _context2.abrupt('return', []);
 
-          case 14:
+          case 15:
 
             dirs = dirs.sort(byDate);
 
@@ -190,18 +190,20 @@ var whichFiles = exports.whichFiles = (function () {
             });
 
             if (!(dirs.length === 0)) {
-              _context2.next = 18;
+              _context2.next = 20;
               break;
             }
 
-            return _context2.abrupt('return', [{ error: 'No logs found in date/time range' }]);
+            console.error('No logs found in date/time range');return _context2.abrupt('return', []);
 
-          case 18:
+          case 20:
+            ;
+
             result = [];
             _iteratorNormalCompletion = true;
             _didIteratorError = false;
             _iteratorError = undefined;
-            _context2.prev = 22;
+            _context2.prev = 25;
             _loop = regeneratorRuntime.mark(function _loop() {
               var dir, files, paths;
               return regeneratorRuntime.wrap(function _loop$(_context) {
@@ -232,8 +234,8 @@ var whichFiles = exports.whichFiles = (function () {
                     case 11:
                       _context.prev = 11;
                       _context.t0 = _context['catch'](1);
-                      console.error(_context.t0);return _context.abrupt('return', {
-                        v: [{ error: 'Error filtering log files: ' + _context.t0.message }]
+                      console.error('Error filtering log files:' + _context.t0.message);return _context.abrupt('return', {
+                        v: []
                       });
 
                     case 15:
@@ -245,72 +247,72 @@ var whichFiles = exports.whichFiles = (function () {
             });
             _iterator = dirs[Symbol.iterator]();
 
-          case 25:
+          case 28:
             if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-              _context2.next = 33;
+              _context2.next = 36;
               break;
             }
 
-            return _context2.delegateYield(_loop(), 't1', 27);
+            return _context2.delegateYield(_loop(), 't1', 30);
 
-          case 27:
+          case 30:
             _ret = _context2.t1;
 
             if (!((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object")) {
-              _context2.next = 30;
+              _context2.next = 33;
               break;
             }
 
             return _context2.abrupt('return', _ret.v);
 
-          case 30:
-            _iteratorNormalCompletion = true;
-            _context2.next = 25;
-            break;
-
           case 33:
-            _context2.next = 39;
+            _iteratorNormalCompletion = true;
+            _context2.next = 28;
             break;
 
-          case 35:
-            _context2.prev = 35;
-            _context2.t2 = _context2['catch'](22);
+          case 36:
+            _context2.next = 42;
+            break;
+
+          case 38:
+            _context2.prev = 38;
+            _context2.t2 = _context2['catch'](25);
             _didIteratorError = true;
             _iteratorError = _context2.t2;
 
-          case 39:
-            _context2.prev = 39;
-            _context2.prev = 40;
+          case 42:
+            _context2.prev = 42;
+            _context2.prev = 43;
 
             if (!_iteratorNormalCompletion && _iterator.return) {
               _iterator.return();
             }
 
-          case 42:
-            _context2.prev = 42;
+          case 45:
+            _context2.prev = 45;
 
             if (!_didIteratorError) {
-              _context2.next = 45;
+              _context2.next = 48;
               break;
             }
 
             throw _iteratorError;
 
-          case 45:
+          case 48:
+            return _context2.finish(45);
+
+          case 49:
             return _context2.finish(42);
 
-          case 46:
-            return _context2.finish(39);
-
-          case 47:
+          case 50:
             return _context2.abrupt('return', result);
 
-          case 48:
+          case 51:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee, this, [[5, 11], [22, 35, 39, 47], [40,, 42, 46]]);
+    }, _callee, this, [[5, 11], [25, 38, 42, 50], [43,, 45, 49]]);
   }));
 
   return function whichFiles(_x3, _x4, _x5) {
