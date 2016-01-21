@@ -105,9 +105,9 @@ function byTime(a, b) {
 }
 
 export async function whichFiles(type, start, end) {
-  let startDate = moment(start).startOf('day').valueOf();
-  let endDate = moment(end).endOf('day').valueOf();
-  let st = moment(start).startOf('hour').valueOf();
+  let startDate = moment(start).utcOffset(0).startOf('day').valueOf();
+  let endDate = moment(end).utcOffset(0).endOf('day').valueOf();
+  let st = moment(start).utcOffset(0).startOf('hour').valueOf();
   let en = moment(end).valueOf();
   let dirs = [];
   try { dirs = await fs.readdir(`${cfg.path}/${type}_GMT`); } 
@@ -124,7 +124,7 @@ export async function whichFiles(type, start, end) {
                   ' st='+startDate+' en='+endDate+' matching dirs='+JSON.stringify(newDirs)); 
     return []
   };
-  dir = newDirs;
+  dirs = newDirs;
   let result = [];
   for (let dir of dirs) {
     try {

@@ -161,9 +161,9 @@ var whichFiles = exports.whichFiles = (function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            startDate = (0, _moment2.default)(start).startOf('day').valueOf();
-            endDate = (0, _moment2.default)(end).endOf('day').valueOf();
-            st = (0, _moment2.default)(start).startOf('hour').valueOf();
+            startDate = (0, _moment2.default)(start).utcOffset(0).startOf('day').valueOf();
+            endDate = (0, _moment2.default)(end).utcOffset(0).endOf('day').valueOf();
+            st = (0, _moment2.default)(start).utcOffset(0).startOf('hour').valueOf();
             en = (0, _moment2.default)(end).valueOf();
             dirs = [];
             _context2.prev = 5;
@@ -199,7 +199,7 @@ var whichFiles = exports.whichFiles = (function () {
 
           case 20:
             ;
-            dir = newDirs;
+            dirs = newDirs;
             result = [];
             _iteratorNormalCompletion = true;
             _didIteratorError = false;
