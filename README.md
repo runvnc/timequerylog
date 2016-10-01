@@ -4,7 +4,7 @@ JSON logging separated into a files per hour of day with simple query between st
 
 *log(type, object, time = current time)*
 
-Uses JSON stream to log some data to the file `./[type]_GMT/DATE/HOUR.json`.
+Uses JSON stream to log some data to the file `./[type]_GMT/DATE/HOUR`.
 Returns a promise.
 
 
