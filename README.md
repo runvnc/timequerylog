@@ -17,7 +17,7 @@ async function test() {
   await delay(300);
 
   console.log('Running query');
-  let rows = await query('req', moment("1995-12-25").toDate(), new Date());
+  let rows = await query('req', moment("1995-12-25").toDate(), new Date(), d=>d.url);
   console.log('rows returned');
   console.log(inspect(rows));
   rows = await queryRecent('req');
