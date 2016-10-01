@@ -10,7 +10,7 @@ Returns a promise.
 
 *queryRecent(type)*
 
-Return a promise with data from the last 15 minutes for `type`.  Searches JSON streamed files starting 
+Return a promise with data from the last 30 minutes for `type`.  Searches JSON streamed files starting 
 from directory `./[type]_GMT`.
 
 *query(type, startDate, endDate, matchFunction)*
