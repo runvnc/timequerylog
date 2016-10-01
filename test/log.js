@@ -25,7 +25,9 @@ var test = function () {
 
             console.log('Running query');
             _context.next = 7;
-            return (0, _log.query)('req', (0, _moment2.default)("1995-12-25").toDate(), new Date());
+            return (0, _log.query)('req', (0, _moment2.default)("1995-12-25").toDate(), new Date(), function (d) {
+              return d.url;
+            });
 
           case 7:
             rows = _context.sent;
