@@ -1,5 +1,3 @@
-import 'babel-core';
-import 'babel-polyfill';
 import fs from 'mz/fs';
 import {inspect} from 'util';
 import {stringify, parse} from 'JSONStream';
@@ -24,7 +22,7 @@ setInterval( () => {
       delete streams[file];
       delete lastAccessTime[file];
     }
-  }  
+  }
 }, 15000);
 
 process.on('beforeExit', () => {
@@ -39,12 +37,12 @@ export function config(cfg) {
 
 export function whichFile(type, datetime) {
   let gmt = moment(datetime).utcOffset(0);
-  return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}`; 
+  return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}`;
 }
 
 export function log(type,obj,time = new Date()) {
-  q.push(cb => { dolog(type, obj, time, cb);});  
-  q.start(e=> { 
+  q.push(cb => { dolog(type, obj, time, cb);});
+  q.start(e=> {
     if (e) console.error('Error running queue: ', e)
   });
 }
@@ -55,7 +53,7 @@ function getWriteStream(fname, cb) {
     return cb(streams[fname]);
   }
   pathExists(dirname(fname)).then(exists => {
-    if (!exists) mkdirp(dirname(fname)); 
+    if (!exists) mkdirp(dirname(fname));
 
     pathExists(fname).then(fexists => {
       let finish = (continueJSON) => {
@@ -87,7 +85,7 @@ function dolog(type, obj, time = new Date(), cb) {
   getWriteStream(fname, stream => {
     stream.write(toWrite);
     cb();
-  }); 
+  });
 }
 
 function byDate(a, b) {
@@ -99,9 +97,9 @@ function byDate(a, b) {
 
 function byTime(a, b) {
   const dt = d => moment(`2015-12-01 ${d}`, 'YYYY-MM-DD hhA');
-  if (dt(a).valueOf() < dt(b).valueOf()) return -1; 
+  if (dt(a).valueOf() < dt(b).valueOf()) return -1;
   if (dt(a).valueOf() > dt(b).valueOf()) return 1;
-  return 0;      
+  return 0;
 }
 
 export async function whichFiles(type, start, end) {
@@ -110,18 +108,18 @@ export async function whichFiles(type, start, end) {
   let st = moment(start).utcOffset(0).startOf('hour').valueOf();
   let en = moment(end).valueOf();
   let dirs = [];
-  try { dirs = await fs.readdir(`${cfg.path}/${type}_GMT`); } 
+  try { dirs = await fs.readdir(`${cfg.path}/${type}_GMT`); }
   catch (e) { console.error('timequerylog error reading dirlist: '+e.message+' cfg.path is '+cfg.path);return []; }
 
   dirs = dirs.sort(byDate) ;
-  
+
   let newDirs = dirs.filter( d => {
     let val = moment(d+' +0000', 'YYYY-MM-DD Z').valueOf();
     return val >= startDate && val <= endDate;
   });
-  if (newDirs.length === 0) { 
+  if (newDirs.length === 0) {
     console.error('No logs found in date/time range: all dirs found='+JSON.stringify(dirs)+
-                  ' st='+startDate+' en='+endDate+' matching dirs='+JSON.stringify(newDirs)); 
+                  ' st='+startDate+' en='+endDate+' matching dirs='+JSON.stringify(newDirs));
     return []
   };
   dirs = newDirs;
@@ -129,10 +127,10 @@ export async function whichFiles(type, start, end) {
   for (let dir of dirs) {
     try {
       let files = await fs.readdir(`${cfg.path}/${type}_GMT/${dir}`);
-      files = files.sort(byTime);      
+      files = files.sort(byTime);
       files = files.filter( file => {
         let timeMS = moment(`${dir} ${file} +0000`,'YYYY-MM-DD hhA Z').valueOf();
-        return timeMS >= st && timeMS <= en; 
+        return timeMS >= st && timeMS <= en;
       });
       let paths = files.map( f => `${cfg.path}/${type}_GMT/${dir}/${f}` );
       Array.prototype.push.apply(result, paths);
@@ -163,7 +161,7 @@ async function filterFile(fname, start, end, matchFunction) {
   });
   return data;
 }
- 
+
 export async function query(type, start, end, matchFunction = (d => true)) {
   let files = await whichFiles(type, start, end);
   let results = [];
@@ -180,6 +178,6 @@ function fmt(dt) {
 export async function queryRecent(type) {
   let end = new Date();
   let start = moment(end).subtract(30, 'minutes').toDate();
-  let results = await query(type, start, end); 
+  let results = await query(type, start, end);
   return results;
 }

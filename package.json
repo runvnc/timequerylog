@@ -1,10 +1,10 @@
 {
   "name": "timequerylog",
   "version": "4.6.0",
-  "description": "",
+  "description": "Structured (JSON) logging separated into files per hour of day, with query.",
   "main": "log.js",
   "scripts": {
-    "babel": "babel --presets es2015,stage-0 -d . src",
+    "babel": "babel -d . src",
     "build": "npm run babel"
   },
   "author": "Jason Livesay",
@@ -29,12 +29,14 @@
     "log",
     "logging",
     "query",
+    "time",
     "time series",
     "hourly"
   ],
   "devDependencies": {
-    "babel-plugin-transform-es2015-template-literals": "^6.3.13",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-preset-stage-0": "^6.3.13"
+    "babel-cli": "^6.16.0",
+    "babel-plugin-transform-runtime": "^6.15.0",
+    "babel-preset-latest": "^6.16.0",
+    "delay": "^1.3.1"
   }
 }
