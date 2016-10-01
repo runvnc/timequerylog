@@ -2,6 +2,23 @@ JSON logging separated into a files per hour of day with simple query between st
 
 ## Usage
 
+*log(type, object, time = current time)*
+
+Uses JSON stream to log some data to the file `./[type]_GMT/DATE/HOUR.json`.
+Returns a promise.
+
+
+*queryRecent(type)*
+
+Return a promise with data from the last 15 minutes for `type`.  Searches JSON streamed files starting 
+from directory `./[type]_GMT`.
+
+*query(type, startDate, endDate, matchFunction)*
+
+Returns a promise with data for `type` between `startDate` and `endDate` where `matchFunction`
+returns true. Searches JSON streamed files starting from directory `./[type]_GMT`.
+
+
 ```javascript
 import {log, query, queryRecent} from '../log';
 import moment from 'moment';
