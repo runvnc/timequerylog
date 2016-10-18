@@ -438,9 +438,9 @@ function whichFile(type, datetime) {
   return cfg.path + '/' + type + '_GMT/' + gmt.format('YYYY-MM-DD/hhA');
 }
 
-q.on('timeout', function () {
+q.on('timeout', function (next) {
   console.error('queue timed out');
-  started = false;
+  next();
 });
 
 function log(type, obj) {

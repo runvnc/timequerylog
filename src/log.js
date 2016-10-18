@@ -41,9 +41,9 @@ export function whichFile(type, datetime) {
   return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}`;
 }
 
-q.on('timeout', () => {
+q.on('timeout', (next) => {
   console.error('queue timed out');
-  started = false;
+  next();
 });
 
 export function log(type,obj,time = new Date()) {
