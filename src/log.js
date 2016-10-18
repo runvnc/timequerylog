@@ -9,6 +9,7 @@ import pathExists from 'path-exists';
 import moment from 'moment';
 import queue from 'queue';
 
+let started = false;
 let cfg = {path:process.cwd()};
 let streams = {};
 let lastAccessTime = {};
@@ -40,11 +41,20 @@ export function whichFile(type, datetime) {
   return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}`;
 }
 
+q.on('timeout', () => {
+  console.error('queue timed out');
+  started = false;
+});
+
 export function log(type,obj,time = new Date()) {
   q.push(cb => { dolog(type, obj, time, cb);});
-  q.start(e=> {
-    if (e) console.error('Error running queue: ', e)
-  });
+  if (!started) {
+    started = true;
+    q.start(e=> {
+      started = false;
+      if (e) console.error('Error running queue: ', e)
+    });
+  }
 }
 
 function getWriteStream(fname, cb) {

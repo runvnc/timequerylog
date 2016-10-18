@@ -406,6 +406,7 @@ var _queue2 = _interopRequireDefault(_queue);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var started = false;
 var cfg = { path: process.cwd() };
 var streams = {};
 var lastAccessTime = {};
@@ -437,15 +438,24 @@ function whichFile(type, datetime) {
   return cfg.path + '/' + type + '_GMT/' + gmt.format('YYYY-MM-DD/hhA');
 }
 
+q.on('timeout', function () {
+  console.error('queue timed out');
+  started = false;
+});
+
 function log(type, obj) {
   var time = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
 
   q.push(function (cb) {
     dolog(type, obj, time, cb);
   });
-  q.start(function (e) {
-    if (e) console.error('Error running queue: ', e);
-  });
+  if (!started) {
+    started = true;
+    q.start(function (e) {
+      started = false;
+      if (e) console.error('Error running queue: ', e);
+    });
+  }
 }
 
 function getWriteStream(fname, cb) {
