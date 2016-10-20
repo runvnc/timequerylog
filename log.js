@@ -429,8 +429,8 @@ process.on('beforeExit', function () {
   }
 });
 
-function config(cfg) {
-  cfg = cfg;
+function config(conf) {
+  cfg = conf;
 }
 
 function whichFile(type, datetime) {

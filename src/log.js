@@ -32,8 +32,8 @@ process.on('beforeExit', () => {
   }
 });
 
-export function config(cfg) {
-  cfg = cfg;
+export function config(conf) {
+  cfg = conf;
 }
 
 export function whichFile(type, datetime) {
