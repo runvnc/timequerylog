@@ -18,32 +18,38 @@ var test = function () {
             (0, _log.log)('req', { blah: 100 });
             (0, _log.log)('req', { url: 'http://google.com' });
 
-            _context.next = 4;
+            (0, _log.log)('req', { cat: 100, time: new Date('2015-05-01T23:50:59.392Z') });
+            (0, _log.log)('req', { cat: 100, time: new Date('2015-05-01T23:51:53.312Z') });
+            (0, _log.log)('req', { dog: 1000 });
+            (0, _log.log)('req', { dog: 1000 });
+            (0, _log.log)('req', { dog: 1000 });
+
+            _context.next = 9;
             return (0, _delay2.default)(300);
 
-          case 4:
+          case 9:
 
             console.log('Running query');
-            _context.next = 7;
+            _context.next = 12;
             return (0, _log.query)('req', (0, _moment2.default)("1995-12-25").toDate(), new Date(), function (d) {
               return d.url;
             });
 
-          case 7:
+          case 12:
             rows = _context.sent;
 
             console.log('rows returned');
             console.log((0, _util.inspect)(rows));
-            _context.next = 12;
+            _context.next = 17;
             return (0, _log.queryRecent)('req');
 
-          case 12:
+          case 17:
             rows = _context.sent;
 
             console.log('queryRecent result:');
             console.log((0, _util.inspect)(rows));
 
-          case 15:
+          case 20:
           case 'end':
             return _context.stop();
         }
@@ -69,5 +75,7 @@ var _delay = require('delay');
 var _delay2 = _interopRequireDefault(_delay);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+(0, _log.config)({ path: process.cwd(), noRepeat: true });
 
 test().catch(console.error);

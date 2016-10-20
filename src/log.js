@@ -8,6 +8,9 @@ import {sync as mkdirp} from 'mkdirp';
 import pathExists from 'path-exists';
 import moment from 'moment';
 import queue from 'queue';
+import equal from 'deep-equal';
+import cloneDeep from 'lodash.clonedeep';
+
 
 let started = false;
 let cfg = {path:process.cwd()};
@@ -33,7 +36,7 @@ process.on('beforeExit', () => {
 });
 
 export function config(conf) {
-  cfg = conf;
+  Object.assign(cfg,conf);
 }
 
 export function whichFile(type, datetime) {
@@ -46,7 +49,21 @@ q.on('timeout', (next) => {
   next();
 });
 
+let lastData = {};
+
 export function log(type,obj,time = new Date()) {
+  if (cfg.noRepeat) {
+    let hadTime = obj.hasOwnProperty('time');
+    let copyTime = null;
+    if (hadTime) copyTime = new Date(obj.time.getTime());
+    if (hadTime) delete obj['time'];
+    if (lastData.hasOwnProperty(type) && equal(lastData[type], obj)) {
+      if (hadTime) obj.time = copyTime;
+      return;
+    }
+    lastData[type] = cloneDeep(obj);
+    if (hadTime) obj.time = copyTime;
+  }
   q.push(cb => { dolog(type, obj, time, cb);});
   if (!started) {
     started = true;
@@ -89,13 +106,17 @@ function getWriteStream(fname, cb) {
 }
 
 function dolog(type, obj, time = new Date(), cb) {
-  let fname = whichFile(type, time);
-  let toWrite = {time, type};
-  for (let key in obj) toWrite[key] = obj[key];
-  getWriteStream(fname, stream => {
-    stream.write(toWrite);
-    cb();
-  });
+  try {
+    let fname = whichFile(type, time);
+    let toWrite = {time, type};
+    for (let key in obj) toWrite[key] = obj[key];
+    getWriteStream(fname, stream => {
+      stream.write(toWrite);
+      cb();
+    });
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 function byDate(a, b) {
