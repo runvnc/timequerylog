@@ -212,3 +212,60 @@ export async function queryRecent(type) {
   let results = await query(type, start, end);
   return results;
 }
+
+import {Readable} from 'stream';
+
+class QueryStream extends Readable {
+  constructor(options) {
+    super(options);
+    Object.assign(this, options);
+    this.init(options).catch(consol.error);
+  }
+
+  init = async (options) => {
+    this.files = await whichFiles(type, start, end);
+    this.fileNum = 0;
+    this.rowNum = 0;
+    this.data = [];
+  }
+
+  loadFile = async () => {
+    if (this.fileNum) >= this.files.length) {
+      return null;
+    }
+    return await filterFile(this.files[this.fileNum++], this.start,
+                            this.end, this.matchFunction);
+  }
+
+  nextRow = async () => {
+    this.reading = true;
+    if (!this.data) return null;
+    if (this.rowNum >= this.data.length) {
+      this.fileNum++;
+      this.data = await this.loadFile();
+      if (!this.data) return null;
+    }
+    const row = this.data[this.rowNum];
+    this.rowNum++;
+    return row;
+  }
+
+  _read = () => {
+    return new Promise( async (resolve) => {
+      let canPush = true;
+      do {
+        if (!(this.data)) this.data = this.loadFile();
+        this.row = await this.nextRow();
+        canPush = this.push(row);
+      } while (this.row && canPush);
+    }).resolve();
+  }
+
+}
+
+export function queryOpts(options) {
+
+  const {type, start, end, matchFunction} = options;
+  if (!options.matchFunction) options.matchFunction = (d=>true);
+  return new QueryStream(options);
+}
