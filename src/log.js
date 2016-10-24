@@ -171,6 +171,8 @@ export async function whichFiles(type, start, end) {
 }
 
 async function filterFile(fname, start, end, matchFunction) {
+  console.log('top of fileterfile');
+  console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
   let data = await new Promise( res => {
     try {
       let results = [];
@@ -178,6 +180,7 @@ async function filterFile(fname, start, end, matchFunction) {
       let stream = parse();
       file.pipe(stream);
       stream.pipe(mapSync( data => {
+        console.log('map');
         data.time = new Date(data.time);
         if (data.time >= start && data.time <= end &&
             matchFunction(data)) {
@@ -187,6 +190,7 @@ async function filterFile(fname, start, end, matchFunction) {
       }));
       stream.on('end', () => { res(results);});
     } catch (e) {
+      console.error('Error in filterFile:');
       console.error(inspect(e));
     }
   });
@@ -217,55 +221,81 @@ import {Readable} from 'stream';
 
 class QueryStream extends Readable {
   constructor(options) {
+    options.objectMode = true;
     super(options);
     Object.assign(this, options);
-    this.init(options).catch(consol.error);
+    this.initFinished = false;
+    this.init().catch(console.error);
   }
 
-  init = async (options) => {
-    this.files = await whichFiles(type, start, end);
+  init = async () => {
+    this.files = await whichFiles(this.type, this.start, this.end);
+    if (this.files) console.log('files count',this.files.length, this.files);
     this.fileNum = 0;
     this.rowNum = 0;
     this.data = [];
+    this.initFinished = true;
   }
 
-  loadFile = async () => {
-    if (this.fileNum) >= this.files.length) {
+  loadFile = async (f) => {
+    console.log('loadfile');
+    if (!this.files) await this.init();
+    if (this.data && this.rowNum < this.data.length) {
+      return this.data;
+    } 
+    console.log('this.files = ', this.files);
+    if (this.files && this.fileNum >= this.files.length) {
+      console.log('ni');
       return null;
     }
-    return await filterFile(this.files[this.fileNum++], this.start,
-                            this.end, this.matchFunction);
+    if (this.data) {
+      this.rowNum = 0;
+    }
+    const result =  await filterFile(this.files[this.fileNum++], this.start,
+                                     this.end, this.match);
+    this.data = result;
+    return result;
   }
 
   nextRow = async () => {
-    this.reading = true;
-    if (!this.data) return null;
+    console.log('a');
+    if (!this.data) { console.log('NO DATA RETURNING NULL'); return null; }
+    console.log('b');
     if (this.rowNum >= this.data.length) {
-      this.fileNum++;
+      console.log('c');
       this.data = await this.loadFile();
+      console.log('tried to load next file');
       if (!this.data) return null;
     }
     const row = this.data[this.rowNum];
+    console.log('rowNum is now', this.rowNum, 'row is', row);
     this.rowNum++;
     return row;
   }
 
   _read = () => {
-    return new Promise( async (resolve) => {
+    console.log('_read called');
+    new Promise( async (res) => {
+      console.log('top of function');
       let canPush = true;
       do {
-        if (!(this.data)) this.data = this.loadFile();
+        console.log(1);
+        try {
+          this.data = await this.loadFile();
+        } catch (e) { console.trace(e) };
+        console.log(2);
         this.row = await this.nextRow();
-        canPush = this.push(row);
+        console.log('this.row = ', this.row);
+        canPush = this.push(this.row);
       } while (this.row && canPush);
-    }).resolve();
+    }).catch(console.error);
+    console.log('bottom of _read'); 
   }
 
 }
 
 export function queryOpts(options) {
-
-  const {type, start, end, matchFunction} = options;
-  if (!options.matchFunction) options.matchFunction = (d=>true);
+  const {type, start, end, match} = options;
+  if (!options.match) options.match = (d=>true);
   return new QueryStream(options);
 }

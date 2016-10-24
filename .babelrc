@@ -1,1 +1,2 @@
-{ "presets": [ "latest"], "plugins": [["transform-runtime"]] }
+{ "presets": [ "latest"], "plugins": ["transform-class-properties","transform-async-to-generator",
+                               ["transform-runtime", {"polyfill": false, "regenerator":true }] ] }

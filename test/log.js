@@ -10,7 +10,7 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var test = function () {
   var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-    var rows;
+    var rows, matched;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -49,7 +49,16 @@ var test = function () {
             console.log('queryRecent result:');
             console.log((0, _util.inspect)(rows));
 
-          case 20:
+            matched = (0, _log.queryOpts)({ type: 'req', start: (0, _moment2.default)('1995-12-25').toDate(),
+              end: new Date(), match: function match(d) {
+                return d.dog > 100 || d.cat;
+              } });
+
+            console.log('queryOpts:');
+            console.log(matched);
+            matched.on('data', console.log);
+
+          case 24:
           case 'end':
             return _context.stop();
         }

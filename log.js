@@ -5,9 +5,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.queryRecent = exports.query = exports.whichFiles = undefined;
 
-var _promise = require('babel-runtime/core-js/promise');
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
-var _promise2 = _interopRequireDefault(_promise);
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
 
 var _regenerator = require('babel-runtime/regenerator');
 
@@ -17,21 +25,9 @@ var _typeof2 = require('babel-runtime/helpers/typeof');
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
-var _getIterator2 = require('babel-runtime/core-js/get-iterator');
-
-var _getIterator3 = _interopRequireDefault(_getIterator2);
-
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
-var _assign = require('babel-runtime/core-js/object/assign');
-
-var _assign2 = _interopRequireDefault(_assign);
 
 var whichFiles = exports.whichFiles = function () {
   var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(type, start, end) {
@@ -76,7 +72,7 @@ var whichFiles = exports.whichFiles = function () {
               break;
             }
 
-            console.error('No logs found in date/time range: all dirs found=' + (0, _stringify2.default)(dirs) + ' st=' + startDate + ' en=' + endDate + ' matching dirs=' + (0, _stringify2.default)(newDirs));
+            console.error('No logs found in date/time range: all dirs found=' + JSON.stringify(dirs) + ' st=' + startDate + ' en=' + endDate + ' matching dirs=' + JSON.stringify(newDirs));
             return _context2.abrupt('return', []);
 
           case 20:
@@ -128,7 +124,7 @@ var whichFiles = exports.whichFiles = function () {
                 }
               }, _loop, _this, [[1, 11]]);
             });
-            _iterator = (0, _getIterator3.default)(dirs);
+            _iterator = dirs[Symbol.iterator]();
 
           case 29:
             if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
@@ -210,8 +206,10 @@ var filterFile = function () {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _context3.next = 2;
-            return new _promise2.default(function (res) {
+            console.log('top of fileterfile');
+            console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+            _context3.next = 4;
+            return new Promise(function (res) {
               try {
                 (function () {
                   var results = [];
@@ -219,6 +217,7 @@ var filterFile = function () {
                   var stream = (0, _JSONStream.parse)();
                   file.pipe(stream);
                   stream.pipe((0, _eventStream.mapSync)(function (data) {
+                    console.log('map');
                     data.time = new Date(data.time);
                     if (data.time >= start && data.time <= end && matchFunction(data)) {
                       results.push(data);
@@ -230,15 +229,16 @@ var filterFile = function () {
                   });
                 })();
               } catch (e) {
+                console.error('Error in filterFile:');
                 console.error((0, _util.inspect)(e));
               }
             });
 
-          case 2:
+          case 4:
             data = _context3.sent;
             return _context3.abrupt('return', data);
 
-          case 4:
+          case 6:
           case 'end':
             return _context3.stop();
         }
@@ -273,7 +273,7 @@ var query = exports.query = function () {
             _didIteratorError2 = false;
             _iteratorError2 = undefined;
             _context4.prev = 7;
-            _iterator2 = (0, _getIterator3.default)(files);
+            _iterator2 = files[Symbol.iterator]();
 
           case 9:
             if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
@@ -379,6 +379,7 @@ var queryRecent = exports.queryRecent = function () {
 exports.config = config;
 exports.whichFile = whichFile;
 exports.log = log;
+exports.queryOpts = queryOpts;
 
 var _fs = require('mz/fs');
 
@@ -416,6 +417,8 @@ var _lodash = require('lodash.clonedeep');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _stream = require('stream');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var started = false;
@@ -442,7 +445,7 @@ process.on('beforeExit', function () {
 });
 
 function config(conf) {
-  (0, _assign2.default)(cfg, conf);
+  Object.assign(cfg, conf);
 }
 
 function whichFile(type, datetime) {
@@ -555,4 +558,239 @@ function byTime(a, b) {
 
 function fmt(dt) {
   return (0, _moment2.default)(dt).format('YYYY-MM-DD hh:mm:ss A');
+}
+
+var QueryStream = function (_Readable) {
+  (0, _inherits3.default)(QueryStream, _Readable);
+
+  function QueryStream(options) {
+    var _this3 = this;
+
+    (0, _classCallCheck3.default)(this, QueryStream);
+
+    options.objectMode = true;
+
+    var _this2 = (0, _possibleConstructorReturn3.default)(this, (QueryStream.__proto__ || Object.getPrototypeOf(QueryStream)).call(this, options));
+
+    _this2.init = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5() {
+      return _regenerator2.default.wrap(function _callee5$(_context6) {
+        while (1) {
+          switch (_context6.prev = _context6.next) {
+            case 0:
+              _context6.next = 2;
+              return whichFiles(_this2.type, _this2.start, _this2.end);
+
+            case 2:
+              _this2.files = _context6.sent;
+
+              if (_this2.files) console.log('files count', _this2.files.length, _this2.files);
+              _this2.fileNum = 0;
+              _this2.rowNum = 0;
+              _this2.data = [];
+              _this2.initFinished = true;
+
+            case 8:
+            case 'end':
+              return _context6.stop();
+          }
+        }
+      }, _callee5, _this3);
+    }));
+
+    _this2.loadFile = function () {
+      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(f) {
+        var result;
+        return _regenerator2.default.wrap(function _callee6$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                console.log('loadfile');
+
+                if (_this2.files) {
+                  _context7.next = 4;
+                  break;
+                }
+
+                _context7.next = 4;
+                return _this2.init();
+
+              case 4:
+                if (!(_this2.data && _this2.rowNum < _this2.data.length)) {
+                  _context7.next = 6;
+                  break;
+                }
+
+                return _context7.abrupt('return', _this2.data);
+
+              case 6:
+                console.log('this.files = ', _this2.files);
+
+                if (!(_this2.files && _this2.fileNum >= _this2.files.length)) {
+                  _context7.next = 10;
+                  break;
+                }
+
+                console.log('ni');
+                return _context7.abrupt('return', null);
+
+              case 10:
+                if (_this2.data) {
+                  _this2.rowNum = 0;
+                }
+                _context7.next = 13;
+                return filterFile(_this2.files[_this2.fileNum++], _this2.start, _this2.end, _this2.match);
+
+              case 13:
+                result = _context7.sent;
+
+                _this2.data = result;
+                return _context7.abrupt('return', result);
+
+              case 16:
+              case 'end':
+                return _context7.stop();
+            }
+          }
+        }, _callee6, _this3);
+      }));
+
+      return function (_x16) {
+        return _ref6.apply(this, arguments);
+      };
+    }();
+
+    _this2.nextRow = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7() {
+      var row;
+      return _regenerator2.default.wrap(function _callee7$(_context8) {
+        while (1) {
+          switch (_context8.prev = _context8.next) {
+            case 0:
+              console.log('a');
+
+              if (_this2.data) {
+                _context8.next = 4;
+                break;
+              }
+
+              console.log('NO DATA RETURNING NULL');return _context8.abrupt('return', null);
+
+            case 4:
+              console.log('b');
+
+              if (!(_this2.rowNum >= _this2.data.length)) {
+                _context8.next = 13;
+                break;
+              }
+
+              console.log('c');
+              _context8.next = 9;
+              return _this2.loadFile();
+
+            case 9:
+              _this2.data = _context8.sent;
+
+              console.log('tried to load next file');
+
+              if (_this2.data) {
+                _context8.next = 13;
+                break;
+              }
+
+              return _context8.abrupt('return', null);
+
+            case 13:
+              row = _this2.data[_this2.rowNum];
+
+              console.log('rowNum is now', _this2.rowNum, 'row is', row);
+              _this2.rowNum++;
+              return _context8.abrupt('return', row);
+
+            case 17:
+            case 'end':
+              return _context8.stop();
+          }
+        }
+      }, _callee7, _this3);
+    }));
+
+    _this2._read = function () {
+      console.log('_read called');
+      new Promise(function () {
+        var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(res) {
+          var canPush;
+          return _regenerator2.default.wrap(function _callee8$(_context9) {
+            while (1) {
+              switch (_context9.prev = _context9.next) {
+                case 0:
+                  console.log('top of function');
+                  canPush = true;
+
+                case 2:
+                  console.log(1);
+                  _context9.prev = 3;
+                  _context9.next = 6;
+                  return _this2.loadFile();
+
+                case 6:
+                  _this2.data = _context9.sent;
+                  _context9.next = 12;
+                  break;
+
+                case 9:
+                  _context9.prev = 9;
+                  _context9.t0 = _context9['catch'](3);
+                  console.trace(_context9.t0);
+
+                case 12:
+                  ;
+                  console.log(2);
+                  _context9.next = 16;
+                  return _this2.nextRow();
+
+                case 16:
+                  _this2.row = _context9.sent;
+
+                  console.log('this.row = ', _this2.row);
+                  canPush = _this2.push(_this2.row);
+
+                case 19:
+                  if (_this2.row && canPush) {
+                    _context9.next = 2;
+                    break;
+                  }
+
+                case 20:
+                case 'end':
+                  return _context9.stop();
+              }
+            }
+          }, _callee8, _this3, [[3, 9]]);
+        }));
+
+        return function (_x17) {
+          return _ref8.apply(this, arguments);
+        };
+      }()).catch(console.error);
+      console.log('bottom of _read');
+    };
+
+    Object.assign(_this2, options);
+    _this2.initFinished = false;
+    _this2.init().catch(console.error);
+    return _this2;
+  }
+
+  return QueryStream;
+}(_stream.Readable);
+
+function queryOpts(options) {
+  var type = options.type;
+  var start = options.start;
+  var end = options.end;
+  var match = options.match;
+
+  if (!options.match) options.match = function (d) {
+    return true;
+  };
+  return new QueryStream(options);
 }

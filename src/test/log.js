@@ -1,4 +1,5 @@
-import {config, log, query, queryRecent} from '../log';
+import {config, log, query, queryRecent, 
+        queryOpts} from '../log';
 import moment from 'moment';
 import {inspect} from 'util';
 import delay from 'delay';
@@ -24,6 +25,12 @@ async function test() {
   rows = await queryRecent('req',);
   console.log('queryRecent result:');
   console.log(inspect(rows));
+
+  const matched = queryOpts({type:'req', start: moment('1995-12-25').toDate(),
+                             end: new Date(), match: d => ((d.dog>100)||(d.cat))});
+  console.log('queryOpts:');
+  console.log(matched);
+  matched.on('data', console.log);
 }
 
 test().catch(console.error);
