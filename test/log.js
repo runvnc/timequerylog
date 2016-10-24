@@ -1,6 +1,60 @@
 'use strict';
 
-require('babel-core');
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var test = function () {
+  var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
+    var rows;
+    return _regenerator2.default.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            (0, _log.log)('req', { blah: 100 });
+            (0, _log.log)('req', { url: 'http://google.com' });
+
+            _context.next = 4;
+            return (0, _delay2.default)(300);
+
+          case 4:
+
+            console.log('Running query');
+            _context.next = 7;
+            return (0, _log.query)('req', (0, _moment2.default)("1995-12-25").toDate(), new Date(), function (d) {
+              return d.url;
+            });
+
+          case 7:
+            rows = _context.sent;
+
+            console.log('rows returned');
+            console.log((0, _util.inspect)(rows));
+            _context.next = 12;
+            return (0, _log.queryRecent)('req');
+
+          case 12:
+            rows = _context.sent;
+
+            console.log('queryRecent result:');
+            console.log((0, _util.inspect)(rows));
+
+          case 15:
+          case 'end':
+            return _context.stop();
+        }
+      }
+    }, _callee, this);
+  }));
+
+  return function test() {
+    return _ref.apply(this, arguments);
+  };
+}();
 
 var _log = require('../log');
 
@@ -10,78 +64,10 @@ var _moment2 = _interopRequireDefault(_moment);
 
 var _util = require('util');
 
+var _delay = require('delay');
+
+var _delay2 = _interopRequireDefault(_delay);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } step("next"); }); }; }
-
-var test = (function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
-    var _this = this;
-
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            (0, _log.log)('req', { blah: 100 });
-            (0, _log.log)('req', { url: 'http://google.com' });
-            setTimeout(_asyncToGenerator(regeneratorRuntime.mark(function _callee() {
-              var st, en, rows;
-              return regeneratorRuntime.wrap(function _callee$(_context) {
-                while (1) {
-                  switch (_context.prev = _context.next) {
-                    case 0:
-                      console.log('Running query');
-                      st = (0, _moment2.default)("1995-12-25").toDate();
-                      en = new Date();
-                      _context.prev = 3;
-                      _context.next = 6;
-                      return (0, _log.query)('req', st, en);
-
-                    case 6:
-                      rows = _context.sent;
-
-                      console.log('rows returned');
-                      console.log((0, _util.inspect)(rows));
-                      _context.next = 11;
-                      return (0, _log.queryRecent)('req');
-
-                    case 11:
-                      rows = _context.sent;
-
-                      console.log('queryRecent result:');
-                      console.log((0, _util.inspect)(rows));
-                      _context.next = 19;
-                      break;
-
-                    case 16:
-                      _context.prev = 16;
-                      _context.t0 = _context['catch'](3);
-
-                      console.error(_context.t0);
-
-                    case 19:
-                    case 'end':
-                      return _context.stop();
-                  }
-                }
-              }, _callee, _this, [[3, 16]]);
-            })), 10);
-
-          case 3:
-          case 'end':
-            return _context2.stop();
-        }
-      }
-    }, _callee2, this);
-  }));
-
-  return function test() {
-    return ref.apply(this, arguments);
-  };
-})();
-
-test().then(function (f) {
-  return console.log('done');
-}).catch(function (e) {
-  return console.error(e);
-});
+test().catch(console.error);
