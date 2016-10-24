@@ -29,11 +29,15 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
+var _assign = require('babel-runtime/core-js/object/assign');
+
+var _assign2 = _interopRequireDefault(_assign);
+
 var whichFiles = exports.whichFiles = function () {
   var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(type, start, end) {
     var _this = this;
 
-    var startDate, endDate, st, en, dirs, newDirs, result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step, _ret;
+    var startDate, endDate, st, en, dirs, newDirs, result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step, _ret2;
 
     return _regenerator2.default.wrap(function _callee$(_context2) {
       while (1) {
@@ -135,14 +139,14 @@ var whichFiles = exports.whichFiles = function () {
             return _context2.delegateYield(_loop(), 't1', 31);
 
           case 31:
-            _ret = _context2.t1;
+            _ret2 = _context2.t1;
 
-            if (!((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object")) {
+            if (!((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object")) {
               _context2.next = 34;
               break;
             }
 
-            return _context2.abrupt('return', _ret.v);
+            return _context2.abrupt('return', _ret2.v);
 
           case 34:
             _iteratorNormalCompletion = true;
@@ -404,8 +408,17 @@ var _queue = require('queue');
 
 var _queue2 = _interopRequireDefault(_queue);
 
+var _deepEqual = require('deep-equal');
+
+var _deepEqual2 = _interopRequireDefault(_deepEqual);
+
+var _lodash = require('lodash.clonedeep');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var started = false;
 var cfg = { path: process.cwd() };
 var streams = {};
 var lastAccessTime = {};
@@ -428,8 +441,8 @@ process.on('beforeExit', function () {
   }
 });
 
-function config(cfg) {
-  cfg = cfg;
+function config(conf) {
+  (0, _assign2.default)(cfg, conf);
 }
 
 function whichFile(type, datetime) {
@@ -437,15 +450,38 @@ function whichFile(type, datetime) {
   return cfg.path + '/' + type + '_GMT/' + gmt.format('YYYY-MM-DD/hhA');
 }
 
+q.on('timeout', function (next) {
+  console.error('queue timed out');
+  next();
+});
+
+var lastData = {};
+
 function log(type, obj) {
   var time = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
 
+  if (cfg.noRepeat) {
+    var hadTime = obj.hasOwnProperty('time');
+    var copyTime = null;
+    if (hadTime) copyTime = new Date(obj.time.getTime());
+    if (hadTime) delete obj['time'];
+    if (lastData.hasOwnProperty(type) && (0, _deepEqual2.default)(lastData[type], obj)) {
+      if (hadTime) obj.time = copyTime;
+      return;
+    }
+    lastData[type] = (0, _lodash2.default)(obj);
+    if (hadTime) obj.time = copyTime;
+  }
   q.push(function (cb) {
     dolog(type, obj, time, cb);
   });
-  q.start(function (e) {
-    if (e) console.error('Error running queue: ', e);
-  });
+  if (!started) {
+    started = true;
+    q.start(function (e) {
+      started = false;
+      if (e) console.error('Error running queue: ', e);
+    });
+  }
 }
 
 function getWriteStream(fname, cb) {
@@ -483,14 +519,20 @@ function dolog(type, obj) {
   var time = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
   var cb = arguments[3];
 
-  var fname = whichFile(type, time);
-  var toWrite = { time: time, type: type };
-  for (var key in obj) {
-    toWrite[key] = obj[key];
-  }getWriteStream(fname, function (stream) {
-    stream.write(toWrite);
-    cb();
-  });
+  try {
+    (function () {
+      var fname = whichFile(type, time);
+      var toWrite = { time: time, type: type };
+      for (var key in obj) {
+        toWrite[key] = obj[key];
+      }getWriteStream(fname, function (stream) {
+        stream.write(toWrite);
+        cb();
+      });
+    })();
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 function byDate(a, b) {

@@ -18,12 +18,18 @@ from directory `./[type]_GMT`.
 Returns a promise with data for `type` between `startDate` and `endDate` where `matchFunction`
 returns true. Searches JSON streamed files starting from directory `./[type]_GMT`.
 
+*config(opts)*
+
+Set configuration options.  Current option is path.  Defaults to working directory.
+
 
 ```javascript
-import {log, query, queryRecent} from '../log';
+import {log, config, query, queryRecent} from '../log';
 import moment from 'moment';
 import {inspect} from 'util';
 import delay from 'delay';
+
+config({path:process.cwd()+'/datalog'});
 
 async function test() {
   log('req',{blah:100});

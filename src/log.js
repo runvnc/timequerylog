@@ -8,7 +8,11 @@ import {sync as mkdirp} from 'mkdirp';
 import pathExists from 'path-exists';
 import moment from 'moment';
 import queue from 'queue';
+import equal from 'deep-equal';
+import cloneDeep from 'lodash.clonedeep';
 
+
+let started = false;
 let cfg = {path:process.cwd()};
 let streams = {};
 let lastAccessTime = {};
@@ -31,8 +35,8 @@ process.on('beforeExit', () => {
   }
 });
 
-export function config(cfg) {
-  cfg = cfg;
+export function config(conf) {
+  Object.assign(cfg,conf);
 }
 
 export function whichFile(type, datetime) {
@@ -40,11 +44,34 @@ export function whichFile(type, datetime) {
   return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}`;
 }
 
+q.on('timeout', (next) => {
+  console.error('queue timed out');
+  next();
+});
+
+let lastData = {};
+
 export function log(type,obj,time = new Date()) {
+  if (cfg.noRepeat) {
+    let hadTime = obj.hasOwnProperty('time');
+    let copyTime = null;
+    if (hadTime) copyTime = new Date(obj.time.getTime());
+    if (hadTime) delete obj['time'];
+    if (lastData.hasOwnProperty(type) && equal(lastData[type], obj)) {
+      if (hadTime) obj.time = copyTime;
+      return;
+    }
+    lastData[type] = cloneDeep(obj);
+    if (hadTime) obj.time = copyTime;
+  }
   q.push(cb => { dolog(type, obj, time, cb);});
-  q.start(e=> {
-    if (e) console.error('Error running queue: ', e)
-  });
+  if (!started) {
+    started = true;
+    q.start(e=> {
+      started = false;
+      if (e) console.error('Error running queue: ', e)
+    });
+  }
 }
 
 function getWriteStream(fname, cb) {
@@ -79,13 +106,17 @@ function getWriteStream(fname, cb) {
 }
 
 function dolog(type, obj, time = new Date(), cb) {
-  let fname = whichFile(type, time);
-  let toWrite = {time, type};
-  for (let key in obj) toWrite[key] = obj[key];
-  getWriteStream(fname, stream => {
-    stream.write(toWrite);
-    cb();
-  });
+  try {
+    let fname = whichFile(type, time);
+    let toWrite = {time, type};
+    for (let key in obj) toWrite[key] = obj[key];
+    getWriteStream(fname, stream => {
+      stream.write(toWrite);
+      cb();
+    });
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 function byDate(a, b) {
@@ -180,4 +211,61 @@ export async function queryRecent(type) {
   let start = moment(end).subtract(30, 'minutes').toDate();
   let results = await query(type, start, end);
   return results;
+}
+
+import {Readable} from 'stream';
+
+class QueryStream extends Readable {
+  constructor(options) {
+    super(options);
+    Object.assign(this, options);
+    this.init(options).catch(consol.error);
+  }
+
+  init = async (options) => {
+    this.files = await whichFiles(type, start, end);
+    this.fileNum = 0;
+    this.rowNum = 0;
+    this.data = [];
+  }
+
+  loadFile = async () => {
+    if (this.fileNum) >= this.files.length) {
+      return null;
+    }
+    return await filterFile(this.files[this.fileNum++], this.start,
+                            this.end, this.matchFunction);
+  }
+
+  nextRow = async () => {
+    this.reading = true;
+    if (!this.data) return null;
+    if (this.rowNum >= this.data.length) {
+      this.fileNum++;
+      this.data = await this.loadFile();
+      if (!this.data) return null;
+    }
+    const row = this.data[this.rowNum];
+    this.rowNum++;
+    return row;
+  }
+
+  _read = () => {
+    return new Promise( async (resolve) => {
+      let canPush = true;
+      do {
+        if (!(this.data)) this.data = this.loadFile();
+        this.row = await this.nextRow();
+        canPush = this.push(row);
+      } while (this.row && canPush);
+    }).resolve();
+  }
+
+}
+
+export function queryOpts(options) {
+
+  const {type, start, end, matchFunction} = options;
+  if (!options.matchFunction) options.matchFunction = (d=>true);
+  return new QueryStream(options);
 }
