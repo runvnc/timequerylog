@@ -13,11 +13,15 @@
     "url": "https://github.com/runvnc/timequerylog.git"
   },
   "license": "ISC",
+  "engines": {
+    "node": ">=1.0.0"
+  },
   "dependencies": {
     "JSONStream": "^1.0.7",
     "babel-core": "^6.3.26",
     "babel-polyfill": "^6.3.14",
     "babel-runtime": "^6.11.6",
+    "csv-write-stream": "^2.0.0",
     "deep-equal": "^1.0.1",
     "event-stream": "^3.3.2",
     "lodash.clonedeep": "^4.5.0",

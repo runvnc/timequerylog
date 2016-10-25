@@ -206,9 +206,7 @@ var filterFile = function () {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            console.log('top of fileterfile');
-            console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-            _context3.next = 4;
+            _context3.next = 2;
             return new Promise(function (res) {
               try {
                 (function () {
@@ -217,7 +215,6 @@ var filterFile = function () {
                   var stream = (0, _JSONStream.parse)();
                   file.pipe(stream);
                   stream.pipe((0, _eventStream.mapSync)(function (data) {
-                    console.log('map');
                     data.time = new Date(data.time);
                     if (data.time >= start && data.time <= end && matchFunction(data)) {
                       results.push(data);
@@ -234,11 +231,11 @@ var filterFile = function () {
               }
             });
 
-          case 4:
+          case 2:
             data = _context3.sent;
             return _context3.abrupt('return', data);
 
-          case 6:
+          case 4:
           case 'end':
             return _context3.stop();
         }
@@ -583,13 +580,12 @@ var QueryStream = function (_Readable) {
             case 2:
               _this2.files = _context6.sent;
 
-              if (_this2.files) console.log('files count', _this2.files.length, _this2.files);
               _this2.fileNum = 0;
               _this2.rowNum = 0;
               _this2.data = [];
               _this2.initFinished = true;
 
-            case 8:
+            case 7:
             case 'end':
               return _context6.stop();
           }
@@ -604,49 +600,44 @@ var QueryStream = function (_Readable) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                console.log('loadfile');
-
                 if (_this2.files) {
-                  _context7.next = 4;
+                  _context7.next = 3;
                   break;
                 }
 
-                _context7.next = 4;
+                _context7.next = 3;
                 return _this2.init();
 
-              case 4:
+              case 3:
                 if (!(_this2.data && _this2.rowNum < _this2.data.length)) {
-                  _context7.next = 6;
+                  _context7.next = 5;
                   break;
                 }
 
                 return _context7.abrupt('return', _this2.data);
 
-              case 6:
-                console.log('this.files = ', _this2.files);
-
+              case 5:
                 if (!(_this2.files && _this2.fileNum >= _this2.files.length)) {
-                  _context7.next = 10;
+                  _context7.next = 7;
                   break;
                 }
 
-                console.log('ni');
                 return _context7.abrupt('return', null);
 
-              case 10:
+              case 7:
                 if (_this2.data) {
                   _this2.rowNum = 0;
                 }
-                _context7.next = 13;
+                _context7.next = 10;
                 return filterFile(_this2.files[_this2.fileNum++], _this2.start, _this2.end, _this2.match);
 
-              case 13:
+              case 10:
                 result = _context7.sent;
 
                 _this2.data = result;
                 return _context7.abrupt('return', result);
 
-              case 16:
+              case 13:
               case 'end':
                 return _context7.stop();
             }
@@ -665,47 +656,39 @@ var QueryStream = function (_Readable) {
         while (1) {
           switch (_context8.prev = _context8.next) {
             case 0:
-              console.log('a');
-
               if (_this2.data) {
-                _context8.next = 4;
-                break;
-              }
-
-              console.log('NO DATA RETURNING NULL');return _context8.abrupt('return', null);
-
-            case 4:
-              console.log('b');
-
-              if (!(_this2.rowNum >= _this2.data.length)) {
-                _context8.next = 13;
-                break;
-              }
-
-              console.log('c');
-              _context8.next = 9;
-              return _this2.loadFile();
-
-            case 9:
-              _this2.data = _context8.sent;
-
-              console.log('tried to load next file');
-
-              if (_this2.data) {
-                _context8.next = 13;
+                _context8.next = 2;
                 break;
               }
 
               return _context8.abrupt('return', null);
 
-            case 13:
+            case 2:
+              if (!(_this2.rowNum >= _this2.data.length)) {
+                _context8.next = 8;
+                break;
+              }
+
+              _context8.next = 5;
+              return _this2.loadFile();
+
+            case 5:
+              _this2.data = _context8.sent;
+
+              if (_this2.data) {
+                _context8.next = 8;
+                break;
+              }
+
+              return _context8.abrupt('return', null);
+
+            case 8:
               row = _this2.data[_this2.rowNum];
 
-              console.log('rowNum is now', _this2.rowNum, 'row is', row);
               _this2.rowNum++;
               return _context8.abrupt('return', row);
 
-            case 17:
+            case 11:
             case 'end':
               return _context8.stop();
           }
@@ -714,7 +697,6 @@ var QueryStream = function (_Readable) {
     }));
 
     _this2._read = function () {
-      console.log('_read called');
       new Promise(function () {
         var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(res) {
           var canPush;
@@ -722,56 +704,51 @@ var QueryStream = function (_Readable) {
             while (1) {
               switch (_context9.prev = _context9.next) {
                 case 0:
-                  console.log('top of function');
                   canPush = true;
 
-                case 2:
-                  console.log(1);
-                  _context9.prev = 3;
-                  _context9.next = 6;
+                case 1:
+                  _context9.prev = 1;
+                  _context9.next = 4;
                   return _this2.loadFile();
 
-                case 6:
+                case 4:
                   _this2.data = _context9.sent;
-                  _context9.next = 12;
+                  _context9.next = 10;
                   break;
 
-                case 9:
-                  _context9.prev = 9;
-                  _context9.t0 = _context9['catch'](3);
+                case 7:
+                  _context9.prev = 7;
+                  _context9.t0 = _context9['catch'](1);
                   console.trace(_context9.t0);
 
-                case 12:
+                case 10:
                   ;
-                  console.log(2);
-                  _context9.next = 16;
+                  _context9.next = 13;
                   return _this2.nextRow();
 
-                case 16:
+                case 13:
                   _this2.row = _context9.sent;
 
-                  console.log('this.row = ', _this2.row);
                   canPush = _this2.push(_this2.row);
 
-                case 19:
+                case 15:
                   if (_this2.row && canPush) {
-                    _context9.next = 2;
+                    _context9.next = 1;
                     break;
                   }
 
-                case 20:
+                case 16:
                 case 'end':
                   return _context9.stop();
               }
             }
-          }, _callee8, _this3, [[3, 9]]);
+          }, _callee8, _this3, [[1, 7]]);
         }));
 
         return function (_x17) {
           return _ref8.apply(this, arguments);
         };
       }()).catch(console.error);
-      console.log('bottom of _read');
     };
 
     Object.assign(_this2, options);
@@ -784,13 +761,22 @@ var QueryStream = function (_Readable) {
 }(_stream.Readable);
 
 function queryOpts(options) {
-  var type = options.type;
-  var start = options.start;
-  var end = options.end;
-  var match = options.match;
+  var type = options.type,
+      start = options.start,
+      end = options.end,
+      match = options.match;
 
   if (!options.match) options.match = function (d) {
     return true;
   };
-  return new QueryStream(options);
+  var qs = new QueryStream(options);
+
+  if (options.csv) {
+    var csvWriter = require('csv-write-stream');
+    var obj2csv = csvWriter();
+    qs.pipe(obj2csv);
+    return obj2csv;
+  } else {
+    return qs;
+  }
 }

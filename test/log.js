@@ -10,7 +10,7 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var test = function () {
   var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-    var rows, matched;
+    var rows, matched, csvStream;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -24,26 +24,29 @@ var test = function () {
             (0, _log.log)('req', { dog: 1000 });
             (0, _log.log)('req', { dog: 1000 });
 
-            _context.next = 9;
+            (0, _log.log)('event', { category: 'science', action: 'new' });
+            (0, _log.log)('event', { category: 'general', action: 'edit' });
+
+            _context.next = 11;
             return (0, _delay2.default)(300);
 
-          case 9:
+          case 11:
 
             console.log('Running query');
-            _context.next = 12;
+            _context.next = 14;
             return (0, _log.query)('req', (0, _moment2.default)("1995-12-25").toDate(), new Date(), function (d) {
               return d.url;
             });
 
-          case 12:
+          case 14:
             rows = _context.sent;
 
             console.log('rows returned');
             console.log((0, _util.inspect)(rows));
-            _context.next = 17;
+            _context.next = 19;
             return (0, _log.queryRecent)('req');
 
-          case 17:
+          case 19:
             rows = _context.sent;
 
             console.log('queryRecent result:');
@@ -51,14 +54,18 @@ var test = function () {
 
             matched = (0, _log.queryOpts)({ type: 'req', start: (0, _moment2.default)('1995-12-25').toDate(),
               end: new Date(), match: function match(d) {
-                return d.dog > 100 || d.cat;
+                return d.dog || d.cat;
               } });
 
             console.log('queryOpts:');
-            console.log(matched);
             matched.on('data', console.log);
 
-          case 24:
+            csvStream = (0, _log.queryOpts)({ type: 'event', csv: true, start: (0, _moment2.default)('1995-12-25').toDate(),
+              end: new Date() });
+
+            csvStream.pipe(process.stdout);
+
+          case 27:
           case 'end':
             return _context.stop();
         }

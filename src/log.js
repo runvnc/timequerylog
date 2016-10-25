@@ -171,8 +171,6 @@ export async function whichFiles(type, start, end) {
 }
 
 async function filterFile(fname, start, end, matchFunction) {
-  console.log('top of fileterfile');
-  console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
   let data = await new Promise( res => {
     try {
       let results = [];
@@ -180,7 +178,6 @@ async function filterFile(fname, start, end, matchFunction) {
       let stream = parse();
       file.pipe(stream);
       stream.pipe(mapSync( data => {
-        console.log('map');
         data.time = new Date(data.time);
         if (data.time >= start && data.time <= end &&
             matchFunction(data)) {
@@ -230,7 +227,6 @@ class QueryStream extends Readable {
 
   init = async () => {
     this.files = await whichFiles(this.type, this.start, this.end);
-    if (this.files) console.log('files count',this.files.length, this.files);
     this.fileNum = 0;
     this.rowNum = 0;
     this.data = [];
@@ -238,14 +234,11 @@ class QueryStream extends Readable {
   }
 
   loadFile = async (f) => {
-    console.log('loadfile');
     if (!this.files) await this.init();
     if (this.data && this.rowNum < this.data.length) {
       return this.data;
-    } 
-    console.log('this.files = ', this.files);
+    }
     if (this.files && this.fileNum >= this.files.length) {
-      console.log('ni');
       return null;
     }
     if (this.data) {
@@ -258,38 +251,27 @@ class QueryStream extends Readable {
   }
 
   nextRow = async () => {
-    console.log('a');
-    if (!this.data) { console.log('NO DATA RETURNING NULL'); return null; }
-    console.log('b');
+    if (!this.data) return null;
     if (this.rowNum >= this.data.length) {
-      console.log('c');
       this.data = await this.loadFile();
-      console.log('tried to load next file');
       if (!this.data) return null;
     }
     const row = this.data[this.rowNum];
-    console.log('rowNum is now', this.rowNum, 'row is', row);
     this.rowNum++;
     return row;
   }
 
   _read = () => {
-    console.log('_read called');
     new Promise( async (res) => {
-      console.log('top of function');
       let canPush = true;
       do {
-        console.log(1);
         try {
           this.data = await this.loadFile();
         } catch (e) { console.trace(e) };
-        console.log(2);
         this.row = await this.nextRow();
-        console.log('this.row = ', this.row);
         canPush = this.push(this.row);
       } while (this.row && canPush);
     }).catch(console.error);
-    console.log('bottom of _read'); 
   }
 
 }
@@ -297,5 +279,15 @@ class QueryStream extends Readable {
 export function queryOpts(options) {
   const {type, start, end, match} = options;
   if (!options.match) options.match = (d=>true);
-  return new QueryStream(options);
+  const qs = new QueryStream(options);
+
+  if (options.csv) {
+    const csvWriter = require('csv-write-stream');
+    const obj2csv = csvWriter();
+    qs.pipe(obj2csv);
+    return obj2csv;
+  } else {
+    return qs;
+  }
 }
+

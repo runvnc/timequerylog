@@ -1,4 +1,4 @@
-import {config, log, query, queryRecent, 
+import {config, log, query, queryRecent,
         queryOpts} from '../log';
 import moment from 'moment';
 import {inspect} from 'util';
@@ -16,6 +16,9 @@ async function test() {
   log('req',{dog:1000});
   log('req',{dog:1000});
 
+  log('event', {category: 'science', action:'new'});
+  log('event', {category: 'general', action:'edit'});
+
   await delay(300);
 
   console.log('Running query');
@@ -27,10 +30,13 @@ async function test() {
   console.log(inspect(rows));
 
   const matched = queryOpts({type:'req', start: moment('1995-12-25').toDate(),
-                             end: new Date(), match: d => ((d.dog>100)||(d.cat))});
+                             end: new Date(), match: d => d.dog||d.cat});
   console.log('queryOpts:');
-  console.log(matched);
   matched.on('data', console.log);
+
+  const csvStream = queryOpts({type:'event', csv: true, start: moment('1995-12-25').toDate(),
+                               end: new Date()});
+  csvStream.pipe(process.stdout);
 }
 
 test().catch(console.error);
