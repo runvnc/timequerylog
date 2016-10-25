@@ -34,8 +34,9 @@ async function test() {
   console.log('queryOpts:');
   matched.on('data', console.log);
 
-  const csvStream = queryOpts({type:'event', csv: true, start: moment('1995-12-25').toDate(),
-                               end: new Date()});
+  let i = 0;
+  const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
+                               map: (r)=>{r.row = i++;return r}});
   csvStream.pipe(process.stdout);
 }
 

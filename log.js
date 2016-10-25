@@ -729,15 +729,17 @@ var QueryStream = function (_Readable) {
                 case 13:
                   _this2.row = _context9.sent;
 
+                  if (_this2.timeMS) _this2.row.time = _this2.row.time.getTime();
+                  if (_this2.map) _this2.row = _this2.map(_this2.row);
                   canPush = _this2.push(_this2.row);
 
-                case 15:
+                case 17:
                   if (_this2.row && canPush) {
                     _context9.next = 1;
                     break;
                   }
 
-                case 16:
+                case 18:
                 case 'end':
                   return _context9.stop();
               }
@@ -766,9 +768,12 @@ function queryOpts(options) {
       end = options.end,
       match = options.match;
 
-  if (!options.match) options.match = function (d) {
+  if (!match) options.match = function (d) {
     return true;
   };
+  if (!end) options.end = new Date();
+  if (!start) options.start = (0, _moment2.default)(end).subtract(30, 'minutes').toDate();
+
   var qs = new QueryStream(options);
 
   if (options.csv) {

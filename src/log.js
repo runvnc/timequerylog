@@ -269,6 +269,8 @@ class QueryStream extends Readable {
           this.data = await this.loadFile();
         } catch (e) { console.trace(e) };
         this.row = await this.nextRow();
+        if (this.timeMS) this.row.time = this.row.time.getTime();
+        if (this.map) this.row = this.map(this.row);
         canPush = this.push(this.row);
       } while (this.row && canPush);
     }).catch(console.error);
@@ -277,8 +279,11 @@ class QueryStream extends Readable {
 }
 
 export function queryOpts(options) {
-  const {type, start, end, match} = options;
-  if (!options.match) options.match = (d=>true);
+  let {type, start, end, match} = options;
+  if (!match) options.match = (d=>true);
+  if (!end) options.end = new Date();
+  if (!start) options.start = moment(end).subtract(30, 'minutes').toDate();
+
   const qs = new QueryStream(options);
 
   if (options.csv) {
