@@ -42,8 +42,8 @@ async function test() {
   log('req',{blah:100});
   log('req',{url:'http://google.com'});
 
-  log('req',{cat:100, time: new Date('2015-05-01T23:50:59.392Z')});
-  log('req',{cat:100, time: new Date('2015-05-01T23:51:53.312Z')});
+  log('req',{cat:100}, new Date('2015-05-01T23:50:59.392Z'));
+  log('req',{cat:100}, new Date('2015-05-01T23:51:53.312Z'));
   log('req',{dog:1000});
   log('req',{dog:1000});
   log('req',{dog:1000});
