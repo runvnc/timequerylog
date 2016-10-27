@@ -68,7 +68,7 @@ async function test() {
 
   let i = 0;
   const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
-                               map: (r) => r.row=i++; return r});
+                               map: (r) => {r.row=i++; return r});
   csvStream.pipe(process.stdout);
 }
 
