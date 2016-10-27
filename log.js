@@ -581,11 +581,10 @@ var QueryStream = function (_Readable) {
         while (1) {
           switch (_context6.prev = _context6.next) {
             case 0:
-              console.log('INIT');
-              _context6.next = 3;
+              _context6.next = 2;
               return whichFiles(_this2.type, _this2.start, _this2.end);
 
-            case 3:
+            case 2:
               _this2.files = _context6.sent;
 
               _this2.fileNum = 0;
@@ -593,7 +592,7 @@ var QueryStream = function (_Readable) {
               _this2.data = [];
               _this2.initFinished = true;
 
-            case 8:
+            case 7:
             case 'end':
               return _context6.stop();
           }
@@ -608,67 +607,60 @@ var QueryStream = function (_Readable) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                console.log('filenum ', _this2.fileNum);
-
                 if (_this2.files) {
-                  _context7.next = 4;
+                  _context7.next = 3;
                   break;
                 }
 
-                _context7.next = 4;
+                _context7.next = 3;
                 return _this2.init();
 
-              case 4:
+              case 3:
                 if (!(_this2.data && _this2.rowNum < _this2.data.length)) {
-                  _context7.next = 6;
+                  _context7.next = 5;
                   break;
                 }
 
                 return _context7.abrupt('return', _this2.data);
 
-              case 6:
+              case 5:
                 if (!(_this2.files && _this2.fileNum >= _this2.files.length)) {
-                  _context7.next = 8;
+                  _context7.next = 7;
                   break;
                 }
 
                 return _context7.abrupt('return', null);
 
-              case 8:
+              case 7:
                 if (_this2.data) {
-                  console.log('assign rowNum to 0');
                   _this2.rowNum = 0;
                 }
-                console.log('filterfile#####');
-                console.log('filenum =', _this2.fileNum, 'file=', _this2.files[_this2.fileNum]);
                 result = null;
-                _context7.prev = 12;
-                _context7.next = 15;
+                _context7.prev = 9;
+                _context7.next = 12;
                 return filterFile(_this2.files[_this2.fileNum++], _this2.start, _this2.end, _this2.match);
 
-              case 15:
+              case 12:
                 result = _context7.sent;
-                _context7.next = 21;
+                _context7.next = 18;
                 break;
 
-              case 18:
-                _context7.prev = 18;
-                _context7.t0 = _context7['catch'](12);
+              case 15:
+                _context7.prev = 15;
+                _context7.t0 = _context7['catch'](9);
 
                 console.error('filterfile err in loadfile', _context7.t0);
 
-              case 21:
-                console.log('result is', result);
+              case 18:
                 _this2.data = result;
-                console.log('this.data=', _this2.data);
                 return _context7.abrupt('return', result);
 
-              case 25:
+              case 20:
               case 'end':
                 return _context7.stop();
             }
           }
-        }, _callee6, _this3, [[12, 18]]);
+        }, _callee6, _this3, [[9, 15]]);
       }));
 
       return function (_x16) {
@@ -691,31 +683,30 @@ var QueryStream = function (_Readable) {
 
             case 2:
               if (!(_this2.rowNum >= _this2.data.length)) {
-                _context8.next = 9;
+                _context8.next = 8;
                 break;
               }
 
-              console.log('loadfile ***');
-              _context8.next = 6;
+              _context8.next = 5;
               return _this2.loadFile();
 
-            case 6:
+            case 5:
               _this2.data = _context8.sent;
 
               if (_this2.data) {
-                _context8.next = 9;
+                _context8.next = 8;
                 break;
               }
 
               return _context8.abrupt('return', null);
 
-            case 9:
+            case 8:
               row = _this2.data[_this2.rowNum];
 
               _this2.rowNum++;
               return _context8.abrupt('return', row);
 
-            case 12:
+            case 11:
             case 'end':
               return _context8.stop();
           }
@@ -744,48 +735,45 @@ var QueryStream = function (_Readable) {
 
                 case 4:
                   _context9.prev = 4;
-
-                  console.log('loadfile in read');
-                  _context9.next = 8;
+                  _context9.next = 7;
                   return _this2.loadFile();
 
-                case 8:
+                case 7:
                   _this2.data = _context9.sent;
-                  _context9.next = 14;
+                  _context9.next = 13;
                   break;
 
-                case 11:
-                  _context9.prev = 11;
+                case 10:
+                  _context9.prev = 10;
                   _context9.t0 = _context9['catch'](4);
                   console.trace(_context9.t0);
 
-                case 14:
+                case 13:
                   ;
-                  _context9.next = 17;
+                  _context9.next = 16;
                   return _this2.nextRow();
 
-                case 17:
+                case 16:
                   _this2.row = _context9.sent;
 
                   if (_this2.row) {
                     if (_this2.timeMS) _this2.row.time = _this2.row.time.getTime();
                     if (_this2.map) _this2.row = _this2.map(_this2.row);
                   }
-                  console.log('pushing --', _this2.row);
                   canPush = _this2.push(_this2.row);
 
-                case 21:
+                case 19:
                   if (_this2.row && canPush) {
                     _context9.next = 4;
                     break;
                   }
 
-                case 22:
+                case 20:
                 case 'end':
                   return _context9.stop();
               }
             }
-          }, _callee8, _this3, [[4, 11]]);
+          }, _callee8, _this3, [[4, 10]]);
         }));
 
         return function (_x17) {
@@ -797,7 +785,6 @@ var QueryStream = function (_Readable) {
     Object.assign(_this2, options);
     _this2.initFinished = false;
     _this2.fileNum = 0;
-    //this.init().catch(console.error);
     return _this2;
   }
 

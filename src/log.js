@@ -231,11 +231,9 @@ class QueryStream extends Readable {
     Object.assign(this, options);
     this.initFinished = false;
     this.fileNum = 0;
-    //this.init().catch(console.error);
   }
 
   init = async () => {
-    console.log('INIT');
     this.files = await whichFiles(this.type, this.start, this.end);
     this.fileNum = 0;
     this.rowNum = 0;
@@ -244,7 +242,6 @@ class QueryStream extends Readable {
   }
 
   loadFile = async (f) => {
-    console.log('filenum ', this.fileNum);
     if (!this.files) await this.init();
     if (this.data && this.rowNum < this.data.length) {
       return this.data;
@@ -253,11 +250,8 @@ class QueryStream extends Readable {
       return null;
     }
     if (this.data) {
-      console.log('assign rowNum to 0');
       this.rowNum = 0;
     }
-    console.log('filterfile#####');
-    console.log('filenum =',this.fileNum,'file=',this.files[this.fileNum]);
     let result = null;
     try {
       result =  await filterFile(this.files[this.fileNum++], this.start,
@@ -265,16 +259,13 @@ class QueryStream extends Readable {
     } catch (e) {
       console.error('filterfile err in loadfile',e); 
     }
-    console.log('result is', result);
     this.data = result;
-    console.log('this.data=',this.data);
     return result;
   }
 
   nextRow = async () => {
     if (!this.data) return null;
     if (this.rowNum >= this.data.length) {
-      console.log('loadfile ***');
       this.data = await this.loadFile();
       if (!this.data) return null;
     }
@@ -289,7 +280,6 @@ class QueryStream extends Readable {
       let canPush = true;
       do {
         try {
-          console.log('loadfile in read');
           this.data = await this.loadFile();
         } catch (e) { console.trace(e) };
         this.row = await this.nextRow();
@@ -297,7 +287,6 @@ class QueryStream extends Readable {
           if (this.timeMS) this.row.time = this.row.time.getTime();
           if (this.map) this.row = this.map(this.row);
         }
-        console.log('pushing --',this.row);
         canPush = this.push(this.row);
       } while (this.row && canPush);
     }).catch(console.error);
