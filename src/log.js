@@ -51,18 +51,27 @@ q.on('timeout', (next) => {
 
 let lastData = {};
 
+function noRepeat(type) {
+  return false;
+  if (!(cfg.hasOwnProperty('noRepeat'))) return false;
+  if (cfg.noRepeat === true) return true;
+  if (cfg.noRepeat.hasOwnProperty(type) &&
+      cfg.noRepeat[type] === true) return true;
+  return false;
+}
+
 export function log(type,obj,time = new Date()) {
-  if (cfg.noRepeat) {
-    let hadTime = obj.hasOwnProperty('time');
+  obj.time = time;
+  if (noRepeat(type)) {
     let copyTime = null;
-    if (hadTime) copyTime = new Date(obj.time.getTime());
-    if (hadTime) delete obj['time'];
+    copyTime = new Date(obj.time.getTime());
+    delete obj['time'];
     if (lastData.hasOwnProperty(type) && equal(lastData[type], obj)) {
-      if (hadTime) obj.time = copyTime;
+      obj.time = copyTime;
       return;
     }
     lastData[type] = cloneDeep(obj);
-    if (hadTime) obj.time = copyTime;
+    obj.time = copyTime;
   }
   q.push(cb => { dolog(type, obj, time, cb);});
   if (!started) {

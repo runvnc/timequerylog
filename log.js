@@ -457,20 +457,28 @@ q.on('timeout', function (next) {
 
 var lastData = {};
 
+function noRepeat(type) {
+  return false;
+  if (!cfg.hasOwnProperty('noRepeat')) return false;
+  if (cfg.noRepeat === true) return true;
+  if (cfg.noRepeat.hasOwnProperty(type) && cfg.noRepeat[type] === true) return true;
+  return false;
+}
+
 function log(type, obj) {
   var time = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
 
-  if (cfg.noRepeat) {
-    var hadTime = obj.hasOwnProperty('time');
+  obj.time = time;
+  if (noRepeat(type)) {
     var copyTime = null;
-    if (hadTime) copyTime = new Date(obj.time.getTime());
-    if (hadTime) delete obj['time'];
+    copyTime = new Date(obj.time.getTime());
+    delete obj['time'];
     if (lastData.hasOwnProperty(type) && (0, _deepEqual2.default)(lastData[type], obj)) {
-      if (hadTime) obj.time = copyTime;
+      obj.time = copyTime;
       return;
     }
     lastData[type] = (0, _lodash2.default)(obj);
-    if (hadTime) obj.time = copyTime;
+    obj.time = copyTime;
   }
   q.push(function (cb) {
     dolog(type, obj, time, cb);
