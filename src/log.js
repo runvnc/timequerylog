@@ -52,7 +52,6 @@ q.on('timeout', (next) => {
 let lastData = {};
 
 function noRepeat(type) {
-  return false;
   if (!(cfg.hasOwnProperty('noRepeat'))) return false;
   if (cfg.noRepeat === true) return true;
   if (cfg.noRepeat.hasOwnProperty(type) &&
@@ -231,7 +230,7 @@ class QueryStream extends Readable {
     super(options);
     Object.assign(this, options);
     this.initFinished = false;
-    this.init().catch(console.error);
+    this.fileNum = 0;
   }
 
   init = async () => {
@@ -253,8 +252,13 @@ class QueryStream extends Readable {
     if (this.data) {
       this.rowNum = 0;
     }
-    const result =  await filterFile(this.files[this.fileNum++], this.start,
-                                     this.end, this.match);
+    let result = null;
+    try {
+      result =  await filterFile(this.files[this.fileNum++], this.start,
+                                 this.end, this.match);
+    } catch (e) {
+      console.error('filterfile err in loadfile',e); 
+    }
     this.data = result;
     return result;
   }
@@ -271,15 +275,18 @@ class QueryStream extends Readable {
   }
 
   _read = () => {
-    new Promise( async (res) => {
+    this.reading = new Promise( async (res) => {
+      if (this.reading) await this.reading;
       let canPush = true;
       do {
         try {
           this.data = await this.loadFile();
         } catch (e) { console.trace(e) };
         this.row = await this.nextRow();
-        if (this.row && this.row.time && this.timeMS) this.row.time = this.row.time.getTime();
-        if (this.row && this.map) this.row = this.map(this.row);
+        if (this.row) {
+          if (this.timeMS) this.row.time = this.row.time.getTime();
+          if (this.map) this.row = this.map(this.row);
+        }
         canPush = this.push(this.row);
       } while (this.row && canPush);
     }).catch(console.error);

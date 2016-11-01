@@ -458,7 +458,6 @@ q.on('timeout', function (next) {
 var lastData = {};
 
 function noRepeat(type) {
-  return false;
   if (!cfg.hasOwnProperty('noRepeat')) return false;
   if (cfg.noRepeat === true) return true;
   if (cfg.noRepeat.hasOwnProperty(type) && cfg.noRepeat[type] === true) return true;
@@ -636,21 +635,32 @@ var QueryStream = function (_Readable) {
                 if (_this2.data) {
                   _this2.rowNum = 0;
                 }
-                _context7.next = 10;
+                result = null;
+                _context7.prev = 9;
+                _context7.next = 12;
                 return filterFile(_this2.files[_this2.fileNum++], _this2.start, _this2.end, _this2.match);
 
-              case 10:
+              case 12:
                 result = _context7.sent;
+                _context7.next = 18;
+                break;
 
+              case 15:
+                _context7.prev = 15;
+                _context7.t0 = _context7['catch'](9);
+
+                console.error('filterfile err in loadfile', _context7.t0);
+
+              case 18:
                 _this2.data = result;
                 return _context7.abrupt('return', result);
 
-              case 13:
+              case 20:
               case 'end':
                 return _context7.stop();
             }
           }
-        }, _callee6, _this3);
+        }, _callee6, _this3, [[9, 15]]);
       }));
 
       return function (_x16) {
@@ -705,54 +715,65 @@ var QueryStream = function (_Readable) {
     }));
 
     _this2._read = function () {
-      new Promise(function () {
+      _this2.reading = new Promise(function () {
         var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(res) {
           var canPush;
           return _regenerator2.default.wrap(function _callee8$(_context9) {
             while (1) {
               switch (_context9.prev = _context9.next) {
                 case 0:
-                  canPush = true;
-
-                case 1:
-                  _context9.prev = 1;
-                  _context9.next = 4;
-                  return _this2.loadFile();
-
-                case 4:
-                  _this2.data = _context9.sent;
-                  _context9.next = 10;
-                  break;
-
-                case 7:
-                  _context9.prev = 7;
-                  _context9.t0 = _context9['catch'](1);
-                  console.trace(_context9.t0);
-
-                case 10:
-                  ;
-                  _context9.next = 13;
-                  return _this2.nextRow();
-
-                case 13:
-                  _this2.row = _context9.sent;
-
-                  if (_this2.row && _this2.row.time && _this2.timeMS) _this2.row.time = _this2.row.time.getTime();
-                  if (_this2.row && _this2.map) _this2.row = _this2.map(_this2.row);
-                  canPush = _this2.push(_this2.row);
-
-                case 17:
-                  if (_this2.row && canPush) {
-                    _context9.next = 1;
+                  if (!_this2.reading) {
+                    _context9.next = 3;
                     break;
                   }
 
-                case 18:
+                  _context9.next = 3;
+                  return _this2.reading;
+
+                case 3:
+                  canPush = true;
+
+                case 4:
+                  _context9.prev = 4;
+                  _context9.next = 7;
+                  return _this2.loadFile();
+
+                case 7:
+                  _this2.data = _context9.sent;
+                  _context9.next = 13;
+                  break;
+
+                case 10:
+                  _context9.prev = 10;
+                  _context9.t0 = _context9['catch'](4);
+                  console.trace(_context9.t0);
+
+                case 13:
+                  ;
+                  _context9.next = 16;
+                  return _this2.nextRow();
+
+                case 16:
+                  _this2.row = _context9.sent;
+
+                  if (_this2.row) {
+                    if (_this2.timeMS) _this2.row.time = _this2.row.time.getTime();
+                    if (_this2.map) _this2.row = _this2.map(_this2.row);
+                  }
+                  canPush = _this2.push(_this2.row);
+
+                case 19:
+                  if (_this2.row && canPush) {
+                    _context9.next = 4;
+                    break;
+                  }
+
+                case 20:
                 case 'end':
                   return _context9.stop();
               }
             }
-          }, _callee8, _this3, [[1, 7]]);
+          }, _callee8, _this3, [[4, 10]]);
         }));
 
         return function (_x17) {
@@ -763,7 +784,7 @@ var QueryStream = function (_Readable) {
 
     Object.assign(_this2, options);
     _this2.initFinished = false;
-    _this2.init().catch(console.error);
+    _this2.fileNum = 0;
     return _this2;
   }
 
@@ -771,10 +792,10 @@ var QueryStream = function (_Readable) {
 }(_stream.Readable);
 
 function queryOpts(options) {
-  var type = options.type,
-      start = options.start,
-      end = options.end,
-      match = options.match;
+  var type = options.type;
+  var start = options.start;
+  var end = options.end;
+  var match = options.match;
 
   if (!match) options.match = function (d) {
     return true;

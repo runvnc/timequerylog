@@ -21,7 +21,7 @@ returns true. Searches JSON streamed files starting from directory `./[type]_GMT
 *config(opts)*
 
 Set configuration options.  Defaults are: `{path: process.cwd(), noRepeat: false}`.
-`noRepeat` makes it ignore rows that are duplicates (besides time).
+`noRepeat:{[type]:true}` makes it ignore rows that are duplicates (besides time).
 
 *queryOpts({type, start, end, match = (d=>true), csv=false,map, timeMS=false})*
 
@@ -36,7 +36,7 @@ import moment from 'moment';
 import {inspect} from 'util';
 import delay from 'delay';
 
-config({path:process.cwd()+'/datalog'});
+config({path:process.cwd()+'/datalog',noRepeat:{req:true}});
 
 async function test() {
   log('req',{blah:100});
@@ -68,7 +68,7 @@ async function test() {
 
   let i = 0;
   const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
-                               map: (r) => r.row=i++; return r});
+                               map: (r) => {r.row=i++; return r});
   csvStream.pipe(process.stdout);
 }
 
