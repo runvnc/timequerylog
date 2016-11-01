@@ -278,8 +278,8 @@ class QueryStream extends Readable {
           this.data = await this.loadFile();
         } catch (e) { console.trace(e) };
         this.row = await this.nextRow();
-        if (this.timeMS) this.row.time = this.row.time.getTime();
-        if (this.map) this.row = this.map(this.row);
+        if (this.row && this.row.time && this.timeMS) this.row.time = this.row.time.getTime();
+        if (this.row && this.map) this.row = this.map(this.row);
         canPush = this.push(this.row);
       } while (this.row && canPush);
     }).catch(console.error);

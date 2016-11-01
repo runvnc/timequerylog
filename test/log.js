@@ -10,7 +10,7 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var test = function () {
   var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-    var rows, matched, i, csvStream;
+    var rows, matched, i, csvStream, objStream;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -68,7 +68,14 @@ var test = function () {
 
             csvStream.pipe(process.stdout);
 
-          case 28:
+            console.log('obj stream');
+            objStream = (0, _log.queryOpts)({ type: 'event', timeMS: true, map: function map(r) {
+                return [r.time, r.action];
+              } });
+
+            objStream.on('data', console.log);
+
+          case 31:
           case 'end':
             return _context.stop();
         }

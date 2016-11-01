@@ -737,8 +737,8 @@ var QueryStream = function (_Readable) {
                 case 13:
                   _this2.row = _context9.sent;
 
-                  if (_this2.timeMS) _this2.row.time = _this2.row.time.getTime();
-                  if (_this2.map) _this2.row = _this2.map(_this2.row);
+                  if (_this2.row && _this2.row.time && _this2.timeMS) _this2.row.time = _this2.row.time.getTime();
+                  if (_this2.row && _this2.map) _this2.row = _this2.map(_this2.row);
                   canPush = _this2.push(_this2.row);
 
                 case 17:

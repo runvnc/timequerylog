@@ -38,6 +38,10 @@ async function test() {
   const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
                                map: (r)=>{r.row = i++;return r}});
   csvStream.pipe(process.stdout);
+
+  console.log('obj stream');
+  const objStream = queryOpts({type:'event', timeMS: true, map: r => [ r.time, r.action ]});
+  objStream.on('data', console.log);
 }
 
 test().catch(console.error);
