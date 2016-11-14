@@ -35,10 +35,10 @@ async function test() {
   console.log('queryOpts:');
   matched.on('data', console.log);
 
-  //let i = 0;
-  //const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
-  //                             map: (r)=>{r.row = i++;return r}});
-  //csvStream.pipe(process.stdout);
+  let i = 0;
+  const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
+                               map: (r)=>{r.row = i++;return r}});
+  csvStream.pipe(process.stdout);
 }
 
 test().catch(console.error);

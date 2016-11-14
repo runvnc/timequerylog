@@ -6,14 +6,15 @@ import {mapSync} from 'event-stream';
 import {dirname} from 'path';
 import {sync as mkdirp} from 'mkdirp';
 import pathExists from 'path-exists';
+import {extname} from 'path';
 import moment from 'moment';
 import queue from 'queue';
 import equal from 'deep-equal';
 import cloneDeep from 'lodash.clonedeep';
-
+import msgpack from 'msgpack-lite';
 
 let started = false;
-let cfg = {path:process.cwd()};
+let cfg = {path:process.cwd(), ext:'jsonl'};
 let streams = {};
 let lastAccessTime = {};
 let q = queue({concurrency:1});
@@ -40,8 +41,10 @@ export function config(conf) {
 }
 
 export function whichFile(type, datetime) {
+  let ext = 'jsonl';
+
   let gmt = moment(datetime).utcOffset(0);
-  return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}`;
+  return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}.${ext}`;
 }
 
 q.on('timeout', (next) => {
@@ -50,6 +53,15 @@ q.on('timeout', (next) => {
 });
 
 let lastData = {};
+
+function getConfig(type, opt, default_) {
+  if (!(cfg.hasOwnProperty(opt))) return default_;
+  if (!(typeof cfg[opt] == 'object')) return cfg[opt];
+  // use glob/minimatch to match cfg[opt] 
+  if (cfg.noRepeat.hasOwnProperty(type) &&
+      cfg.noRepeat[type] === true) return true;
+  return false;
+}
 
 function noRepeat(type) {
   if (!(cfg.hasOwnProperty('noRepeat'))) return false;
@@ -82,6 +94,7 @@ export function log(type,obj,time = new Date()) {
   }
 }
 
+/*
 function getWriteStream(fname, cb) {
   if (streams[fname]) {
     lastAccessTime[fname] = new Date();
@@ -111,14 +124,42 @@ function getWriteStream(fname, cb) {
       }
     });
   });
-}
+} */
 
+async function getWriteStreamExt(fname) {
+  if (streams[fname]) {
+    lastAccessTime[fname] = new Date();
+    return streams[fname];
+  }
+  const exists = await pathExists(dirname(fname));
+  if (!exists) mkdirp(dirname(fname));
+
+  const fexists = await pathExists(fname);
+  let encodeStream = null;
+  let fileStream = createWriteStream(fname,{flags:'a'});
+
+  switch (extname(fname)) {
+    case 'msp': 
+      encodeStream = msgpack.createEncodeStream();
+      break;
+    default:
+      encodeStream = stringify(false);
+      if (fexists) {
+        fileStream.write('\n');
+      }
+  }
+  encodeStream.pipe(fileStream);
+  streams[fname] = encodeStream;
+  lastAccessTime[fname] = new Date();
+  return encodeStream;
+}
+ 
 function dolog(type, obj, time = new Date(), cb) {
   try {
     let fname = whichFile(type, time);
     let toWrite = {time, type};
     for (let key in obj) toWrite[key] = obj[key];
-    getWriteStream(fname, stream => {
+    getWriteStreamExt(fname).then(stream => {
       stream.write(toWrite);
       cb();
     });
