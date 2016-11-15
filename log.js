@@ -17,10 +17,6 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
-var _typeof2 = require('babel-runtime/helpers/typeof');
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -28,6 +24,10 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _typeof2 = require('babel-runtime/helpers/typeof');
+
+var _typeof3 = _interopRequireDefault(_typeof2);
 
 /*
 function getWriteStream(fname, cb) {
@@ -93,7 +93,7 @@ var getWriteStreamExt = function () {
             encodeStream = null;
             fileStream = (0, _fs3.createWriteStream)(fname, { flags: 'a' });
             _context.t0 = (0, _path.extname)(fname);
-            _context.next = _context.t0 === 'msp' ? 15 : 17;
+            _context.next = _context.t0 === '.msp' ? 15 : 17;
             break;
 
           case 15:
@@ -308,7 +308,7 @@ var filterFile = function () {
                 (function () {
                   var results = [];
                   var file = (0, _fs3.createReadStream)(fname);
-                  var stream = (0, _JSONStream.parse)();
+                  var stream = getReadStreamExt(fname);
                   file.pipe(stream);
                   stream.pipe((0, _eventStream.mapSync)(function (data) {
                     data.time = new Date(data.time);
@@ -519,7 +519,7 @@ var _stream = require('stream');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var started = false;
-var cfg = { path: process.cwd() };
+var cfg = { path: process.cwd(), ext: 'jsonl' };
 var streams = {};
 var lastAccessTime = {};
 var q = (0, _queue2.default)({ concurrency: 1 });
@@ -527,18 +527,26 @@ var q = (0, _queue2.default)({ concurrency: 1 });
 setInterval(function () {
   for (var file in lastAccessTime) {
     var now = new Date().getTime();
-    if (now - lastAccessTime[file].getTime() > 31000) {
+    if (now - lastAccessTime[file].getTime() > 900) {
       streams[file].end();
       delete streams[file];
       delete lastAccessTime[file];
     }
   }
-}, 15000);
+}, 1000); //15000
 
-process.on('beforeExit', function () {
+function shutdown() {
   for (var file in streams) {
-    streams[file].end();
+    try {
+      streams[file].end();
+    } catch (e) {}
   }
+}
+
+process.on('beforeExit', shutdown);
+process.on('exit', shutdown);
+process.on('SIGINT', function () {
+  shutdown();process.exit();
 });
 
 function config(conf) {
@@ -546,8 +554,10 @@ function config(conf) {
 }
 
 function whichFile(type, datetime) {
+  var ext = '.jsonl';
+  if (cfg.ext) ext = '.' + cfg.ext;
   var gmt = (0, _moment2.default)(datetime).utcOffset(0);
-  return cfg.path + '/' + type + '_GMT/' + gmt.format('YYYY-MM-DD/hhA');
+  return cfg.path + '/' + type + '_GMT/' + gmt.format('YYYY-MM-DD/hhA') + ext;
 }
 
 q.on('timeout', function (next) {
@@ -556,6 +566,14 @@ q.on('timeout', function (next) {
 });
 
 var lastData = {};
+
+function getConfig(type, opt, default_) {
+  if (!cfg.hasOwnProperty(opt)) return default_;
+  if (!((0, _typeof3.default)(cfg[opt]) == 'object')) return cfg[opt];
+  // use glob/minimatch to match cfg[opt] 
+  if (cfg.noRepeat.hasOwnProperty(type) && cfg.noRepeat[type] === true) return true;
+  return false;
+}
 
 function noRepeat(type) {
   if (!cfg.hasOwnProperty('noRepeat')) return false;
@@ -627,6 +645,16 @@ function byTime(a, b) {
   if (dt(a).valueOf() < dt(b).valueOf()) return -1;
   if (dt(a).valueOf() > dt(b).valueOf()) return 1;
   return 0;
+}
+
+function getReadStreamExt(fname) {
+  switch ((0, _path.extname)(fname)) {
+    case '.msp':
+      return _msgpackLite2.default.createDecodeStream();
+      break;
+    default:
+      return (0, _JSONStream.parse)();
+  }
 }
 
 function fmt(dt) {

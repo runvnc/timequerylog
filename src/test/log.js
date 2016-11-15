@@ -20,7 +20,7 @@ async function test() {
   log('event', {category: 'general', action:'edit'});
   log('event', {category: 'general', action:'edit'});
 
-  await delay(300);
+  await delay(1100);
 
   console.log('Running query');
   let rows = await query('req', moment("1995-12-25").toDate(), new Date(), d=>d.url);

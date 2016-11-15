@@ -29,7 +29,7 @@ var test = function () {
             (0, _log.log)('event', { category: 'general', action: 'edit' });
 
             _context.next = 12;
-            return (0, _delay2.default)(300);
+            return (0, _delay2.default)(1100);
 
           case 12:
 

@@ -22,29 +22,36 @@ let q = queue({concurrency:1});
 setInterval( () => {
   for (let file in lastAccessTime) {
     let now = new Date().getTime();
-    if (now - lastAccessTime[file].getTime() > 31000) {
+    if (now - lastAccessTime[file].getTime() > 900) {
       streams[file].end();
       delete streams[file];
       delete lastAccessTime[file];
     }
   }
-}, 15000);
+}, 1000); //15000
 
-process.on('beforeExit', () => {
+function shutdown() {
   for (let file in streams) {
-    streams[file].end();
+    try {
+      streams[file].end();
+    } catch (e) {
+    }
   }
-});
+}
+
+process.on('beforeExit', shutdown);
+process.on('exit', shutdown);
+process.on('SIGINT', () => { shutdown(); process.exit() });
 
 export function config(conf) {
   Object.assign(cfg,conf);
 }
 
 export function whichFile(type, datetime) {
-  let ext = 'jsonl';
-
+  let ext = '.jsonl';
+  if (cfg.ext) ext = '.'+cfg.ext;
   let gmt = moment(datetime).utcOffset(0);
-  return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}.${ext}`;
+  return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}${ext}`;
 }
 
 q.on('timeout', (next) => {
@@ -139,7 +146,7 @@ async function getWriteStreamExt(fname) {
   let fileStream = createWriteStream(fname,{flags:'a'});
 
   switch (extname(fname)) {
-    case 'msp': 
+    case '.msp': 
       encodeStream = msgpack.createEncodeStream();
       break;
     default:
@@ -219,12 +226,22 @@ export async function whichFiles(type, start, end) {
   return result;
 }
 
+function getReadStreamExt(fname) {
+  switch (extname(fname)) {
+    case '.msp':
+      return msgpack.createDecodeStream();
+      break;
+    default:
+      return parse();
+  }
+}
+
 async function filterFile(fname, start, end, matchFunction) {
   let data = await new Promise( res => {
     try {
       let results = [];
       let file = createReadStream(fname);
-      let stream = parse();
+      let stream = getReadStreamExt(fname);
       file.pipe(stream);
       stream.pipe(mapSync( data => {
         data.time = new Date(data.time);
