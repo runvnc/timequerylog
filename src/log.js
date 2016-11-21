@@ -1,7 +1,8 @@
 import fs from 'mz/fs';
 import {inspect} from 'util';
 import {stringify, parse} from 'JSONStream';
-import {createWriteStream, createReadStream} from 'fs';
+import {createWriteStream,
+        readFile, writeFile, createReadStream} from 'fs';
 import {mapSync} from 'event-stream';
 import {dirname} from 'path';
 import {sync as mkdirp} from 'mkdirp';
@@ -12,6 +13,13 @@ import queue from 'queue';
 import equal from 'deep-equal';
 import cloneDeep from 'lodash.clonedeep';
 import msgpack from 'msgpack-lite';
+import pify from 'pify';
+import snappy from 'snappy';
+import {ReadableStreamBuffer} from 'stream-buffers';
+
+const readFilePromise = pify(readFile);
+const snappyCompressPromise = pify(snappy.compress);
+const snappyUncompressPromise = pify(snappy.uncompress);
 
 let started = false;
 let cfg = {path:process.cwd(), ext:'jsonl'};
@@ -64,7 +72,7 @@ let lastData = {};
 function getConfig(type, opt, default_) {
   if (!(cfg.hasOwnProperty(opt))) return default_;
   if (!(typeof cfg[opt] == 'object')) return cfg[opt];
-  // use glob/minimatch to match cfg[opt] 
+  // use glob/minimatch to match cfg[opt]
   if (cfg.noRepeat.hasOwnProperty(type) &&
       cfg.noRepeat[type] === true) return true;
   return false;
@@ -101,38 +109,6 @@ export function log(type,obj,time = new Date()) {
   }
 }
 
-/*
-function getWriteStream(fname, cb) {
-  if (streams[fname]) {
-    lastAccessTime[fname] = new Date();
-    return cb(streams[fname]);
-  }
-  pathExists(dirname(fname)).then(exists => {
-    if (!exists) mkdirp(dirname(fname));
-
-    pathExists(fname).then(fexists => {
-      let finish = (continueJSON) => {
-        let fileStream = createWriteStream(fname,{flags:'a'});
-        let jsonStream = null;
-        jsonStream = stringify(false);
-        if (continueJSON) {
-          fileStream.write('\n');
-        }
-        jsonStream.pipe(fileStream);
-        streams[fname] = jsonStream;
-        lastAccessTime[fname] = new Date();
-        return cb(jsonStream);
-      }
-
-      if (fexists) {
-        finish(true);
-      } else {
-        finish(false);
-      }
-    });
-  });
-} */
-
 async function getWriteStreamExt(fname) {
   if (streams[fname]) {
     lastAccessTime[fname] = new Date();
@@ -146,7 +122,7 @@ async function getWriteStreamExt(fname) {
   let fileStream = createWriteStream(fname,{flags:'a'});
 
   switch (extname(fname)) {
-    case '.msp': 
+    case '.msp':
       encodeStream = msgpack.createEncodeStream();
       break;
     default:
@@ -160,7 +136,35 @@ async function getWriteStreamExt(fname) {
   lastAccessTime[fname] = new Date();
   return encodeStream;
 }
- 
+
+const compressing = {};
+
+async function snappyCompress(type,f) {
+  try {
+    if (f.indexOf('.snappy')>0) return;
+    if (compressing[f]) return;
+    compressing[f] = true;
+    const buffer = await readFile(f);
+    const compressed = await snappyCompressPromise(buffer);
+    await writeFile(f, compressed);
+  } catch (e) {
+    console.error('Error in snappy compress:',e);
+  }
+  compressing[f] = false;
+}
+
+const oldestSnappy = {};
+
+async function compressOld({type, time}) {
+  const end = new Date(time.getTime());
+  end.setHours(d.getHours()-cfg.snappy);
+  let start = new Date('1920-01-01');
+  if (oldestSnappy[type]) start = oldestSnappy[type];
+  const files = await whichFiles(type, start, end);
+  Promise.all(files.map(f=>snappyCompress(type, f)));
+  oldestSnappy[type] = end;
+}
+
 function dolog(type, obj, time = new Date(), cb) {
   try {
     let fname = whichFile(type, time);
@@ -168,8 +172,10 @@ function dolog(type, obj, time = new Date(), cb) {
     for (let key in obj) toWrite[key] = obj[key];
     getWriteStreamExt(fname).then(stream => {
       stream.write(toWrite);
+      if (cfg.snappy) compressOld({type, time}).catch(console.error);
       cb();
     });
+
   } catch (e) {
     console.error(e);
   }
@@ -190,6 +196,7 @@ function byTime(a, b) {
 }
 
 export async function whichFiles(type, start, end) {
+  console.log('q');
   let startDate = moment(start).utcOffset(0).startOf('day').valueOf();
   let endDate = moment(end).utcOffset(0).endOf('day').valueOf();
   let st = moment(start).utcOffset(0).startOf('hour').valueOf();
@@ -199,7 +206,7 @@ export async function whichFiles(type, start, end) {
   catch (e) { console.error('timequerylog error reading dirlist: '+e.message+' cfg.path is '+cfg.path);return []; }
 
   dirs = dirs.sort(byDate) ;
-
+  console.log(dirs);
   let newDirs = dirs.filter( d => {
     let val = moment(d+' +0000', 'YYYY-MM-DD Z').valueOf();
     return val >= startDate && val <= endDate;
@@ -220,29 +227,49 @@ export async function whichFiles(type, start, end) {
         return timeMS >= st && timeMS <= en;
       });
       let paths = files.map( f => `${cfg.path}/${type}_GMT/${dir}/${f}` );
+      console.log(paths);
       Array.prototype.push.apply(result, paths);
     } catch (e) { console.error('Error filtering log files:'+e.message); return []; }
   }
   return result;
 }
 
-function getReadStreamExt(fname) {
-  switch (extname(fname)) {
+async function getReadStreamExt(fname) {
+  let ext = extname(fname), input = null;
+  if (ext.indexOf('.snappy')>=0) {
+      const hourLogs = await readFilePromise(fname);
+      const uncompressed = await snappyUncompressPromise(hourLogs);
+      input = new ReadableStreamBuffer({frequency:1,chunkSize:128000});
+      input.put(uncompressed);
+      input.stop();
+      fname = fname.replace('.snappy','');
+      ext = extname(fname);
+  } else {
+    console.log('ext is ',ext);
+    input = createReadStream(fname);
+  }
+  let ret = null;
+  switch (ext) {
     case '.msp':
-      return msgpack.createDecodeStream();
+      ret = msgpack.createDecodeStream();
+      input.pipe(ret);
+      return ret;
       break;
     default:
-      return parse();
+      ret = parse();
+      input.pipe(ret);
+      return ret;
   }
 }
 
 async function filterFile(fname, start, end, matchFunction) {
-  let data = await new Promise( res => {
+  console.log('n');
+  let data = await new Promise( async res => {
     try {
       let results = [];
-      let file = createReadStream(fname);
-      let stream = getReadStreamExt(fname);
-      file.pipe(stream);
+      console.log('a');
+      let stream = await getReadStreamExt(fname);
+      console.log('b');
       stream.pipe(mapSync( data => {
         data.time = new Date(data.time);
         if (data.time >= start && data.time <= end &&
@@ -292,7 +319,9 @@ class QueryStream extends Readable {
   }
 
   init = async () => {
+    console.log('A');
     this.files = await whichFiles(this.type, this.start, this.end);
+    console.log('B');
     this.fileNum = 0;
     this.rowNum = 0;
     this.data = [];
@@ -300,6 +329,7 @@ class QueryStream extends Readable {
   }
 
   loadFile = async (f) => {
+    console.log(this.files);
     if (!this.files) await this.init();
     if (this.data && this.rowNum < this.data.length) {
       return this.data;
@@ -315,7 +345,7 @@ class QueryStream extends Readable {
       result =  await filterFile(this.files[this.fileNum++], this.start,
                                  this.end, this.match);
     } catch (e) {
-      console.error('filterfile err in loadfile',e); 
+      console.error('filterfile err in loadfile',e);
     }
     this.data = result;
     return result;

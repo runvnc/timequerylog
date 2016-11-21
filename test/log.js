@@ -9,77 +9,61 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var test = function () {
-  var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-    var rows, matched, i, csvStream;
-    return _regenerator2.default.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            (0, _log.log)('req', { blah: 100 });
-            (0, _log.log)('req', { url: 'http://google.com' });
+        var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
+                var i, csvStream;
+                return _regenerator2.default.wrap(function _callee$(_context) {
+                        while (1) {
+                                switch (_context.prev = _context.next) {
+                                        case 0:
+                                                /*  log('req',{blah:100});
+                                                  log('req',{url:'http://google.com'});
+                                                
+                                                  log('req',{cat:100}, new Date('2015-05-01T23:50:59.392Z'));
+                                                  log('req',{cat:100}, new Date('2015-05-01T23:51:53.312Z'));
+                                                  log('req',{dog:1000});
+                                                  log('req',{dog:1000});
+                                                  log('req',{dog:1000});
+                                                 */
+                                                /*  log('event', {category: 'science', action:'new'});
+                                                  log('event', {category: 'general', action:'edit'});
+                                                  log('event', {category: 'general', action:'edit'});
+                                                
+                                                  await delay(1100);*/
 
-            (0, _log.log)('req', { cat: 100 }, new Date('2015-05-01T23:50:59.392Z'));
-            (0, _log.log)('req', { cat: 100 }, new Date('2015-05-01T23:51:53.312Z'));
-            (0, _log.log)('req', { dog: 1000 });
-            (0, _log.log)('req', { dog: 1000 });
-            (0, _log.log)('req', { dog: 1000 });
+                                                /*console.log('Running query');
+                                                let rows = await query('req', moment("1995-12-25").toDate(), new Date(), d=>d.url);
+                                                console.log('rows returned');
+                                                console.log(inspect(rows));
+                                                rows = await queryRecent('req',);
+                                                console.log('queryRecent result:');
+                                                console.log(inspect(rows));
+                                                 const matched = queryOpts({type:'req', start: moment('1995-12-25').toDate(),
+                                                                           end: new Date(), match: d => d.dog||d.cat});
+                                                console.log('queryOpts:');
+                                                matched.on('data', console.log); */
+                                                console.log(1);
 
-            (0, _log.log)('event', { category: 'science', action: 'new' });
-            (0, _log.log)('event', { category: 'general', action: 'edit' });
-            (0, _log.log)('event', { category: 'general', action: 'edit' });
+                                                i = 0;
+                                                csvStream = (0, _log.queryOpts)({ type: 'event', csv: true, timeMS: true,
+                                                        start: (0, _moment2.default)('1995-12-25').toDate(),
+                                                        map: function map(r) {
+                                                                r.row = i++;return r;
+                                                        } });
 
-            _context.next = 12;
-            return (0, _delay2.default)(1100);
+                                                csvStream.pipe(process.stdout);
+                                                console.log(2);
 
-          case 12:
+                                        case 5:
+                                        case 'end':
+                                                return _context.stop();
+                                }
+                        }
+                }, _callee, this);
+        }));
 
-            console.log('Running query');
-            _context.next = 15;
-            return (0, _log.query)('req', (0, _moment2.default)("1995-12-25").toDate(), new Date(), function (d) {
-              return d.url;
-            });
-
-          case 15:
-            rows = _context.sent;
-
-            console.log('rows returned');
-            console.log((0, _util.inspect)(rows));
-            _context.next = 20;
-            return (0, _log.queryRecent)('req');
-
-          case 20:
-            rows = _context.sent;
-
-            console.log('queryRecent result:');
-            console.log((0, _util.inspect)(rows));
-
-            matched = (0, _log.queryOpts)({ type: 'req', start: (0, _moment2.default)('1995-12-25').toDate(),
-              end: new Date(), match: function match(d) {
-                return d.dog || d.cat;
-              } });
-
-            console.log('queryOpts:');
-            matched.on('data', console.log);
-
-            i = 0;
-            csvStream = (0, _log.queryOpts)({ type: 'event', csv: true, timeMS: true,
-              map: function map(r) {
-                r.row = i++;return r;
-              } });
-
-            csvStream.pipe(process.stdout);
-
-          case 29:
-          case 'end':
-            return _context.stop();
-        }
-      }
-    }, _callee, this);
-  }));
-
-  return function test() {
-    return _ref.apply(this, arguments);
-  };
+        return function test() {
+                return _ref.apply(this, arguments);
+        };
 }();
 
 var _log = require('../log');
@@ -96,6 +80,7 @@ var _delay2 = _interopRequireDefault(_delay);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-(0, _log.config)({ path: process.cwd() + '/datalog', noRepeat: { req: true } });
+(0, _log.config)({ path: process.cwd() + '/datalog', noRepeat: { req: true },
+        ext: 'msp', snappy: 1 });
 
 test().catch(console.error);

@@ -4,10 +4,11 @@ import moment from 'moment';
 import {inspect} from 'util';
 import delay from 'delay';
 
-config({path:process.cwd()+'/datalog', noRepeat:{req:true}});
+config({path:process.cwd()+'/datalog', noRepeat:{req:true},
+        ext:'msp', snappy: 1});
 
 async function test() {
-  log('req',{blah:100});
+/*  log('req',{blah:100});
   log('req',{url:'http://google.com'});
 
   log('req',{cat:100}, new Date('2015-05-01T23:50:59.392Z'));
@@ -15,14 +16,14 @@ async function test() {
   log('req',{dog:1000});
   log('req',{dog:1000});
   log('req',{dog:1000});
-
-  log('event', {category: 'science', action:'new'});
+ */
+/*  log('event', {category: 'science', action:'new'});
   log('event', {category: 'general', action:'edit'});
   log('event', {category: 'general', action:'edit'});
 
-  await delay(1100);
+  await delay(1100);*/
 
-  console.log('Running query');
+  /*console.log('Running query');
   let rows = await query('req', moment("1995-12-25").toDate(), new Date(), d=>d.url);
   console.log('rows returned');
   console.log(inspect(rows));
@@ -33,12 +34,15 @@ async function test() {
   const matched = queryOpts({type:'req', start: moment('1995-12-25').toDate(),
                              end: new Date(), match: d => d.dog||d.cat});
   console.log('queryOpts:');
-  matched.on('data', console.log);
+  matched.on('data', console.log); */
+  console.log(1);
 
   let i = 0;
   const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
+                               start: moment('1995-12-25').toDate(),
                                map: (r)=>{r.row = i++;return r}});
   csvStream.pipe(process.stdout);
+  console.log(2);
 }
 
 test().catch(console.error);
