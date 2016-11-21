@@ -20,7 +20,7 @@ async function test() {
   log('event', {category: 'general', action:'edit'});
   log('event', {category: 'general', action:'edit'});
 
-  await delay(300);
+  await delay(1100);
 
   console.log('Running query');
   let rows = await query('req', moment("1995-12-25").toDate(), new Date(), d=>d.url);
@@ -35,10 +35,10 @@ async function test() {
   console.log('queryOpts:');
   matched.on('data', console.log);
 
-  //let i = 0;
-  //const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
-  //                             map: (r)=>{r.row = i++;return r}});
-  //csvStream.pipe(process.stdout);
+  let i = 0;
+  const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
+                               map: (r)=>{r.row = i++;return r}});
+  csvStream.pipe(process.stdout);
 }
 
 test().catch(console.error);

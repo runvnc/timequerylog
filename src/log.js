@@ -6,14 +6,15 @@ import {mapSync} from 'event-stream';
 import {dirname} from 'path';
 import {sync as mkdirp} from 'mkdirp';
 import pathExists from 'path-exists';
+import {extname} from 'path';
 import moment from 'moment';
 import queue from 'queue';
 import equal from 'deep-equal';
 import cloneDeep from 'lodash.clonedeep';
-
+import msgpack from 'msgpack-lite';
 
 let started = false;
-let cfg = {path:process.cwd()};
+let cfg = {path:process.cwd(), ext:'jsonl'};
 let streams = {};
 let lastAccessTime = {};
 let q = queue({concurrency:1});
@@ -21,27 +22,36 @@ let q = queue({concurrency:1});
 setInterval( () => {
   for (let file in lastAccessTime) {
     let now = new Date().getTime();
-    if (now - lastAccessTime[file].getTime() > 31000) {
+    if (now - lastAccessTime[file].getTime() > 900) {
       streams[file].end();
       delete streams[file];
       delete lastAccessTime[file];
     }
   }
-}, 15000);
+}, 1000); //15000
 
-process.on('beforeExit', () => {
+function shutdown() {
   for (let file in streams) {
-    streams[file].end();
+    try {
+      streams[file].end();
+    } catch (e) {
+    }
   }
-});
+}
+
+process.on('beforeExit', shutdown);
+process.on('exit', shutdown);
+process.on('SIGINT', () => { shutdown(); process.exit() });
 
 export function config(conf) {
   Object.assign(cfg,conf);
 }
 
 export function whichFile(type, datetime) {
+  let ext = '.jsonl';
+  if (cfg.ext) ext = '.'+cfg.ext;
   let gmt = moment(datetime).utcOffset(0);
-  return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}`;
+  return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}${ext}`;
 }
 
 q.on('timeout', (next) => {
@@ -50,6 +60,15 @@ q.on('timeout', (next) => {
 });
 
 let lastData = {};
+
+function getConfig(type, opt, default_) {
+  if (!(cfg.hasOwnProperty(opt))) return default_;
+  if (!(typeof cfg[opt] == 'object')) return cfg[opt];
+  // use glob/minimatch to match cfg[opt] 
+  if (cfg.noRepeat.hasOwnProperty(type) &&
+      cfg.noRepeat[type] === true) return true;
+  return false;
+}
 
 function noRepeat(type) {
   if (!(cfg.hasOwnProperty('noRepeat'))) return false;
@@ -82,6 +101,7 @@ export function log(type,obj,time = new Date()) {
   }
 }
 
+/*
 function getWriteStream(fname, cb) {
   if (streams[fname]) {
     lastAccessTime[fname] = new Date();
@@ -111,14 +131,42 @@ function getWriteStream(fname, cb) {
       }
     });
   });
-}
+} */
 
+async function getWriteStreamExt(fname) {
+  if (streams[fname]) {
+    lastAccessTime[fname] = new Date();
+    return streams[fname];
+  }
+  const exists = await pathExists(dirname(fname));
+  if (!exists) mkdirp(dirname(fname));
+
+  const fexists = await pathExists(fname);
+  let encodeStream = null;
+  let fileStream = createWriteStream(fname,{flags:'a'});
+
+  switch (extname(fname)) {
+    case '.msp': 
+      encodeStream = msgpack.createEncodeStream();
+      break;
+    default:
+      encodeStream = stringify(false);
+      if (fexists) {
+        fileStream.write('\n');
+      }
+  }
+  encodeStream.pipe(fileStream);
+  streams[fname] = encodeStream;
+  lastAccessTime[fname] = new Date();
+  return encodeStream;
+}
+ 
 function dolog(type, obj, time = new Date(), cb) {
   try {
     let fname = whichFile(type, time);
     let toWrite = {time, type};
     for (let key in obj) toWrite[key] = obj[key];
-    getWriteStream(fname, stream => {
+    getWriteStreamExt(fname).then(stream => {
       stream.write(toWrite);
       cb();
     });
@@ -178,12 +226,22 @@ export async function whichFiles(type, start, end) {
   return result;
 }
 
+function getReadStreamExt(fname) {
+  switch (extname(fname)) {
+    case '.msp':
+      return msgpack.createDecodeStream();
+      break;
+    default:
+      return parse();
+  }
+}
+
 async function filterFile(fname, start, end, matchFunction) {
   let data = await new Promise( res => {
     try {
       let results = [];
       let file = createReadStream(fname);
-      let stream = parse();
+      let stream = getReadStreamExt(fname);
       file.pipe(stream);
       stream.pipe(mapSync( data => {
         data.time = new Date(data.time);
