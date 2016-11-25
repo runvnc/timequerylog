@@ -5,7 +5,7 @@ import {inspect} from 'util';
 import delay from 'delay';
 
 config({path:process.cwd()+'/datalog', noRepeat:{req:true},
-        ext:'msp', snappy: 1});
+        ext:'msp', snappy:1});
 
 async function test() {
 /*  log('req',{blah:100});
@@ -17,11 +17,12 @@ async function test() {
   log('req',{dog:1000});
   log('req',{dog:1000});
  */
-/*  log('event', {category: 'science', action:'new'});
+/*  log('event', {category: 'science', action:'new'}, new Date('2015-05-01 00:00:00 GMT'));
+  await delay(4500);
   log('event', {category: 'general', action:'edit'});
-  log('event', {category: 'general', action:'edit'});
+  log('event', {category: 'general', action:'update'});
 
-  await delay(1100);*/
+  await delay(3300);*/
 
   /*console.log('Running query');
   let rows = await query('req', moment("1995-12-25").toDate(), new Date(), d=>d.url);

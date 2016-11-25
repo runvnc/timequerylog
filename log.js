@@ -102,55 +102,66 @@ var snappyCompress = function () {
           case 0:
             _context2.prev = 0;
 
+            console.log('trying to compress type', type, ' file', f);
+
             if (!(f.indexOf('.snappy') > 0)) {
-              _context2.next = 3;
+              _context2.next = 4;
               break;
             }
 
             return _context2.abrupt('return');
 
-          case 3:
+          case 4:
             if (!compressing[f]) {
-              _context2.next = 5;
+              _context2.next = 6;
               break;
             }
 
             return _context2.abrupt('return');
 
-          case 5:
+          case 6:
             compressing[f] = true;
-            _context2.next = 8;
-            return (0, _fs3.readFile)(f);
+            _context2.next = 9;
+            return readFilePromise(f);
 
-          case 8:
+          case 9:
             buffer = _context2.sent;
-            _context2.next = 11;
+
+            console.log('buffer is..', buffer);
+            _context2.next = 13;
             return snappyCompressPromise(buffer);
 
-          case 11:
+          case 13:
             compressed = _context2.sent;
-            _context2.next = 14;
-            return (0, _fs3.writeFile)(f, compressed);
 
-          case 14:
+            console.log('writing compressed.');
+            _context2.next = 17;
+            return writeFilePromise(f + '.snappy', compressed);
+
+          case 17:
             _context2.next = 19;
+            return unlinkPromise(f);
+
+          case 19:
+            _context2.next = 25;
             break;
 
-          case 16:
-            _context2.prev = 16;
+          case 21:
+            _context2.prev = 21;
             _context2.t0 = _context2['catch'](0);
 
             console.error('Error in snappy compress:', _context2.t0);
-
-          case 19:
             compressing[f] = false;
 
-          case 20:
+          case 25:
+            compressing[f] = false;
+
+          case 26:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[0, 16]]);
+    }, _callee2, this, [[0, 21]]);
   }));
 
   return function snappyCompress(_x3, _x4) {
@@ -167,29 +178,49 @@ var compressOld = function () {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            end = new Date(time.getTime());
+            _context3.prev = 0;
 
-            end.setHours(d.getHours() - cfg.snappy);
-            start = new Date('1920-01-01');
+            console.log('compressOld called type = ', type, 'time = ', time);
+            end = (0, _momentTimezone2.default)(time).tz('UCT').subtract(1, 'hours').toDate();
+            ;
+            start = new Date('1979-01-01');
 
+            console.log('start =', start.toUTCString(), 'end =', end.toUTCString());
             if (oldestSnappy[type]) start = oldestSnappy[type];
-            _context3.next = 6;
+            _context3.next = 9;
             return whichFiles(type, start, end);
 
-          case 6:
+          case 9:
             files = _context3.sent;
 
+            console.log('calling snapp compress on files ', files);
             Promise.all(files.map(function (f) {
               return snappyCompress(type, f);
             }));
             oldestSnappy[type] = end;
+            console.log('waiting..');
+            _context3.next = 16;
+            return (0, _delay2.default)(300);
 
-          case 9:
+          case 16:
+            console.log('returning from compressOld');
+            _context3.next = 24;
+            break;
+
+          case 19:
+            _context3.prev = 19;
+            _context3.t0 = _context3['catch'](0);
+
+            console.log('blah');
+            console.error(_context3.t0);
+            throw new Error('timequerylog problem compressing old files: ' + _context3.t0.message);
+
+          case 24:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this);
+    }, _callee3, this, [[0, 19]]);
   }));
 
   return function compressOld(_x5) {
@@ -208,10 +239,10 @@ var whichFiles = exports.whichFiles = function () {
         switch (_context5.prev = _context5.next) {
           case 0:
             console.log('q');
-            startDate = (0, _moment2.default)(start).utcOffset(0).startOf('day').valueOf();
-            endDate = (0, _moment2.default)(end).utcOffset(0).endOf('day').valueOf();
-            st = (0, _moment2.default)(start).utcOffset(0).startOf('hour').valueOf();
-            en = (0, _moment2.default)(end).valueOf();
+            startDate = (0, _momentTimezone2.default)(start).utcOffset(0).startOf('day').valueOf();
+            endDate = (0, _momentTimezone2.default)(end).utcOffset(0).endOf('day').valueOf();
+            st = (0, _momentTimezone2.default)(start).utcOffset(0).startOf('hour').valueOf();
+            en = (0, _momentTimezone2.default)(end).valueOf();
             dirs = [];
             _context5.prev = 6;
             _context5.next = 9;
@@ -232,7 +263,7 @@ var whichFiles = exports.whichFiles = function () {
             dirs = dirs.sort(byDate);
             console.log(dirs);
             newDirs = dirs.filter(function (d) {
-              var val = (0, _moment2.default)(d + ' +0000', 'YYYY-MM-DD Z').valueOf();
+              var val = (0, _momentTimezone2.default)(d + ' +0000', 'YYYY-MM-DD Z').valueOf();
               return val >= startDate && val <= endDate;
             });
 
@@ -268,7 +299,7 @@ var whichFiles = exports.whichFiles = function () {
 
                       files = files.sort(byTime);
                       files = files.filter(function (file) {
-                        var timeMS = (0, _moment2.default)(dir + ' ' + file + ' +0000', 'YYYY-MM-DD hhA Z').valueOf();
+                        var timeMS = (0, _momentTimezone2.default)(dir + ' ' + file + ' +0000', 'YYYY-MM-DD hhA Z').valueOf();
                         return timeMS >= st && timeMS <= en;
                       });
                       paths = files.map(function (f) {
@@ -354,9 +385,12 @@ var whichFiles = exports.whichFiles = function () {
             return _context5.finish(45);
 
           case 53:
+            result = result.filter(function (fname) {
+              return !((0, _path.extname)(fname) != '.snappy' && result.includes(fname + '.snappy'));
+            });
             return _context5.abrupt('return', result);
 
-          case 54:
+          case 55:
           case 'end':
             return _context5.stop();
         }
@@ -633,7 +667,7 @@ var queryRecent = exports.queryRecent = function () {
         switch (_context11.prev = _context11.next) {
           case 0:
             end = new Date();
-            start = (0, _moment2.default)(end).subtract(30, 'minutes').toDate();
+            start = (0, _momentTimezone2.default)(end).subtract(30, 'minutes').toDate();
             _context11.next = 4;
             return query(type, start, end);
 
@@ -679,9 +713,9 @@ var _pathExists = require('path-exists');
 
 var _pathExists2 = _interopRequireDefault(_pathExists);
 
-var _moment = require('moment');
+var _momentTimezone = require('moment-timezone');
 
-var _moment2 = _interopRequireDefault(_moment);
+var _momentTimezone2 = _interopRequireDefault(_momentTimezone);
 
 var _queue = require('queue');
 
@@ -707,13 +741,21 @@ var _snappy = require('snappy');
 
 var _snappy2 = _interopRequireDefault(_snappy);
 
+var _delay = require('delay');
+
+var _delay2 = _interopRequireDefault(_delay);
+
 var _streamBuffers = require('stream-buffers');
+
+var _nowOrAgain = require('now-or-again');
 
 var _stream = require('stream');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var readFilePromise = (0, _pify2.default)(_fs3.readFile);
+var writeFilePromise = (0, _pify2.default)(_fs3.writeFile);
+var unlinkPromise = (0, _pify2.default)(_fs3.unlink);
 var snappyCompressPromise = (0, _pify2.default)(_snappy2.default.compress);
 var snappyUncompressPromise = (0, _pify2.default)(_snappy2.default.uncompress);
 
@@ -755,7 +797,7 @@ function config(conf) {
 function whichFile(type, datetime) {
   var ext = '.jsonl';
   if (cfg.ext) ext = '.' + cfg.ext;
-  var gmt = (0, _moment2.default)(datetime).utcOffset(0);
+  var gmt = (0, _momentTimezone2.default)(datetime).utcOffset(0);
   return cfg.path + '/' + type + '_GMT/' + gmt.format('YYYY-MM-DD/hhA') + ext;
 }
 
@@ -824,8 +866,11 @@ function dolog(type, obj) {
         toWrite[key] = obj[key];
       }getWriteStreamExt(fname).then(function (stream) {
         stream.write(toWrite);
-        if (cfg.snappy) compressOld({ type: type, time: time }).catch(console.error);
-        cb();
+        if (cfg.snappy) {
+          console.log('calling now or again');
+          (0, _nowOrAgain.nowOrAgainPromise)(type, compressOld, { type: type, time: time }).catch(console.error);
+        }
+        cb(null);
       });
     })();
   } catch (e) {
@@ -835,7 +880,7 @@ function dolog(type, obj) {
 
 function byDate(a, b) {
   var dt = function dt(d) {
-    return (0, _moment2.default)(d, 'YYYY-MM-DD');
+    return (0, _momentTimezone2.default)(d, 'YYYY-MM-DD');
   };
   if (dt(a).valueOf() < dt(b).valueOf()) return -1;
   if (dt(a).valueOf() > dt(b).valueOf()) return 1;
@@ -844,7 +889,7 @@ function byDate(a, b) {
 
 function byTime(a, b) {
   var dt = function dt(d) {
-    return (0, _moment2.default)('2015-12-01 ' + d, 'YYYY-MM-DD hhA');
+    return (0, _momentTimezone2.default)('2015-12-01 ' + d, 'YYYY-MM-DD hhA');
   };
   if (dt(a).valueOf() < dt(b).valueOf()) return -1;
   if (dt(a).valueOf() > dt(b).valueOf()) return 1;
@@ -852,7 +897,7 @@ function byTime(a, b) {
 }
 
 function fmt(dt) {
-  return (0, _moment2.default)(dt).format('YYYY-MM-DD hh:mm:ss A');
+  return (0, _momentTimezone2.default)(dt).format('YYYY-MM-DD hh:mm:ss A');
 }
 
 var QueryStream = function (_Readable) {
@@ -872,20 +917,22 @@ var QueryStream = function (_Readable) {
         while (1) {
           switch (_context12.prev = _context12.next) {
             case 0:
+              console.log('INITIALIXING');
               console.log('A');
-              _context12.next = 3;
+              _context12.next = 4;
               return whichFiles(_this3.type, _this3.start, _this3.end);
 
-            case 3:
+            case 4:
               _this3.files = _context12.sent;
 
               console.log('B');
+              console.log('this.files is', _this3.files);
               _this3.fileNum = 0;
               _this3.rowNum = 0;
               _this3.data = [];
               _this3.initFinished = true;
 
-            case 9:
+            case 11:
             case 'end':
               return _context12.stop();
           }
@@ -1010,6 +1057,7 @@ var QueryStream = function (_Readable) {
     }));
 
     _this3._read = function () {
+      console.log('read');
       _this3.reading = new Promise(function () {
         var _ref14 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee14(res) {
           var canPush;
@@ -1026,29 +1074,30 @@ var QueryStream = function (_Readable) {
                   return _this3.reading;
 
                 case 3:
+                  console.log('actually reading');
                   canPush = true;
 
-                case 4:
-                  _context15.prev = 4;
-                  _context15.next = 7;
+                case 5:
+                  _context15.prev = 5;
+                  _context15.next = 8;
                   return _this3.loadFile();
 
-                case 7:
+                case 8:
                   _this3.data = _context15.sent;
-                  _context15.next = 13;
+                  _context15.next = 14;
                   break;
 
-                case 10:
-                  _context15.prev = 10;
-                  _context15.t0 = _context15['catch'](4);
+                case 11:
+                  _context15.prev = 11;
+                  _context15.t0 = _context15['catch'](5);
                   console.trace(_context15.t0);
 
-                case 13:
+                case 14:
                   ;
-                  _context15.next = 16;
+                  _context15.next = 17;
                   return _this3.nextRow();
 
-                case 16:
+                case 17:
                   _this3.row = _context15.sent;
 
                   if (_this3.row) {
@@ -1057,18 +1106,18 @@ var QueryStream = function (_Readable) {
                   }
                   canPush = _this3.push(_this3.row);
 
-                case 19:
+                case 20:
                   if (_this3.row && canPush) {
-                    _context15.next = 4;
+                    _context15.next = 5;
                     break;
                   }
 
-                case 20:
+                case 21:
                 case 'end':
                   return _context15.stop();
               }
             }
-          }, _callee14, _this4, [[4, 10]]);
+          }, _callee14, _this4, [[5, 11]]);
         }));
 
         return function (_x23) {
@@ -1087,6 +1136,7 @@ var QueryStream = function (_Readable) {
 }(_stream.Readable);
 
 function queryOpts(options) {
+  console.log('received query');
   var type = options.type,
       start = options.start,
       end = options.end,
@@ -1096,7 +1146,7 @@ function queryOpts(options) {
     return true;
   };
   if (!end) options.end = new Date();
-  if (!start) options.start = (0, _moment2.default)(end).subtract(30, 'minutes').toDate();
+  if (!start) options.start = (0, _momentTimezone2.default)(end).subtract(30, 'minutes').toDate();
 
   var qs = new QueryStream(options);
 
@@ -1106,6 +1156,7 @@ function queryOpts(options) {
     qs.pipe(obj2csv);
     return obj2csv;
   } else {
+    console.log('returning quer stream');
     return qs;
   }
 }

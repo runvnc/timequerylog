@@ -1,23 +1,27 @@
 import fs from 'mz/fs';
 import {inspect} from 'util';
 import {stringify, parse} from 'JSONStream';
-import {createWriteStream,
+import {createWriteStream, unlink,
         readFile, writeFile, createReadStream} from 'fs';
 import {mapSync} from 'event-stream';
 import {dirname} from 'path';
 import {sync as mkdirp} from 'mkdirp';
 import pathExists from 'path-exists';
 import {extname} from 'path';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import queue from 'queue';
 import equal from 'deep-equal';
 import cloneDeep from 'lodash.clonedeep';
 import msgpack from 'msgpack-lite';
 import pify from 'pify';
 import snappy from 'snappy';
+import delay from 'delay';
 import {ReadableStreamBuffer} from 'stream-buffers';
+import {nowOrAgainPromise} from 'now-or-again';
 
 const readFilePromise = pify(readFile);
+const writeFilePromise = pify(writeFile);
+const unlinkPromise = pify(unlink);
 const snappyCompressPromise = pify(snappy.compress);
 const snappyUncompressPromise = pify(snappy.uncompress);
 
@@ -141,14 +145,19 @@ const compressing = {};
 
 async function snappyCompress(type,f) {
   try {
+    console.log('trying to compress type',type, ' file', f);
     if (f.indexOf('.snappy')>0) return;
     if (compressing[f]) return;
     compressing[f] = true;
-    const buffer = await readFile(f);
+    const buffer = await readFilePromise(f);
+    console.log('buffer is..',buffer);
     const compressed = await snappyCompressPromise(buffer);
-    await writeFile(f, compressed);
+    console.log('writing compressed.');
+    await writeFilePromise(f+'.snappy', compressed);
+    await unlinkPromise(f);
   } catch (e) {
     console.error('Error in snappy compress:',e);
+    compressing[f] = false;
   }
   compressing[f] = false;
 }
@@ -156,13 +165,24 @@ async function snappyCompress(type,f) {
 const oldestSnappy = {};
 
 async function compressOld({type, time}) {
-  const end = new Date(time.getTime());
-  end.setHours(d.getHours()-cfg.snappy);
-  let start = new Date('1920-01-01');
-  if (oldestSnappy[type]) start = oldestSnappy[type];
-  const files = await whichFiles(type, start, end);
-  Promise.all(files.map(f=>snappyCompress(type, f)));
-  oldestSnappy[type] = end;
+  try {
+    console.log('compressOld called type = ', type, 'time = ', time);
+    const end = moment(time).tz('UCT').subtract(1,'hours').toDate();;
+    let start = new Date('1979-01-01');
+    console.log('start =',start.toUTCString(), 'end =', end.toUTCString());
+    if (oldestSnappy[type]) start = oldestSnappy[type];
+    const files = await whichFiles(type, start, end);
+    console.log('calling snapp compress on files ', files);
+    Promise.all(files.map(f=>snappyCompress(type, f)));
+    oldestSnappy[type] = end;
+    console.log('waiting..');
+    await delay(300);
+    console.log('returning from compressOld');
+  } catch (e) {
+    console.log('blah');
+    console.error(e);
+    throw new Error('timequerylog problem compressing old files: '+e.message);
+  }
 }
 
 function dolog(type, obj, time = new Date(), cb) {
@@ -172,8 +192,11 @@ function dolog(type, obj, time = new Date(), cb) {
     for (let key in obj) toWrite[key] = obj[key];
     getWriteStreamExt(fname).then(stream => {
       stream.write(toWrite);
-      if (cfg.snappy) compressOld({type, time}).catch(console.error);
-      cb();
+      if (cfg.snappy) {
+        console.log('calling now or again');
+        nowOrAgainPromise(type,compressOld,{type, time}).catch(console.error);
+      }
+      cb(null);
     });
 
   } catch (e) {
@@ -231,6 +254,7 @@ export async function whichFiles(type, start, end) {
       Array.prototype.push.apply(result, paths);
     } catch (e) { console.error('Error filtering log files:'+e.message); return []; }
   }
+  result = result.filter( fname => !(extname(fname) != '.snappy' && result.includes(fname+'.snappy')) );
   return result;
 }
 
@@ -319,9 +343,11 @@ class QueryStream extends Readable {
   }
 
   init = async () => {
+    console.log('INITIALIXING');
     console.log('A');
     this.files = await whichFiles(this.type, this.start, this.end);
     console.log('B');
+    console.log('this.files is', this.files);
     this.fileNum = 0;
     this.rowNum = 0;
     this.data = [];
@@ -363,8 +389,10 @@ class QueryStream extends Readable {
   }
 
   _read = () => {
+    console.log('read');
     this.reading = new Promise( async (res) => {
       if (this.reading) await this.reading;
+      console.log('actually reading');
       let canPush = true;
       do {
         try {
@@ -383,6 +411,7 @@ class QueryStream extends Readable {
 }
 
 export function queryOpts(options) {
+  console.log('received query');
   let {type, start, end, match} = options;
   if (!match) options.match = (d=>true);
   if (!end) options.end = new Date();
@@ -396,6 +425,7 @@ export function queryOpts(options) {
     qs.pipe(obj2csv);
     return obj2csv;
   } else {
+    console.log('returning quer stream');
     return qs;
   }
 }
