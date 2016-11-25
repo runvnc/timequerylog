@@ -42,7 +42,6 @@ var test = function () {
                                                                            end: new Date(), match: d => d.dog||d.cat});
                                                 console.log('queryOpts:');
                                                 matched.on('data', console.log); */
-                                                console.log(1);
 
                                                 i = 0;
                                                 csvStream = (0, _log.queryOpts)({ type: 'event', csv: true, timeMS: true,
@@ -52,9 +51,8 @@ var test = function () {
                                                         } });
 
                                                 csvStream.pipe(process.stdout);
-                                                console.log(2);
 
-                                        case 5:
+                                        case 3:
                                         case 'end':
                                                 return _context.stop();
                                 }

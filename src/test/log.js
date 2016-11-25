@@ -36,14 +36,12 @@ async function test() {
                              end: new Date(), match: d => d.dog||d.cat});
   console.log('queryOpts:');
   matched.on('data', console.log); */
-  console.log(1);
 
   let i = 0;
   const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
                                start: moment('1995-12-25').toDate(),
                                map: (r)=>{r.row = i++;return r}});
   csvStream.pipe(process.stdout);
-  console.log(2);
 }
 
 test().catch(console.error);

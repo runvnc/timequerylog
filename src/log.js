@@ -145,14 +145,11 @@ const compressing = {};
 
 async function snappyCompress(type,f) {
   try {
-    console.log('trying to compress type',type, ' file', f);
     if (f.indexOf('.snappy')>0) return;
     if (compressing[f]) return;
     compressing[f] = true;
     const buffer = await readFilePromise(f);
-    console.log('buffer is..',buffer);
     const compressed = await snappyCompressPromise(buffer);
-    console.log('writing compressed.');
     await writeFilePromise(f+'.snappy', compressed);
     await unlinkPromise(f);
   } catch (e) {
@@ -166,20 +163,14 @@ const oldestSnappy = {};
 
 async function compressOld({type, time}) {
   try {
-    console.log('compressOld called type = ', type, 'time = ', time);
     const end = moment(time).tz('UCT').subtract(1,'hours').toDate();;
     let start = new Date('1979-01-01');
-    console.log('start =',start.toUTCString(), 'end =', end.toUTCString());
     if (oldestSnappy[type]) start = oldestSnappy[type];
     const files = await whichFiles(type, start, end);
-    console.log('calling snapp compress on files ', files);
     Promise.all(files.map(f=>snappyCompress(type, f)));
     oldestSnappy[type] = end;
-    console.log('waiting..');
     await delay(300);
-    console.log('returning from compressOld');
   } catch (e) {
-    console.log('blah');
     console.error(e);
     throw new Error('timequerylog problem compressing old files: '+e.message);
   }
@@ -193,7 +184,6 @@ function dolog(type, obj, time = new Date(), cb) {
     getWriteStreamExt(fname).then(stream => {
       stream.write(toWrite);
       if (cfg.snappy) {
-        console.log('calling now or again');
         nowOrAgainPromise(type,compressOld,{type, time}).catch(console.error);
       }
       cb(null);
@@ -219,7 +209,6 @@ function byTime(a, b) {
 }
 
 export async function whichFiles(type, start, end) {
-  console.log('q');
   let startDate = moment(start).utcOffset(0).startOf('day').valueOf();
   let endDate = moment(end).utcOffset(0).endOf('day').valueOf();
   let st = moment(start).utcOffset(0).startOf('hour').valueOf();
@@ -229,7 +218,6 @@ export async function whichFiles(type, start, end) {
   catch (e) { console.error('timequerylog error reading dirlist: '+e.message+' cfg.path is '+cfg.path);return []; }
 
   dirs = dirs.sort(byDate) ;
-  console.log(dirs);
   let newDirs = dirs.filter( d => {
     let val = moment(d+' +0000', 'YYYY-MM-DD Z').valueOf();
     return val >= startDate && val <= endDate;
@@ -250,7 +238,6 @@ export async function whichFiles(type, start, end) {
         return timeMS >= st && timeMS <= en;
       });
       let paths = files.map( f => `${cfg.path}/${type}_GMT/${dir}/${f}` );
-      console.log(paths);
       Array.prototype.push.apply(result, paths);
     } catch (e) { console.error('Error filtering log files:'+e.message); return []; }
   }
@@ -269,7 +256,6 @@ async function getReadStreamExt(fname) {
       fname = fname.replace('.snappy','');
       ext = extname(fname);
   } else {
-    console.log('ext is ',ext);
     input = createReadStream(fname);
   }
   let ret = null;
@@ -287,13 +273,10 @@ async function getReadStreamExt(fname) {
 }
 
 async function filterFile(fname, start, end, matchFunction) {
-  console.log('n');
   let data = await new Promise( async res => {
     try {
       let results = [];
-      console.log('a');
       let stream = await getReadStreamExt(fname);
-      console.log('b');
       stream.pipe(mapSync( data => {
         data.time = new Date(data.time);
         if (data.time >= start && data.time <= end &&
@@ -343,11 +326,7 @@ class QueryStream extends Readable {
   }
 
   init = async () => {
-    console.log('INITIALIXING');
-    console.log('A');
     this.files = await whichFiles(this.type, this.start, this.end);
-    console.log('B');
-    console.log('this.files is', this.files);
     this.fileNum = 0;
     this.rowNum = 0;
     this.data = [];
@@ -355,7 +334,6 @@ class QueryStream extends Readable {
   }
 
   loadFile = async (f) => {
-    console.log(this.files);
     if (!this.files) await this.init();
     if (this.data && this.rowNum < this.data.length) {
       return this.data;
@@ -389,10 +367,8 @@ class QueryStream extends Readable {
   }
 
   _read = () => {
-    console.log('read');
     this.reading = new Promise( async (res) => {
       if (this.reading) await this.reading;
-      console.log('actually reading');
       let canPush = true;
       do {
         try {
@@ -411,7 +387,6 @@ class QueryStream extends Readable {
 }
 
 export function queryOpts(options) {
-  console.log('received query');
   let {type, start, end, match} = options;
   if (!match) options.match = (d=>true);
   if (!end) options.end = new Date();
@@ -425,7 +400,6 @@ export function queryOpts(options) {
     qs.pipe(obj2csv);
     return obj2csv;
   } else {
-    console.log('returning quer stream');
     return qs;
   }
 }
