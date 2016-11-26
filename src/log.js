@@ -168,8 +168,8 @@ async function compressOld({type, time}) {
     if (oldestSnappy[type]) start = oldestSnappy[type];
     const files = await whichFiles(type, start, end);
     Promise.all(files.map(f=>snappyCompress(type, f)));
-    oldestSnappy[type] = end;
-    await delay(300);
+    oldestSnappy[type] = moment(end).subtract(2,'hours');
+    await delay(5000);
   } catch (e) {
     console.error(e);
     throw new Error('timequerylog problem compressing old files: '+e.message);

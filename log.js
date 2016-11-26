@@ -187,9 +187,9 @@ var compressOld = function () {
             Promise.all(files.map(function (f) {
               return snappyCompress(type, f);
             }));
-            oldestSnappy[type] = end;
+            oldestSnappy[type] = (0, _momentTimezone2.default)(end).subtract(2, 'hours');
             _context3.next = 12;
-            return (0, _delay2.default)(300);
+            return (0, _delay2.default)(5000);
 
           case 12:
             _context3.next = 18;
