@@ -18,12 +18,12 @@ import snappy from 'snappy';
 import delay from 'delay';
 import {ReadableStreamBuffer} from 'stream-buffers';
 import {nowOrAgainPromise} from 'now-or-again';
+import {v4} from 'uuid';
+import timed from 'timed';
 
 const readFilePromise = pify(readFile);
 const writeFilePromise = pify(writeFile);
 const unlinkPromise = pify(unlink);
-const snappyCompressPromise = pify(snappy.compress);
-const snappyUncompressPromise = pify(snappy.uncompress);
 
 let started = false;
 let cfg = {path:process.cwd(), ext:'jsonl'};
@@ -145,8 +145,8 @@ const compressing = {};
 
 async function snappyCompress(type,f) {
   try {
-    if (f.indexOf('.snappy')>0) return;
-    if (compressing[f]) return;
+    if (f.indexOf('.snappy')>0) return false;
+    if (compressing[f]) return false;
     compressing[f] = true;
     const buffer = await readFilePromise(f);
     const compressed = await snappyCompressPromise(buffer);
@@ -155,8 +155,10 @@ async function snappyCompress(type,f) {
   } catch (e) {
     console.error('Error in snappy compress:',e);
     compressing[f] = false;
+    return true;
   }
   compressing[f] = false;
+  return true;
 }
 
 const oldestSnappy = {};
@@ -167,9 +169,11 @@ async function compressOld({type, time}) {
     let start = new Date('1979-01-01');
     if (oldestSnappy[type]) start = oldestSnappy[type];
     const files = await whichFiles(type, start, end);
-    Promise.all(files.map(f=>snappyCompress(type, f)));
-    oldestSnappy[type] = moment(end).subtract(2,'hours');
-    await delay(5000);
+    for (let file of files) {
+      let didIt = snappyCompress(type, file);
+      if (didIt) oldestSnappy[type] = moment(end).subtract(2,'hours');
+    }
+    await delay(500);
   } catch (e) {
     console.error(e);
     throw new Error('timequerylog problem compressing old files: '+e.message);
@@ -245,19 +249,7 @@ export async function whichFiles(type, start, end) {
   return result;
 }
 
-async function getReadStreamExt(fname) {
-  let ext = extname(fname), input = null;
-  if (ext.indexOf('.snappy')>=0) {
-      const hourLogs = await readFilePromise(fname);
-      const uncompressed = await snappyUncompressPromise(hourLogs);
-      input = new ReadableStreamBuffer({frequency:1,chunkSize:128000});
-      input.put(uncompressed);
-      input.stop();
-      fname = fname.replace('.snappy','');
-      ext = extname(fname);
-  } else {
-    input = createReadStream(fname);
-  }
+function finishGetReadStreamExt(ext, input) {
   let ret = null;
   switch (ext) {
     case '.msp':
@@ -272,20 +264,45 @@ async function getReadStreamExt(fname) {
   }
 }
 
+function getReadStreamExt(fname, cb) {
+  let ext = extname(fname), input = null;
+  if (ext.indexOf('.snappy')>=0) {
+    fs.stat(fname, (er2, stat) => {
+      const buf = new Buffer(stat.size);
+      fs.open(fname, 'r', (er, fd) => {
+        fs.read(fd, buf, 0, stat.size, 0, (e, bytes, buf2) => {
+          snappy.uncompress(buf2, (err, uncompressed) => {
+            input = new ReadableStreamBuffer({frequency:1,chunkSize:32000});
+            input.put(uncompressed);
+            input.stop();
+            fname = fname.replace('.snappy','');
+            ext = extname(fname);
+            cb(finishGetReadStreamExt(ext, input));
+          });
+        })
+      });
+    });
+  } else {
+    input = createReadStream(fname);
+    cb(finishGetReadStreamExt(ext, input));
+  }
+}
+
 async function filterFile(fname, start, end, matchFunction) {
-  let data = await new Promise( async res => {
+  let data = await new Promise( res => {
     try {
       let results = [];
-      let stream = await getReadStreamExt(fname);
-      stream.pipe(mapSync( data => {
-        data.time = new Date(data.time);
-        if (data.time >= start && data.time <= end &&
-            matchFunction(data)) {
-          results.push(data)
-          return data;
-        }
-      }));
-      stream.on('end', () => { res(results);});
+      getReadStreamExt(fname, (stream) => {
+        stream.pipe(mapSync( data => {
+          data.time = new Date(data.time);
+          if (data.time >= start && data.time <= end &&
+              matchFunction(data)) {
+            results.push(data)
+            return data;
+          }
+        }));
+        stream.on('end', () => { res(results);});
+      });
     } catch (e) {
       console.error('Error in filterFile:');
       console.error(inspect(e));
@@ -356,34 +373,52 @@ class QueryStream extends Readable {
   }
 
   nextRow = async () => {
-    if (!this.data) return null;
-    if (this.rowNum >= this.data.length) {
-      this.data = await this.loadFile();
+    try {
       if (!this.data) return null;
+      if (this.rowNum >= this.data.length) {
+        this.data = await this.loadFile();
+        if (!this.data) return null;
+      }
+      const row = this.data[this.rowNum];
+      this.rowNum++;
+      return row;
+    } catch (e) {
+      console.error('nextRow issue', e);
     }
-    const row = this.data[this.rowNum];
-    this.rowNum++;
-    return row;
   }
 
   _read = () => {
+    let id = v4();
     this.reading = new Promise( async (res) => {
-      if (this.reading) await this.reading;
+      if (this.reading) {
+        //console.log(id, this.type, Date.now(), 'waiting for this.reading');
+        //console.log(id, this.type, 'returning true');
+        return true;
+        await this.reading;
+      }
+      //console.log(id, this.type, Date.now(),'!!!! done waiting for this.reading');
       let canPush = true;
+      let i = 0;
       do {
+        //console.log(i++);
         try {
           this.data = await this.loadFile();
         } catch (e) { console.trace(e) };
+        //console.log(id, this.type,'waiting for this.nextrow');
         this.row = await this.nextRow();
+        //console.log(id, this.type,'got row ');
         if (this.row) {
+          //console.log(id, 'ok row');
           if (this.timeMS) this.row.time = this.row.time.getTime();
           if (this.map) this.row = this.map(this.row);
+        } else {
+          //console.log(id, this.type, 'no row');
         }
         canPush = this.push(this.row);
       } while (this.row && canPush);
+      return true;
     }).catch(console.error);
   }
-
 }
 
 export function queryOpts(options) {
