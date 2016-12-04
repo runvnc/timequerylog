@@ -675,6 +675,7 @@ var _stream = require('stream');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var snappyCompressPromise = (0, _pify2.default)(_snappy2.default.compress);
 var readFilePromise = (0, _pify2.default)(_fs3.readFile);
 var writeFilePromise = (0, _pify2.default)(_fs3.writeFile);
 var unlinkPromise = (0, _pify2.default)(_fs3.unlink);

@@ -21,6 +21,7 @@ import {nowOrAgainPromise} from 'now-or-again';
 import {v4} from 'uuid';
 import timed from 'timed';
 
+const snappyCompressPromise = pify(snappy.compress);
 const readFilePromise = pify(readFile);
 const writeFilePromise = pify(writeFile);
 const unlinkPromise = pify(unlink);
