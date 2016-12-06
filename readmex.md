@@ -39,7 +39,7 @@ query('req', null, null, d => d.amount > 1000).then(console.log);
 
 ### Return logs as an object mode stream
 ```javascript
-const matched = queryOpts({type:'request', start: new Date('2016-10-22 10:00 AM'
+const matched = queryOpts({type:'request', start: new Date('2016-10-22 10:00 AM'),
                            end: new Date('2016-10-23')});
 matched.on('data', console.log);
 ```

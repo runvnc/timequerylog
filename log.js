@@ -698,11 +698,16 @@ setInterval(function () {
 }, 1000); //15000
 
 function shutdown() {
+  console.log('Log queue length: ', q.length);
   for (var file in streams) {
     try {
       streams[file].end();
     } catch (e) {}
   }
+  var check = function check() {
+    if (!q.length) process.nextTick(check);
+  };
+  check();
 }
 
 process.on('beforeExit', shutdown);
@@ -759,8 +764,9 @@ function log(type, obj) {
     lastData[type] = (0, _lodash2.default)(obj);
     obj.time = copyTime;
   }
+  var currentState = JSON.stringify(obj);
   q.push(function (cb) {
-    dolog(type, obj, time, cb);
+    dolog(type, currentState, time, cb);
   });
   if (!started) {
     started = true;
@@ -781,6 +787,7 @@ function dolog(type, obj) {
 
   try {
     (function () {
+      obj = JSON.parse(obj);
       var fname = whichFile(type, time);
       var toWrite = { time: time, type: type };
       for (var key in obj) {

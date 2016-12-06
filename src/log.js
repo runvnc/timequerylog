@@ -44,12 +44,17 @@ setInterval( () => {
 }, 1000); //15000
 
 function shutdown() {
+  console.log('Log queue length: ',q.length);
   for (let file in streams) {
     try {
       streams[file].end();
     } catch (e) {
     }
   }
+  const check = () => {
+    if (!q.length) process.nextTick(check);
+  }
+  check();
 }
 
 process.on('beforeExit', shutdown);
@@ -104,7 +109,8 @@ export function log(type,obj,time = new Date()) {
     lastData[type] = cloneDeep(obj);
     obj.time = copyTime;
   }
-  q.push(cb => { dolog(type, obj, time, cb);});
+  const currentState = JSON.stringify(obj);
+  q.push(cb => { dolog(type, currentState, time, cb);});
   if (!started) {
     started = true;
     q.start(e=> {
@@ -183,6 +189,7 @@ async function compressOld({type, time}) {
 
 function dolog(type, obj, time = new Date(), cb) {
   try {
+    obj = JSON.parse(obj);
     let fname = whichFile(type, time);
     let toWrite = {time, type};
     for (let key in obj) toWrite[key] = obj[key];
