@@ -20,6 +20,7 @@ import {ReadableStreamBuffer} from 'stream-buffers';
 import {nowOrAgainPromise} from 'now-or-again';
 import {v4} from 'uuid';
 import timed from 'timed';
+import onExit from 'signal-exit';
 
 const snappyCompressPromise = pify(snappy.compress);
 const readFilePromise = pify(readFile);
@@ -43,7 +44,7 @@ setInterval( () => {
   }
 }, 1000); //15000
 
-function shutdown() {
+const onExit_ = (code, signal) => {
   console.log('Log queue length: ',q.length);
   for (let file in streams) {
     try {
@@ -52,14 +53,13 @@ function shutdown() {
     }
   }
   const check = () => {
-    if (!q.length) process.nextTick(check);
+    if (q.length) process.nextTick(check); else process.exit();
   }
   check();
-}
+};
 
-process.on('beforeExit', shutdown);
-process.on('exit', shutdown);
-process.on('SIGINT', () => { shutdown(); process.exit() });
+onExit(onExit_, {alwaysLast:true});
+//process.on('SIGINT', onExit_);
 
 export function config(conf) {
   Object.assign(cfg,conf);
@@ -155,10 +155,15 @@ async function snappyCompress(type,f) {
     if (f.indexOf('.snappy')>0) return false;
     if (compressing[f]) return false;
     compressing[f] = true;
+    console.log('snappyCompress reading ', f);
     const buffer = await readFilePromise(f);
+    console.log('snappyCompress compressing ',f);
     const compressed = await snappyCompressPromise(buffer);
+    console.log('snappyCompress writing ', f+'.snappy');
     await writeFilePromise(f+'.snappy', compressed);
+    console.log('snappyCompress unlink',f);
     await unlinkPromise(f);
+    console.log('snappyCompress done ', f);
   } catch (e) {
     console.error('Error in snappy compress:',e);
     compressing[f] = false;
@@ -169,9 +174,16 @@ async function snappyCompress(type,f) {
 }
 
 const oldestSnappy = {};
+let lastCompress = 0;
 
 async function compressOld({type, time}) {
+  if (compressing[type]) return;
+  if (Date.now()-lastCompress < 1000) return;
+
+  console.log('compressOld type=',type, 'time=',time);
   try {
+    compressing[type] = true;
+    lastCompress = Date.now();
     const end = moment(time).tz('UCT').subtract(1,'hours').toDate();;
     let start = new Date('1979-01-01');
     if (oldestSnappy[type]) start = oldestSnappy[type];
@@ -180,9 +192,11 @@ async function compressOld({type, time}) {
       let didIt = snappyCompress(type, file);
       if (didIt) oldestSnappy[type] = moment(end).subtract(2,'hours');
     }
-    await delay(500);
+    //await delay(500);
+    compressing[type] = false;
   } catch (e) {
     console.error(e);
+    compressing[type] = false;
     throw new Error('timequerylog problem compressing old files: '+e.message);
   }
 }
@@ -196,7 +210,7 @@ function dolog(type, obj, time = new Date(), cb) {
     getWriteStreamExt(fname).then(stream => {
       stream.write(toWrite);
       if (cfg.snappy) {
-        nowOrAgainPromise(type,compressOld,{type, time}).catch(console.error);
+        compressOld({type, time});
       }
       cb(null);
     });
