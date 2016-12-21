@@ -736,12 +736,19 @@ var onExit_ = function onExit_(code, signal) {
     } catch (e) {}
   }
   var check = function check() {
-    if (q.length) process.nextTick(check);else process.exit();
+    if (q.length) {
+      console.log('Items remaining in queue!');
+      q.start(function () {});
+      setTimeout(function () {
+        process.stdout.write('.');
+        check();
+      }, 1);
+    } else process.exit();
   };
   check();
 };
 
-(0, _signalExit2.default)(onExit_, { alwaysLast: true });
+(0, _signalExit2.default)(onExit_);
 //process.on('SIGINT', onExit_);
 
 function config(conf) {

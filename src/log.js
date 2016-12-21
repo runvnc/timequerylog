@@ -53,12 +53,19 @@ const onExit_ = (code, signal) => {
     }
   }
   const check = () => {
-    if (q.length) process.nextTick(check); else process.exit();
+    if (q.length) {
+      console.log('Items remaining in queue!');
+      q.start( () => {} );
+      setTimeout( () => {
+        process.stdout.write('.');
+        check();
+      }, 1);
+    } else process.exit();
   }
   check();
 };
 
-onExit(onExit_, {alwaysLast:true});
+onExit(onExit_);
 //process.on('SIGINT', onExit_);
 
 export function config(conf) {
