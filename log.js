@@ -728,28 +728,38 @@ setInterval(function () {
   }
 }, 1000); //15000
 
-var onExit_ = function onExit_(code, signal) {
-  console.log('Log queue length: ', q.length);
-  for (var file in streams) {
-    try {
-      streams[file].end();
-    } catch (e) {}
-  }
+var alreadyCleaningUp = false;
+
+process.stdin.resume();
+
+var cleanup = function cleanup(code, signal) {
+  if (alreadyCleaningUp) return;
+  console.log('Log queue length: ', out.length, 'started:', c, 'completed:', completed);
+  return;
   var check = function check() {
     if (q.length) {
-      console.log('Items remaining in queue!');
-      q.start(function () {});
+      console.log('Items remaining in queue:', q.length);
+      //q.start( () => {} );
       setTimeout(function () {
         process.stdout.write('.');
         check();
-      }, 1);
-    } else process.exit();
+      }, 10);
+    } else {
+      for (var file in streams) {
+        try {
+          streams[file].end();
+        } catch (e) {}
+      }
+      process.exit();
+    }
   };
   check();
+  alreadyCleaningUp = true;
+  process.emit('SIGINT');
 };
 
-(0, _signalExit2.default)(onExit_);
-//process.on('SIGINT', onExit_);
+(0, _signalExit2.default)(cleanup);
+//process.on('SIGINT', cleanup);
 
 function config(conf) {
   Object.assign(cfg, conf);
@@ -784,6 +794,24 @@ function noRepeat(type) {
   return false;
 }
 
+var c = 0;
+var completed = 0;
+var out = [];
+
+process.on('tql', function () {
+  c++;
+
+  var _out$pop = out.pop(),
+      type = _out$pop.type,
+      currentState = _out$pop.currentState,
+      time = _out$pop.time;
+
+  var cstr = c.toString();
+  dolog(type, currentState, time, function () {
+    completed++;
+  });
+});
+
 function log(type, obj) {
   var time = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
 
@@ -800,9 +828,9 @@ function log(type, obj) {
     obj.time = copyTime;
   }
   var currentState = JSON.stringify(obj);
-  q.push(function (cb) {
-    dolog(type, currentState, time, cb);
-  });
+  //q.push(cb => { dolog(type, currentState, time, cb);}));
+  out.push({ type: type, currentState: currentState, time: time });
+  process.emit('tql');
   if (!started) {
     started = true;
     q.start(function (e) {

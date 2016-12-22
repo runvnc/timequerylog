@@ -44,29 +44,38 @@ setInterval( () => {
   }
 }, 1000); //15000
 
-const onExit_ = (code, signal) => {
-  console.log('Log queue length: ',q.length);
-  for (let file in streams) {
-    try {
-      streams[file].end();
-    } catch (e) {
-    }
-  }
+let alreadyCleaningUp = false;
+
+process.stdin.resume();
+
+const cleanup = (code, signal) => {
+  if (alreadyCleaningUp) return;
+  console.log('Log queue length: ',out.length, 'started:',c,'completed:',completed);
+  return;
   const check = () => {
     if (q.length) {
-      console.log('Items remaining in queue!');
-      q.start( () => {} );
+      console.log('Items remaining in queue:', q.length);
+      //q.start( () => {} );
       setTimeout( () => {
         process.stdout.write('.');
         check();
-      }, 1);
-    } else process.exit();
+      }, 10);
+    } else {
+      for (let file in streams) {
+        try {
+          streams[file].end();
+        } catch (e) { }
+      }
+      process.exit();
+    }
   }
   check();
+  alreadyCleaningUp = true;
+  process.emit('SIGINT');
 };
 
-onExit(onExit_);
-//process.on('SIGINT', onExit_);
+onExit(cleanup);
+//process.on('SIGINT', cleanup);
 
 export function config(conf) {
   Object.assign(cfg,conf);
@@ -103,6 +112,17 @@ function noRepeat(type) {
   return false;
 }
 
+let c = 0;
+let completed = 0;
+let out = [];
+
+process.on('tql', () => {
+  c++;
+  const {type, currentState, time} = out.pop();
+  const cstr = c.toString();
+  dolog(type, currentState, time, () => { completed++; });
+});
+
 export function log(type,obj,time = new Date()) {
   obj.time = time;
   if (noRepeat(type)) {
@@ -117,7 +137,9 @@ export function log(type,obj,time = new Date()) {
     obj.time = copyTime;
   }
   const currentState = JSON.stringify(obj);
-  q.push(cb => { dolog(type, currentState, time, cb);});
+  //q.push(cb => { dolog(type, currentState, time, cb);}));
+  out.push({type, currentState, time});
+  process.emit('tql');
   if (!started) {
     started = true;
     q.start(e=> {
