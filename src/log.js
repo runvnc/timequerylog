@@ -46,8 +46,6 @@ setInterval( () => {
 
 let alreadyCleaningUp = false;
 
-process.stdin.resume();
-
 const cleanup = (code, signal) => {
   if (alreadyCleaningUp) return;
   console.log('Log queue length: ',out.length, 'started:',c,'completed:',completed);
@@ -57,7 +55,6 @@ const cleanup = (code, signal) => {
       console.log('Items remaining in queue:', q.length);
       //q.start( () => {} );
       setTimeout( () => {
-        process.stdout.write('.');
         check();
       }, 10);
     } else {
@@ -340,6 +337,7 @@ function getReadStreamExt(fname, cb) {
 }
 
 async function filterFile(fname, start, end, matchFunction) {
+  console.log('filterFile fname =',fname);
   let data = await new Promise( res => {
     try {
       let results = [];
@@ -397,7 +395,7 @@ class QueryStream extends Readable {
     this.files = await whichFiles(this.type, this.start, this.end);
     this.fileNum = 0;
     this.rowNum = 0;
-    this.data = [];
+    this.data = null;
     this.initFinished = true;
   }
 
@@ -416,6 +414,7 @@ class QueryStream extends Readable {
     try {
       result =  await filterFile(this.files[this.fileNum++], this.start,
                                  this.end, this.match);
+      if (result.length === 0) return await this.loadFile();
     } catch (e) {
       console.error('filterfile err in loadfile',e);
     }
@@ -457,13 +456,12 @@ class QueryStream extends Readable {
         } catch (e) { console.trace(e) };
         //console.log(id, this.type,'waiting for this.nextrow');
         this.row = await this.nextRow();
+        if (this.row === undefined) this.row = null;
         //console.log(id, this.type,'got row ');
-        if (this.row) {
-          //console.log(id, 'ok row');
+        if (!(this.row===null)) {
           if (this.timeMS) this.row.time = this.row.time.getTime();
           if (this.map) this.row = this.map(this.row);
         } else {
-          //console.log(id, this.type, 'no row');
         }
         canPush = this.push(this.row);
       } while (this.row && canPush);
