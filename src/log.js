@@ -26,6 +26,7 @@ const snappyCompressPromise = pify(snappy.compress);
 const readFilePromise = pify(readFile);
 const writeFilePromise = pify(writeFile);
 const unlinkPromise = pify(unlink);
+const dologPromise = pify(dolog);
 
 let started = false;
 let cfg = {path:process.cwd(), ext:'jsonl'};
@@ -37,6 +38,7 @@ setInterval( () => {
   for (let file in lastAccessTime) {
     let now = new Date().getTime();
     if (now - lastAccessTime[file].getTime() > 900) {
+      console.log('ending and deleting stream',file);
       streams[file].end();
       delete streams[file];
       delete lastAccessTime[file];
@@ -44,35 +46,24 @@ setInterval( () => {
   }
 }, 1000); //15000
 
-let alreadyCleaningUp = false;
 
 const cleanup = (code, signal) => {
-  if (alreadyCleaningUp) return;
   console.log('Log queue length: ',out.length, 'started:',c,'completed:',completed);
-  return;
-  const check = () => {
-    if (q.length) {
-      console.log('Items remaining in queue:', q.length);
-      //q.start( () => {} );
-      setTimeout( () => {
-        check();
-      }, 10);
-    } else {
+  if (q.length>0)
+    q.on('end', () => {
+      console.log('closing streams');
       for (let file in streams) {
         try {
           streams[file].end();
         } catch (e) { }
       }
       process.exit();
-    }
-  }
-  check();
-  alreadyCleaningUp = true;
-  process.emit('SIGINT');
+    });
+  else process.exit();
 };
 
-onExit(cleanup);
-//process.on('SIGINT', cleanup);
+//onExit(cleanup);
+process.on('SIGINT', cleanup);
 
 export function config(conf) {
   Object.assign(cfg,conf);
@@ -112,12 +103,20 @@ function noRepeat(type) {
 let c = 0;
 let completed = 0;
 let out = [];
+let currentLogging = null;
 
-process.on('tql', () => {
+process.on('tql', async () => {
+  console.log('awaiting currentLogging');
+  await currentLogging;
   c++;
   const {type, currentState, time} = out.pop();
   const cstr = c.toString();
-  dolog(type, currentState, time, () => { completed++; });
+  console.log('just before call to promise');
+  const newLogging = dologPromise(type, currentState, time);
+  currentLogging = newLogging;
+  await newLogging;
+  console.log('after call to promise');
+  completed++;
 });
 
 export function log(type,obj,time = new Date()) {
@@ -134,9 +133,9 @@ export function log(type,obj,time = new Date()) {
     obj.time = copyTime;
   }
   const currentState = JSON.stringify(obj);
-  //q.push(cb => { dolog(type, currentState, time, cb);}));
-  out.push({type, currentState, time});
-  process.emit('tql');
+  q.push(cb => { dolog(type, currentState, time, cb);});
+  //out.push({type, currentState, time});
+  //process.emit('tql');
   if (!started) {
     started = true;
     q.start(e=> {
@@ -147,7 +146,9 @@ export function log(type,obj,time = new Date()) {
 }
 
 async function getWriteStreamExt(fname) {
+  console.log('top of getwritestreamext fname is ',fname);
   if (streams[fname]) {
+    console.log('found stream for fname ', fname);
     lastAccessTime[fname] = new Date();
     return streams[fname];
   }
@@ -163,12 +164,15 @@ async function getWriteStreamExt(fname) {
       encodeStream = msgpack.createEncodeStream();
       break;
     default:
+      console.log('create encodestream fname is', fname);
       encodeStream = stringify(false);
       if (fexists) {
+        console.log('fexists writing newline');
         fileStream.write('\n');
       }
   }
   encodeStream.pipe(fileStream);
+  console.log('saving stream for ',fname);
   streams[fname] = encodeStream;
   lastAccessTime[fname] = new Date();
   return encodeStream;
@@ -181,15 +185,10 @@ async function snappyCompress(type,f) {
     if (f.indexOf('.snappy')>0) return false;
     if (compressing[f]) return false;
     compressing[f] = true;
-    console.log('snappyCompress reading ', f);
     const buffer = await readFilePromise(f);
-    console.log('snappyCompress compressing ',f);
     const compressed = await snappyCompressPromise(buffer);
-    console.log('snappyCompress writing ', f+'.snappy');
     await writeFilePromise(f+'.snappy', compressed);
-    console.log('snappyCompress unlink',f);
     await unlinkPromise(f);
-    console.log('snappyCompress done ', f);
   } catch (e) {
     console.error('Error in snappy compress:',e);
     compressing[f] = false;
@@ -206,7 +205,6 @@ async function compressOld({type, time}) {
   if (compressing[type]) return;
   if (Date.now()-lastCompress < 1000) return;
 
-  console.log('compressOld type=',type, 'time=',time);
   try {
     compressing[type] = true;
     lastCompress = Date.now();
@@ -236,11 +234,11 @@ function dolog(type, obj, time = new Date(), cb) {
     getWriteStreamExt(fname).then(stream => {
       stream.write(toWrite);
       if (cfg.snappy) {
-        compressOld({type, time});
+        compressOld({type, time}).then(cb);
+      } else {
+        cb(null,null);
       }
-      cb(null);
     });
-
   } catch (e) {
     console.error(e);
   }
@@ -337,7 +335,6 @@ function getReadStreamExt(fname, cb) {
 }
 
 async function filterFile(fname, start, end, matchFunction) {
-  console.log('filterFile fname =',fname);
   let data = await new Promise( res => {
     try {
       let results = [];
@@ -459,7 +456,7 @@ class QueryStream extends Readable {
         if (this.row === undefined) this.row = null;
         //console.log(id, this.type,'got row ');
         if (!(this.row===null)) {
-          if (this.timeMS) this.row.time = this.row.time.getTime();
+          if (this.timeMS && this.row.time.getTime) this.row.time = this.row.time.getTime();
           if (this.map) this.row = this.map(this.row);
         } else {
         }
