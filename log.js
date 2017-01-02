@@ -36,57 +36,54 @@ var getWriteStreamExt = function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            console.log('top of getwritestreamext fname is ', fname);
-
             if (!streams[fname]) {
-              _context2.next = 5;
+              _context2.next = 3;
               break;
             }
 
-            console.log('found stream for fname ', fname);
             lastAccessTime[fname] = new Date();
             return _context2.abrupt('return', streams[fname]);
 
-          case 5:
-            _context2.next = 7;
+          case 3:
+            _context2.next = 5;
             return (0, _pathExists2.default)((0, _path.dirname)(fname));
 
-          case 7:
+          case 5:
             exists = _context2.sent;
 
             if (!exists) (0, _mkdirp.sync)((0, _path.dirname)(fname));
 
-            _context2.next = 11;
+            _context2.next = 9;
             return (0, _pathExists2.default)(fname);
 
-          case 11:
+          case 9:
             fexists = _context2.sent;
             encodeStream = null;
             fileStream = (0, _fs3.createWriteStream)(fname, { flags: 'a' });
+
+            lastWriteTime[fname] = new Date();
+
             _context2.t0 = (0, _path.extname)(fname);
-            _context2.next = _context2.t0 === '.msp' ? 17 : 19;
+            _context2.next = _context2.t0 === '.msp' ? 16 : 18;
             break;
 
-          case 17:
+          case 16:
             encodeStream = _msgpackLite2.default.createEncodeStream();
-            return _context2.abrupt('break', 22);
+            return _context2.abrupt('break', 20);
 
-          case 19:
-            console.log('create encodestream fname is', fname);
+          case 18:
             encodeStream = (0, _JSONStream.stringify)(false);
             if (fexists) {
-              console.log('fexists writing newline');
               fileStream.write('\n');
             }
 
-          case 22:
+          case 20:
             encodeStream.pipe(fileStream);
-            console.log('saving stream for ', fname);
             streams[fname] = encodeStream;
             lastAccessTime[fname] = new Date();
             return _context2.abrupt('return', encodeStream);
 
-          case 27:
+          case 24:
           case 'end':
             return _context2.stop();
         }
@@ -713,16 +710,18 @@ var started = false;
 var cfg = { path: process.cwd(), ext: 'jsonl' };
 var streams = {};
 var lastAccessTime = {};
+var lastWriteTime = {};
 var q = (0, _queue2.default)({ concurrency: 1 });
 
 setInterval(function () {
   for (var file in lastAccessTime) {
     var now = new Date().getTime();
-    if (now - lastAccessTime[file].getTime() > 900) {
+    if (now - lastAccessTime[file].getTime() > 900 && now - lastWriteTime[file].getTime() > 15000) {
       console.log('ending and deleting stream', file);
       streams[file].end();
       delete streams[file];
       delete lastAccessTime[file];
+      lastWriteTime[file] = new Date();
     }
   }
 }, 1000); //15000
@@ -789,27 +788,23 @@ process.on('tql', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(fun
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          console.log('awaiting currentLogging');
-          _context.next = 3;
+          _context.next = 2;
           return currentLogging;
 
-        case 3:
+        case 2:
           c++;
           _out$pop = out.pop(), type = _out$pop.type, currentState = _out$pop.currentState, time = _out$pop.time;
           cstr = c.toString();
-
-          console.log('just before call to promise');
           newLogging = dologPromise(type, currentState, time);
 
           currentLogging = newLogging;
-          _context.next = 11;
+          _context.next = 9;
           return newLogging;
 
-        case 11:
-          console.log('after call to promise');
+        case 9:
           completed++;
 
-        case 13:
+        case 10:
         case 'end':
           return _context.stop();
       }
@@ -1127,7 +1122,6 @@ var QueryStream = function (_Readable) {
                   return _context13.abrupt('return', true);
 
                 case 4:
-                  //console.log(id, this.type, Date.now(),'!!!! done waiting for this.reading');
                   canPush = true;
                   i = 0;
 
@@ -1148,7 +1142,6 @@ var QueryStream = function (_Readable) {
 
                 case 15:
                   ;
-                  //console.log(id, this.type,'waiting for this.nextrow');
                   _context13.next = 18;
                   return _this2.nextRow();
 
@@ -1156,7 +1149,6 @@ var QueryStream = function (_Readable) {
                   _this2.row = _context13.sent;
 
                   if (_this2.row === undefined) _this2.row = null;
-                  //console.log(id, this.type,'got row ');
                   if (!(_this2.row === null)) {
                     if (_this2.timeMS && _this2.row.time.getTime) _this2.row.time = _this2.row.time.getTime();
                     if (_this2.map) _this2.row = _this2.map(_this2.row);

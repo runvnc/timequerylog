@@ -32,16 +32,19 @@ let started = false;
 let cfg = {path:process.cwd(), ext:'jsonl'};
 let streams = {};
 let lastAccessTime = {};
+let lastWriteTime = {};
 let q = queue({concurrency:1});
 
 setInterval( () => {
   for (let file in lastAccessTime) {
     let now = new Date().getTime();
-    if (now - lastAccessTime[file].getTime() > 900) {
+    if (now - lastAccessTime[file].getTime() > 900 &&
+        now - lastWriteTime[file].getTime() > 15000) {
       console.log('ending and deleting stream',file);
       streams[file].end();
       delete streams[file];
       delete lastAccessTime[file];
+      lastWriteTime[file] = new Date();
     }
   }
 }, 1000); //15000
@@ -106,16 +109,13 @@ let out = [];
 let currentLogging = null;
 
 process.on('tql', async () => {
-  console.log('awaiting currentLogging');
   await currentLogging;
   c++;
   const {type, currentState, time} = out.pop();
   const cstr = c.toString();
-  console.log('just before call to promise');
   const newLogging = dologPromise(type, currentState, time);
   currentLogging = newLogging;
   await newLogging;
-  console.log('after call to promise');
   completed++;
 });
 
@@ -146,9 +146,7 @@ export function log(type,obj,time = new Date()) {
 }
 
 async function getWriteStreamExt(fname) {
-  console.log('top of getwritestreamext fname is ',fname);
   if (streams[fname]) {
-    console.log('found stream for fname ', fname);
     lastAccessTime[fname] = new Date();
     return streams[fname];
   }
@@ -158,21 +156,19 @@ async function getWriteStreamExt(fname) {
   const fexists = await pathExists(fname);
   let encodeStream = null;
   let fileStream = createWriteStream(fname,{flags:'a'});
+  lastWriteTime[fname] = new Date();
 
   switch (extname(fname)) {
     case '.msp':
       encodeStream = msgpack.createEncodeStream();
       break;
     default:
-      console.log('create encodestream fname is', fname);
       encodeStream = stringify(false);
       if (fexists) {
-        console.log('fexists writing newline');
         fileStream.write('\n');
       }
   }
   encodeStream.pipe(fileStream);
-  console.log('saving stream for ',fname);
   streams[fname] = encodeStream;
   lastAccessTime[fname] = new Date();
   return encodeStream;
@@ -438,23 +434,17 @@ class QueryStream extends Readable {
     let id = v4();
     this.reading = new Promise( async (res) => {
       if (this.reading) {
-        //console.log(id, this.type, Date.now(), 'waiting for this.reading');
-        //console.log(id, this.type, 'returning true');
         return true;
         await this.reading;
       }
-      //console.log(id, this.type, Date.now(),'!!!! done waiting for this.reading');
       let canPush = true;
       let i = 0;
       do {
-        //console.log(i++);
         try {
           this.data = await this.loadFile();
         } catch (e) { console.trace(e) };
-        //console.log(id, this.type,'waiting for this.nextrow');
         this.row = await this.nextRow();
         if (this.row === undefined) this.row = null;
-        //console.log(id, this.type,'got row ');
         if (!(this.row===null)) {
           if (this.timeMS && this.row.time.getTime) this.row.time = this.row.time.getTime();
           if (this.map) this.row = this.map(this.row);
