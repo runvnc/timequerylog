@@ -5,14 +5,14 @@ between start and end time with match function.
 
 ### Log some data
 ```javascript
-import {log from '../log'};
+import {log from 'timequerylog'};
 
 log('request', {url:'http://www.reddit.com/'});
 ```
 
 ### Query data with a timestamp after 1/1/1995 GMT
 ```javascript
-import {query} from '../log';
+import {query} from 'timequerylog';
 
 query('request', new Date('01-01-1995'), new Date())
 .then(rows => console.log(rows));
@@ -22,7 +22,7 @@ query('request', new Date('01-01-1995'), new Date())
 ### use MessagePack format and compress with Snappy
 ###after 1 hour
 ```javascript
-import {config} from '../log';
+import {config} from 'timequerylog';
 
 config({path:process.cwd()+'/datalog', noRepeat: true,
         ext:'msp', snappy:1});
