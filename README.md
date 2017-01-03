@@ -85,4 +85,3 @@ This query function takes an options object and returns either an objectMode str
 If `end` is not specified the current time is used.  If `start` is not specified then `end`-30 minutes is
 used. `map` is an optional function to modify rows. `timeMS` will return time as MS since epoch.
 
-```
