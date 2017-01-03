@@ -1,12 +1,66 @@
-JSON logging separated into a files per hour of day with simple query between start and end time with match function.
+JSONL (newline-separated JSON) logging separated into a files per hour of day with simple query 
+between start and end time with match function.
 
 ## Usage
+
+### Log some data
+```javascript
+import {log from '../log'};
+
+log('request', {url:'http://www.reddit.com/'});
+```
+
+### Query data with a timestamp after 1/1/1995 GMT
+```javascript
+import {query} from '../log';
+
+query('request', new Date('01-01-1995'), new Date())
+.then(rows => console.log(rows));
+```
+
+### Set directory for logging, don't repeat rows,
+### use MessagePack format and compress with Snappy
+###after 1 hour
+```javascript
+import {config} from '../log';
+
+config({path:process.cwd()+'/datalog', noRepeat: true,
+        ext:'msp', snappy:1});
+```
+
+### Log using a different time than the present
+```javascript
+log('req',{cat:100}, new Date('2015-05-01T23:50:59.392Z'));
+```
+
+### Query logs from last 30 minutes matching function
+```javascript
+query('req', null, null, d => d.amount > 1000).then(console.log);
+```
+
+### Return logs as an object mode stream
+```javascript
+const matched = queryOpts({type:'request', start: new Date('2016-10-22 10:00 AM'),
+                           end: new Date('2016-10-23')});
+matched.on('data', console.log);
+```
+
+### Match, map results, convert time to MS since epoch, and return CSV text stream
+```javascript
+  let i = 0;
+  const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
+                               match: r => r.category == 'update',
+                               start: new Date('1995-12-25'),
+                               map: (r)=>{r.row = i++;return r}});
+  csvStream.pipe(process.stdout);
+```
+
+# Functions/Options
 
 *log(type, object, time = current time)*
 
 Uses JSON stream to log some data to the file `./[type]_GMT/DATE/HOUR`.
 Returns a promise.
-
 
 *queryRecent(type)*
 
@@ -16,62 +70,19 @@ from directory `./[type]_GMT`.
 *query(type, startDate, endDate, matchFunction)*
 
 Returns a promise with data for `type` between `startDate` and `endDate` where `matchFunction`
-returns true. Searches JSON streamed files starting from directory `./[type]_GMT`.
+returns true. Searches JSONL files starting from directory `./[type]_GMT`.
 
 *config(opts)*
 
-Set configuration options.  Defaults are: `{path: process.cwd(), noRepeat: false}`.
-`noRepeat:{[type]:true}` makes it ignore rows that are duplicates (besides time).
+Set configuration options.  Defaults are: `{path: process.cwd(), noRepeat: false},
+{ext:'jsonl'`}.`noRepeat:{[type]:true}` makes it ignore rows that are duplicates (besides time).
+`ext:'msp'` makes it store data in MessagePack format. To compress (and automatically decompress)
+with Snappy, use `snappy: 1`.
 
 *queryOpts({type, start, end, match = (d=>true), csv=false,map, timeMS=false})*
 
 This query function takes an options object and returns either an objectMode stream or a CSV stream.
 If `end` is not specified the current time is used.  If `start` is not specified then `end`-30 minutes is
 used. `map` is an optional function to modify rows. `timeMS` will return time as MS since epoch.
-
-```javascript
-import {log, config, query, 
-        queryOpts, queryRecent} from '../log';
-import moment from 'moment';
-import {inspect} from 'util';
-import delay from 'delay';
-
-config({path:process.cwd()+'/datalog',noRepeat:{req:true}});
-
-async function test() {
-  log('req',{blah:100});
-  log('req',{url:'http://google.com'});
-
-  log('req',{cat:100}, new Date('2015-05-01T23:50:59.392Z'));
-  log('req',{cat:100}, new Date('2015-05-01T23:51:53.312Z'));
-  log('req',{dog:1000});
-  log('req',{dog:1000});
-  log('req',{dog:1000});
-
-  log('event', {category: 'science', action:'new'});
-  log('event', {category: 'general', action:'edit'});
-
-  await delay(300);
-
-  console.log('Running query');
-  let rows = await query('req', moment("1995-12-25").toDate(), new Date(), d=>d.url);
-  console.log('rows returned');
-  console.log(inspect(rows));
-  rows = await queryRecent('req');
-  console.log('queryRecent result:');
-  console.log(inspect(rows));
-
-  const matched = queryOpts({type:'req', start: moment('1995-12-25').toDate(),
-                             end: new Date(), match: d => d.dog||d.cat});
-  console.log('queryOpts:');
-  matched.on('data', console.log);
-
-  let i = 0;
-  const csvStream = queryOpts({type:'event', csv: true, timeMS: true,
-                               map: (r) => {r.row=i++; return r});
-  csvStream.pipe(process.stdout);
-}
-
-test().catch(console.error);
 
 ```

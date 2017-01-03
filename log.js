@@ -726,18 +726,22 @@ setInterval(function () {
   }
 }, 1000); //15000
 
+function closeStreams() {
+  for (var file in streams) {
+    try {
+      streams[file].end();
+    } catch (e) {}
+  }
+}
 
 var cleanup = function cleanup(code, signal) {
-  console.log('Log queue length: ', out.length, 'started:', c, 'completed:', completed);
   if (q.length > 0) q.on('end', function () {
-    console.log('closing streams');
-    for (var file in streams) {
-      try {
-        streams[file].end();
-      } catch (e) {}
-    }
+    closeStreams();
     process.exit();
-  });else process.exit();
+  });else {
+    closeStreams();
+    process.exit();
+  }
 };
 
 //onExit(cleanup);

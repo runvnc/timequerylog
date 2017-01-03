@@ -49,20 +49,24 @@ setInterval( () => {
   }
 }, 1000); //15000
 
+function closeStreams() {
+  for (let file in streams) {
+    try {
+      streams[file].end();
+    } catch (e) { }
+  }
+}
 
 const cleanup = (code, signal) => {
-  console.log('Log queue length: ',out.length, 'started:',c,'completed:',completed);
   if (q.length>0)
-    q.on('end', () => {
-      console.log('closing streams');
-      for (let file in streams) {
-        try {
-          streams[file].end();
-        } catch (e) { }
-      }
+    q.on('end', ()=> {
+      closeStreams();
       process.exit();
     });
-  else process.exit();
+  else {
+    closeStreams();
+    process.exit();
+  }
 };
 
 //onExit(cleanup);
