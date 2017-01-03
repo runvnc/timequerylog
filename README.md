@@ -20,7 +20,7 @@ query('request', new Date('01-01-1995'), new Date())
 
 ### Set directory for logging, don't repeat rows,
 ### use MessagePack format and compress with Snappy
-###after 1 hour
+### after 1 hour
 ```javascript
 import {config} from 'timequerylog';
 
