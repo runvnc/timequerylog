@@ -5,7 +5,7 @@ between start and end time with match function.
 
 ### Log some data
 ```javascript
-import {log from 'timequerylog'};
+import {log} from 'timequerylog';
 
 log('request', {url:'http://www.reddit.com/'});
 ```
