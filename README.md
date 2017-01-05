@@ -1,5 +1,15 @@
-JSONL (newline-separated JSON) logging separated into a files per hour of day with simple query 
+JSONL (newline-separated JSON) (or MessagePack/Snappy) logging separated into a files per hour of day with simple query 
 between start and end time with match function.
+
+The idea is to make it more efficient to query logs for a specific time period 
+or type of data/event by breaking up the files in a consistent way.
+Using MessagePack and/or Snappy can significantly reduce the disk usage.
+
+You may want to use sub-types to break out data to improve efficiency when the 
+sub-type data doesn't always need to be queried immediately.
+For example, instead of logging all details of an `error` type you may log 
+a main `error` type with the core details of errors and a separate `error-details` 
+type including info such as stack traces.
 
 ## Usage
 
