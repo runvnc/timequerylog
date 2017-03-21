@@ -122,45 +122,46 @@ var snappyCompress = function () {
 
           case 5:
             compressing[f] = true;
-            _context3.next = 8;
+            console.log('snappyCompress reading filename is actually', f);
+            _context3.next = 9;
             return readFilePromise(f);
 
-          case 8:
+          case 9:
             buffer = _context3.sent;
-            _context3.next = 11;
+            _context3.next = 12;
             return snappyCompressPromise(buffer);
 
-          case 11:
+          case 12:
             compressed = _context3.sent;
-            _context3.next = 14;
+            _context3.next = 15;
             return writeFilePromise(f + '.snappy', compressed);
 
-          case 14:
-            _context3.next = 16;
+          case 15:
+            _context3.next = 17;
             return unlinkPromise(f);
 
-          case 16:
-            _context3.next = 23;
+          case 17:
+            _context3.next = 24;
             break;
 
-          case 18:
-            _context3.prev = 18;
+          case 19:
+            _context3.prev = 19;
             _context3.t0 = _context3['catch'](0);
 
             console.error('Error in snappy compress:', _context3.t0);
             compressing[f] = false;
             return _context3.abrupt('return', true);
 
-          case 23:
+          case 24:
             compressing[f] = false;
             return _context3.abrupt('return', true);
 
-          case 25:
+          case 26:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[0, 18]]);
+    }, _callee3, this, [[0, 19]]);
   }));
 
   return function snappyCompress(_x3, _x4) {
@@ -209,11 +210,14 @@ var compressOld = function () {
 
           case 13:
             files = _context4.sent;
+
+            files = files.filter(function (fname) {
+              return !fname.includes('.snappy');
+            });
             _iteratorNormalCompletion = true;
             _didIteratorError = false;
             _iteratorError = undefined;
-            _context4.prev = 17;
-
+            _context4.prev = 18;
             for (_iterator = files[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
               file = _step.value;
               didIt = snappyCompress(type, file);
@@ -221,58 +225,58 @@ var compressOld = function () {
               if (didIt) oldestSnappy[type] = (0, _momentTimezone2.default)(end).subtract(2, 'hours');
             }
             //await delay(500);
-            _context4.next = 25;
+            _context4.next = 26;
             break;
 
-          case 21:
-            _context4.prev = 21;
-            _context4.t0 = _context4['catch'](17);
+          case 22:
+            _context4.prev = 22;
+            _context4.t0 = _context4['catch'](18);
             _didIteratorError = true;
             _iteratorError = _context4.t0;
 
-          case 25:
-            _context4.prev = 25;
+          case 26:
             _context4.prev = 26;
+            _context4.prev = 27;
 
             if (!_iteratorNormalCompletion && _iterator.return) {
               _iterator.return();
             }
 
-          case 28:
-            _context4.prev = 28;
+          case 29:
+            _context4.prev = 29;
 
             if (!_didIteratorError) {
-              _context4.next = 31;
+              _context4.next = 32;
               break;
             }
 
             throw _iteratorError;
 
-          case 31:
-            return _context4.finish(28);
-
           case 32:
-            return _context4.finish(25);
+            return _context4.finish(29);
 
           case 33:
+            return _context4.finish(26);
+
+          case 34:
             compressing[type] = false;
-            _context4.next = 41;
+            _context4.next = 42;
             break;
 
-          case 36:
-            _context4.prev = 36;
+          case 37:
+            _context4.prev = 37;
             _context4.t1 = _context4['catch'](4);
 
             console.error(_context4.t1);
             compressing[type] = false;
             throw new Error('timequerylog problem compressing old files: ' + _context4.t1.message);
 
-          case 41:
+          case 42:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee4, this, [[4, 36], [17, 21, 25, 33], [26,, 28, 32]]);
+    }, _callee4, this, [[4, 37], [18, 22, 26, 34], [27,, 29, 33]]);
   }));
 
   return function compressOld(_x5) {
@@ -729,9 +733,11 @@ setInterval(function () {
 function closeStreams() {
   for (var file in streams) {
     try {
+      console.log('calling end on stream for file', file);
       streams[file].end();
     } catch (e) {}
   }
+  console.log('closed');
 }
 
 var cleanup = function cleanup(code, signal) {
@@ -754,6 +760,7 @@ function config(conf) {
 function whichFile(type, datetime) {
   var ext = '.jsonl';
   if (cfg.ext) ext = '.' + cfg.ext;
+  console.log('type =', type, 'ext =', ext);
   var gmt = (0, _momentTimezone2.default)(datetime).utcOffset(0);
   return cfg.path + '/' + type + '_GMT/' + gmt.format('YYYY-MM-DD/hhA') + ext;
 }
@@ -784,6 +791,7 @@ var c = 0;
 var completed = 0;
 var out = [];
 var currentLogging = null;
+var memlog = [];
 
 process.on('tql', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
   var _out$pop, type, currentState, time, cstr, newLogging;
@@ -819,6 +827,7 @@ process.on('tql', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(fun
 function log(type, obj) {
   var time = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
 
+  //if (cfg.ignore && cfg.ignore == true) return;
   obj.time = time;
   if (noRepeat(type)) {
     var copyTime = null;
@@ -831,6 +840,11 @@ function log(type, obj) {
     lastData[type] = (0, _lodash2.default)(obj);
     obj.time = copyTime;
   }
+  //if (cfg.memory && cfg.memory == true) {
+  //  memlog.push(obj);
+  //  return;
+  //}
+
   var currentState = JSON.stringify(obj);
   q.push(function (cb) {
     dolog(type, currentState, time, cb);

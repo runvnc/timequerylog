@@ -97,6 +97,6 @@ var _delay2 = _interopRequireDefault(_delay);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _log.config)({ path: process.cwd() + '/datalog',
-        ext: 'msp' });
+        snappy: 1 });
 
 test().catch(console.error);

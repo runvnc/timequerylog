@@ -52,9 +52,11 @@ setInterval( () => {
 function closeStreams() {
   for (let file in streams) {
     try {
+      console.log('calling end on stream for file',file);
       streams[file].end();
     } catch (e) { }
   }
+  console.log('closed');
 }
 
 const cleanup = (code, signal) => {
@@ -79,6 +81,7 @@ export function config(conf) {
 export function whichFile(type, datetime) {
   let ext = '.jsonl';
   if (cfg.ext) ext = '.'+cfg.ext;
+  console.log('type =',type,'ext =',ext);
   let gmt = moment(datetime).utcOffset(0);
   return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}${ext}`;
 }
@@ -111,6 +114,7 @@ let c = 0;
 let completed = 0;
 let out = [];
 let currentLogging = null;
+let memlog = [];
 
 process.on('tql', async () => {
   await currentLogging;
@@ -124,6 +128,7 @@ process.on('tql', async () => {
 });
 
 export function log(type,obj,time = new Date()) {
+  //if (cfg.ignore && cfg.ignore == true) return;
   obj.time = time;
   if (noRepeat(type)) {
     let copyTime = null;
@@ -136,6 +141,11 @@ export function log(type,obj,time = new Date()) {
     lastData[type] = cloneDeep(obj);
     obj.time = copyTime;
   }
+  //if (cfg.memory && cfg.memory == true) {
+  //  memlog.push(obj);
+  //  return;
+  //}
+
   const currentState = JSON.stringify(obj);
   q.push(cb => { dolog(type, currentState, time, cb);});
   //out.push({type, currentState, time});
@@ -185,6 +195,7 @@ async function snappyCompress(type,f) {
     if (f.indexOf('.snappy')>0) return false;
     if (compressing[f]) return false;
     compressing[f] = true;
+    console.log('snappyCompress reading filename is actually',f);
     const buffer = await readFilePromise(f);
     const compressed = await snappyCompressPromise(buffer);
     await writeFilePromise(f+'.snappy', compressed);
@@ -211,7 +222,8 @@ async function compressOld({type, time}) {
     const end = moment(time).tz('UCT').subtract(1,'hours').toDate();;
     let start = new Date('1979-01-01');
     if (oldestSnappy[type]) start = oldestSnappy[type];
-    const files = await whichFiles(type, start, end);
+    let files = await whichFiles(type, start, end);
+    files = files.filter( fname => !(fname.includes('.snappy')));
     for (let file of files) {
       let didIt = snappyCompress(type, file);
       if (didIt) oldestSnappy[type] = moment(end).subtract(2,'hours');

@@ -5,7 +5,7 @@ import {inspect} from 'util';
 import delay from 'delay';
 
 config({path:process.cwd()+'/datalog',
-        ext:'msp'});
+        snappy:1});
 
 async function test() {
   log('req',{blah:100});
