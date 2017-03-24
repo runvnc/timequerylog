@@ -1,7 +1,8 @@
 import {config, log, query, queryRecent,
-        queryOpts} from '../log';
+        queryOpts, latest} from '../log';
 import moment from 'moment';
 import {inspect} from 'util';
+import assert from 'assert';
 import delay from 'delay';
 
 config({path:process.cwd()+'/datalog',
@@ -40,6 +41,10 @@ async function test() {
                                start: moment('1995-12-25').toDate(),
                                map: (r)=>{r.row = i++;return r}});
   csvStream.pipe(process.stdout);
+
+  let lastEvent = await latest('event');
+  console.log('last event', lastEvent);
+  assert(lastEvent.action = 'update');
 }
 
 test().catch(console.error);

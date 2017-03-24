@@ -21,6 +21,8 @@ import {nowOrAgainPromise} from 'now-or-again';
 import {v4} from 'uuid';
 import timed from 'timed';
 import onExit from 'signal-exit';
+import collect from 'stream-collect';
+
 
 const snappyCompressPromise = pify(snappy.compress);
 const readFilePromise = pify(readFile);
@@ -33,6 +35,7 @@ let cfg = {path:process.cwd(), ext:'jsonl'};
 let streams = {};
 let lastAccessTime = {};
 let lastWriteTime = {};
+let lastUpdateTime = {};
 let q = queue({concurrency:1});
 
 setInterval( () => {
@@ -129,6 +132,7 @@ process.on('tql', async () => {
 
 export function log(type,obj,time = new Date()) {
   //if (cfg.ignore && cfg.ignore == true) return;
+  lastUpdateTime[type] = time;
   obj.time = time;
   if (noRepeat(type)) {
     let copyTime = null;
@@ -330,7 +334,7 @@ function getReadStreamExt(fname, cb) {
       fs.open(fname, 'r', (er, fd) => {
         fs.read(fd, buf, 0, stat.size, 0, (e, bytes, buf2) => {
           snappy.uncompress(buf2, (err, uncompressed) => {
-            input = new ReadableStreamBuffer({frequency:1,chunkSize:32000});
+            input = new ReadableStreamBuffer({frequency:1,chunkSize:256000});
             input.put(uncompressed);
             input.stop();
             fname = fname.replace('.snappy','');
@@ -471,6 +475,17 @@ class QueryStream extends Readable {
       return true;
     }).catch(console.error);
   }
+}
+
+export async function latest(type) {
+ let start = new Date('01-01-1980');
+ if (lastUpdateTime[type]) start = lastUpdateTime[type];
+ let end = Date.now();
+ let files = await whichFiles(type, start, end);
+ if (!files || (files && files.length == 0)) return;
+ let match = r => true;
+ let data = await filterFile(files[files.length-1], start, end, match);
+ if (data) return data[data.length-1];
 }
 
 export function queryOpts(options) {

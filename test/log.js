@@ -10,7 +10,7 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var test = function () {
         var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-                var rows, matched, i, csvStream;
+                var rows, matched, i, csvStream, lastEvent;
                 return _regenerator2.default.wrap(function _callee$(_context) {
                         while (1) {
                                 switch (_context.prev = _context.next) {
@@ -69,7 +69,16 @@ var test = function () {
 
                                                 csvStream.pipe(process.stdout);
 
-                                        case 29:
+                                                _context.next = 31;
+                                                return (0, _log.latest)('event');
+
+                                        case 31:
+                                                lastEvent = _context.sent;
+
+                                                console.log('last event', lastEvent);
+                                                (0, _assert2.default)(lastEvent.action = 'update');
+
+                                        case 34:
                                         case 'end':
                                                 return _context.stop();
                                 }
@@ -89,6 +98,10 @@ var _moment = require('moment');
 var _moment2 = _interopRequireDefault(_moment);
 
 var _util = require('util');
+
+var _assert = require('assert');
+
+var _assert2 = _interopRequireDefault(_assert);
 
 var _delay = require('delay');
 

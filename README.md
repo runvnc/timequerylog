@@ -22,6 +22,13 @@ import {log} from 'timequerylog';
 log('request', {url:'http://www.reddit.com/'});
 ```
 
+### Read last record for a type
+
+```javascript
+import {latest} from 'timequerylog';
+latest('request').then(row => console.log(row));
+```
+
 ### Query data with a timestamp after 1/1/1995 GMT
 ```javascript
 import {query} from 'timequerylog';

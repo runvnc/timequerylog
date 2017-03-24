@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.queryRecent = exports.query = exports.whichFiles = undefined;
+exports.latest = exports.queryRecent = exports.query = exports.whichFiles = undefined;
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -629,6 +629,61 @@ var queryRecent = exports.queryRecent = function () {
   };
 }();
 
+var latest = exports.latest = function () {
+  var _ref14 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee13(type) {
+    var start, end, files, match, data;
+    return _regenerator2.default.wrap(function _callee13$(_context14) {
+      while (1) {
+        switch (_context14.prev = _context14.next) {
+          case 0:
+            start = new Date('01-01-1980');
+
+            if (lastUpdateTime[type]) start = lastUpdateTime[type];
+            end = Date.now();
+            _context14.next = 5;
+            return whichFiles(type, start, end);
+
+          case 5:
+            files = _context14.sent;
+
+            if (!(!files || files && files.length == 0)) {
+              _context14.next = 8;
+              break;
+            }
+
+            return _context14.abrupt('return');
+
+          case 8:
+            match = function match(r) {
+              return true;
+            };
+
+            _context14.next = 11;
+            return filterFile(files[files.length - 1], start, end, match);
+
+          case 11:
+            data = _context14.sent;
+
+            if (!data) {
+              _context14.next = 14;
+              break;
+            }
+
+            return _context14.abrupt('return', data[data.length - 1]);
+
+          case 14:
+          case 'end':
+            return _context14.stop();
+        }
+      }
+    }, _callee13, this);
+  }));
+
+  return function latest(_x22) {
+    return _ref14.apply(this, arguments);
+  };
+}();
+
 exports.config = config;
 exports.whichFile = whichFile;
 exports.log = log;
@@ -700,6 +755,10 @@ var _signalExit = require('signal-exit');
 
 var _signalExit2 = _interopRequireDefault(_signalExit);
 
+var _streamCollect = require('stream-collect');
+
+var _streamCollect2 = _interopRequireDefault(_streamCollect);
+
 var _stream = require('stream');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -715,6 +774,7 @@ var cfg = { path: process.cwd(), ext: 'jsonl' };
 var streams = {};
 var lastAccessTime = {};
 var lastWriteTime = {};
+var lastUpdateTime = {};
 var q = (0, _queue2.default)({ concurrency: 1 });
 
 setInterval(function () {
@@ -828,6 +888,7 @@ function log(type, obj) {
   var time = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
 
   //if (cfg.ignore && cfg.ignore == true) return;
+  lastUpdateTime[type] = time;
   obj.time = time;
   if (noRepeat(type)) {
     var copyTime = null;
@@ -932,7 +993,7 @@ function getReadStreamExt(fname, cb) {
       _fs2.default.open(fname, 'r', function (er, fd) {
         _fs2.default.read(fd, buf, 0, stat.size, 0, function (e, bytes, buf2) {
           _snappy2.default.uncompress(buf2, function (err, uncompressed) {
-            input = new _streamBuffers.ReadableStreamBuffer({ frequency: 1, chunkSize: 32000 });
+            input = new _streamBuffers.ReadableStreamBuffer({ frequency: 1, chunkSize: 256000 });
             input.put(uncompressed);
             input.stop();
             fname = fname.replace('.snappy', '');
