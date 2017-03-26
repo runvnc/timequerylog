@@ -478,14 +478,20 @@ class QueryStream extends Readable {
 }
 
 export async function latest(type) {
- let start = new Date('01-01-1980');
- if (lastUpdateTime[type]) start = lastUpdateTime[type];
- let end = Date.now();
- let files = await whichFiles(type, start, end);
- if (!files || (files && files.length == 0)) return;
- let match = r => true;
- let data = await filterFile(files[files.length-1], start, end, match);
- if (data) return data[data.length-1];
+  let start = new Date('01-01-1980');
+  if (lastUpdateTime[type]) start = lastUpdateTime[type];
+  let end = Date.now();
+  let files = await whichFiles(type, start, end);
+  if (!files || (files && files.length == 0)) return;
+  let match = r => true;
+  let data = await filterFile(files[files.length-1], start, end, match);
+  let last = null;
+  if (data) last = data[data.length-1];
+  if (last) {
+   delete last.time;
+   delete last.type;
+   return last;
+  }
 }
 
 export function queryOpts(options) {

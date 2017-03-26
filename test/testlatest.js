@@ -40,7 +40,7 @@ var _log = require('../log');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-(0, _log.config)({ path: process.cwd() + '/datalodg',
+(0, _log.config)({ path: process.cwd() + '/datalog',
   snappy: 1 });
 
 test().catch(console.error);

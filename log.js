@@ -288,7 +288,7 @@ var whichFiles = exports.whichFiles = function () {
   var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(type, start, end) {
     var _this = this;
 
-    var startDate, endDate, st, en, dirs, newDirs, result, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _loop, _iterator2, _step2, _ret2;
+    var startDate, endDate, st, en, dirs, newDirs, result, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _loop, _iterator2, _step2, _ret;
 
     return _regenerator2.default.wrap(function _callee5$(_context6) {
       while (1) {
@@ -389,14 +389,14 @@ var whichFiles = exports.whichFiles = function () {
             return _context6.delegateYield(_loop(), 't1', 31);
 
           case 31:
-            _ret2 = _context6.t1;
+            _ret = _context6.t1;
 
-            if (!((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object")) {
+            if (!((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object")) {
               _context6.next = 34;
               break;
             }
 
-            return _context6.abrupt('return', _ret2.v);
+            return _context6.abrupt('return', _ret.v);
 
           case 34:
             _iteratorNormalCompletion2 = true;
@@ -466,21 +466,19 @@ var filterFile = function () {
             _context7.next = 2;
             return new Promise(function (res) {
               try {
-                (function () {
-                  var results = [];
-                  getReadStreamExt(fname, function (stream) {
-                    stream.pipe((0, _eventStream.mapSync)(function (data) {
-                      data.time = new Date(data.time);
-                      if (data.time >= start && data.time <= end && matchFunction(data)) {
-                        results.push(data);
-                        return data;
-                      }
-                    }));
-                    stream.on('end', function () {
-                      res(results);
-                    });
+                var results = [];
+                getReadStreamExt(fname, function (stream) {
+                  stream.pipe((0, _eventStream.mapSync)(function (data) {
+                    data.time = new Date(data.time);
+                    if (data.time >= start && data.time <= end && matchFunction(data)) {
+                      results.push(data);
+                      return data;
+                    }
+                  }));
+                  stream.on('end', function () {
+                    res(results);
                   });
-                })();
+                });
               } catch (e) {
                 console.error('Error in filterFile:');
                 console.error((0, _util.inspect)(e));
@@ -595,7 +593,7 @@ var query = exports.query = function () {
     }, _callee7, this, [[7, 22, 26, 34], [27,, 29, 33]]);
   }));
 
-  return function query(_x14, _x15, _x16, _x17) {
+  return function query(_x14, _x15, _x16) {
     return _ref8.apply(this, arguments);
   };
 }();
@@ -624,14 +622,14 @@ var queryRecent = exports.queryRecent = function () {
     }, _callee8, this);
   }));
 
-  return function queryRecent(_x19) {
+  return function queryRecent(_x18) {
     return _ref9.apply(this, arguments);
   };
 }();
 
 var latest = exports.latest = function () {
   var _ref14 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee13(type) {
-    var start, end, files, match, data;
+    var start, end, files, match, data, last;
     return _regenerator2.default.wrap(function _callee13$(_context14) {
       while (1) {
         switch (_context14.prev = _context14.next) {
@@ -663,15 +661,20 @@ var latest = exports.latest = function () {
 
           case 11:
             data = _context14.sent;
+            last = null;
 
-            if (!data) {
-              _context14.next = 14;
+            if (data) last = data[data.length - 1];
+
+            if (!last) {
+              _context14.next = 18;
               break;
             }
 
-            return _context14.abrupt('return', data[data.length - 1]);
+            delete last.time;
+            delete last.type;
+            return _context14.abrupt('return', last);
 
-          case 14:
+          case 18:
           case 'end':
             return _context14.stop();
         }
@@ -679,7 +682,7 @@ var latest = exports.latest = function () {
     }, _callee13, this);
   }));
 
-  return function latest(_x22) {
+  return function latest(_x21) {
     return _ref14.apply(this, arguments);
   };
 }();
@@ -931,21 +934,19 @@ function dolog(type, obj) {
   var cb = arguments[3];
 
   try {
-    (function () {
-      obj = JSON.parse(obj);
-      var fname = whichFile(type, time);
-      var toWrite = { time: time, type: type };
-      for (var key in obj) {
-        toWrite[key] = obj[key];
-      }getWriteStreamExt(fname).then(function (stream) {
-        stream.write(toWrite);
-        if (cfg.snappy) {
-          compressOld({ type: type, time: time }).then(cb);
-        } else {
-          cb(null, null);
-        }
-      });
-    })();
+    obj = JSON.parse(obj);
+    var fname = whichFile(type, time);
+    var toWrite = { time: time, type: type };
+    for (var key in obj) {
+      toWrite[key] = obj[key];
+    }getWriteStreamExt(fname).then(function (stream) {
+      stream.write(toWrite);
+      if (cfg.snappy) {
+        compressOld({ type: type, time: time }).then(cb);
+      } else {
+        cb(null, null);
+      }
+    });
   } catch (e) {
     console.error(e);
   }
@@ -1125,7 +1126,7 @@ var QueryStream = function (_Readable) {
         }, _callee10, _this3, [[9, 19]]);
       }));
 
-      return function (_x20) {
+      return function (_x19) {
         return _ref11.apply(this, arguments);
       };
     }();
@@ -1251,7 +1252,7 @@ var QueryStream = function (_Readable) {
           }, _callee12, _this3, [[6, 12]]);
         }));
 
-        return function (_x21) {
+        return function (_x20) {
           return _ref13.apply(this, arguments);
         };
       }()).catch(console.error);

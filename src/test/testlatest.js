@@ -1,6 +1,6 @@
 import {config, latest} from '../log';
 
-config({path:process.cwd()+'/datalodg',
+config({path:process.cwd()+'/datalog',
         snappy:1});
 
 
