@@ -7,6 +7,7 @@ import {mapSync} from 'event-stream';
 import {dirname} from 'path';
 import {sync as mkdirp} from 'mkdirp';
 import pathExists from 'path-exists';
+import LRU from 'lru-cache';
 import {extname} from 'path';
 import moment from 'moment-timezone';
 import queue from 'queue';
@@ -23,6 +24,12 @@ import timed from 'timed';
 import onExit from 'signal-exit';
 import collect from 'stream-collect';
 
+
+let opts = { max: 500000000
+              , length: (n, key) => { return n.length }
+              , dispose: (key, n) => { true; }
+              , maxAge: 1000 * 60 * 60 }
+const cache = LRU();
 
 const snappyCompressPromise = pify(snappy.compress);
 const readFilePromise = pify(readFile);
@@ -326,23 +333,37 @@ function finishGetReadStreamExt(ext, input) {
   }
 }
 
+function checkCache(fname, cb) {
+  let cached = cache.get(fname);
+  if (cached) {
+   console.log(fname,'returning from cache');
+   cb(cached);
+   return;
+  }
+  console.log(fname,'not found in cache');
+  fs.stat(fname, (er2, stat) => {
+    const buf = new Buffer(stat.size);
+    fs.open(fname, 'r', (er, fd) => {
+      fs.read(fd, buf, 0, stat.size, 0, (e, bytes, buf2) => {
+        snappy.uncompress(buf2, (err, uncompressed) => {
+          cache.set(fname, uncompressed);
+          cb(uncompressed);
+        });
+      });
+    });
+  });
+}
+
 function getReadStreamExt(fname, cb) {
   let ext = extname(fname), input = null;
   if (ext.indexOf('.snappy')>=0) {
-    fs.stat(fname, (er2, stat) => {
-      const buf = new Buffer(stat.size);
-      fs.open(fname, 'r', (er, fd) => {
-        fs.read(fd, buf, 0, stat.size, 0, (e, bytes, buf2) => {
-          snappy.uncompress(buf2, (err, uncompressed) => {
-            input = new ReadableStreamBuffer({frequency:1,chunkSize:256000});
-            input.put(uncompressed);
-            input.stop();
-            fname = fname.replace('.snappy','');
-            ext = extname(fname);
-            cb(finishGetReadStreamExt(ext, input));
-          });
-        })
-      });
+    checkCache(fname, (uncompressed) => {
+      input = new ReadableStreamBuffer({frequency:1,chunkSize:256000});
+      input.put(uncompressed);
+      input.stop();
+      fname = fname.replace('.snappy','');
+      ext = extname(fname);
+      cb(finishGetReadStreamExt(ext, input));
     });
   } else {
     input = createReadStream(fname);
@@ -425,8 +446,10 @@ class QueryStream extends Readable {
     }
     let result = null;
     try {
+      let st = Date.now();
       result =  await filterFile(this.files[this.fileNum++], this.start,
                                  this.end, this.match);
+      console.log('filterFile elapsed',Date.now()-st,'ms');
       if (result.length === 0) return await this.loadFile();
     } catch (e) {
       console.error('filterfile err in loadfile',e);

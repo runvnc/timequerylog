@@ -712,6 +712,10 @@ var _pathExists = require('path-exists');
 
 var _pathExists2 = _interopRequireDefault(_pathExists);
 
+var _lruCache = require('lru-cache');
+
+var _lruCache2 = _interopRequireDefault(_lruCache);
+
 var _momentTimezone = require('moment-timezone');
 
 var _momentTimezone2 = _interopRequireDefault(_momentTimezone);
@@ -765,6 +769,16 @@ var _streamCollect2 = _interopRequireDefault(_streamCollect);
 var _stream = require('stream');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var opts = { max: 500000000,
+  length: function length(n, key) {
+    return n.length;
+  },
+  dispose: function dispose(key, n) {
+    true;
+  },
+  maxAge: 1000 * 60 * 60 };
+var cache = (0, _lruCache2.default)();
 
 var snappyCompressPromise = (0, _pify2.default)(_snappy2.default.compress);
 var readFilePromise = (0, _pify2.default)(_fs3.readFile);
@@ -985,24 +999,38 @@ function finishGetReadStreamExt(ext, input) {
   }
 }
 
+function checkCache(fname, cb) {
+  var cached = cache.get(fname);
+  if (cached) {
+    console.log(fname, 'returning from cache');
+    cb(cached);
+    return;
+  }
+  console.log(fname, 'not found in cache');
+  _fs2.default.stat(fname, function (er2, stat) {
+    var buf = new Buffer(stat.size);
+    _fs2.default.open(fname, 'r', function (er, fd) {
+      _fs2.default.read(fd, buf, 0, stat.size, 0, function (e, bytes, buf2) {
+        _snappy2.default.uncompress(buf2, function (err, uncompressed) {
+          cache.set(fname, uncompressed);
+          cb(uncompressed);
+        });
+      });
+    });
+  });
+}
+
 function getReadStreamExt(fname, cb) {
   var ext = (0, _path.extname)(fname),
       input = null;
   if (ext.indexOf('.snappy') >= 0) {
-    _fs2.default.stat(fname, function (er2, stat) {
-      var buf = new Buffer(stat.size);
-      _fs2.default.open(fname, 'r', function (er, fd) {
-        _fs2.default.read(fd, buf, 0, stat.size, 0, function (e, bytes, buf2) {
-          _snappy2.default.uncompress(buf2, function (err, uncompressed) {
-            input = new _streamBuffers.ReadableStreamBuffer({ frequency: 1, chunkSize: 256000 });
-            input.put(uncompressed);
-            input.stop();
-            fname = fname.replace('.snappy', '');
-            ext = (0, _path.extname)(fname);
-            cb(finishGetReadStreamExt(ext, input));
-          });
-        });
-      });
+    checkCache(fname, function (uncompressed) {
+      input = new _streamBuffers.ReadableStreamBuffer({ frequency: 1, chunkSize: 256000 });
+      input.put(uncompressed);
+      input.stop();
+      fname = fname.replace('.snappy', '');
+      ext = (0, _path.extname)(fname);
+      cb(finishGetReadStreamExt(ext, input));
     });
   } else {
     input = (0, _fs3.createReadStream)(fname);
@@ -1052,7 +1080,7 @@ var QueryStream = function (_Readable) {
 
     _this2.loadFile = function () {
       var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee10(f) {
-        var result;
+        var result, st;
         return _regenerator2.default.wrap(function _callee10$(_context11) {
           while (1) {
             switch (_context11.prev = _context11.next) {
@@ -1087,43 +1115,46 @@ var QueryStream = function (_Readable) {
                 }
                 result = null;
                 _context11.prev = 9;
-                _context11.next = 12;
+                st = Date.now();
+                _context11.next = 13;
                 return filterFile(_this2.files[_this2.fileNum++], _this2.start, _this2.end, _this2.match);
 
-              case 12:
+              case 13:
                 result = _context11.sent;
 
+                console.log('filterFile elapsed', Date.now() - st, 'ms');
+
                 if (!(result.length === 0)) {
-                  _context11.next = 17;
+                  _context11.next = 19;
                   break;
                 }
 
-                _context11.next = 16;
+                _context11.next = 18;
                 return _this2.loadFile();
 
-              case 16:
+              case 18:
                 return _context11.abrupt('return', _context11.sent);
 
-              case 17:
-                _context11.next = 22;
+              case 19:
+                _context11.next = 24;
                 break;
 
-              case 19:
-                _context11.prev = 19;
+              case 21:
+                _context11.prev = 21;
                 _context11.t0 = _context11['catch'](9);
 
                 console.error('filterfile err in loadfile', _context11.t0);
 
-              case 22:
+              case 24:
                 _this2.data = result;
                 return _context11.abrupt('return', result);
 
-              case 24:
+              case 26:
               case 'end':
                 return _context11.stop();
             }
           }
-        }, _callee10, _this3, [[9, 19]]);
+        }, _callee10, _this3, [[9, 21]]);
       }));
 
       return function (_x19) {
