@@ -37,8 +37,7 @@ query('request', new Date('01-01-1995'), new Date())
 .then(rows => console.log(rows));
 ```
 
-### Set directory for logging, don't repeat rows,
-### compress with Snappy after 1 hour
+### Set directory for logging, don't repeat rows, compress with Snappy after 1 hour
 ```javascript
 import {config} from 'timequerylog';
 
@@ -92,7 +91,7 @@ returns true. Searches JSONL files starting from directory `./[type]_GMT`.
 
 *config(opts)*
 
-Set configuration options.  Defaults are: `{path: process.cwd(), noRepeat: false},
+Set configuration options.  Defaults are: `{path: process.cwd(), noRepeat: false},`
 `noRepeat:{[type]:true}` makes it ignore rows that are duplicates (besides time).
 To compress (and automatically decompress)
 with Snappy, use `snappy: 1`.
