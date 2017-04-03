@@ -45,6 +45,8 @@
   },
   "keywords": [
     "JSON",
+    "JSONL",
+    "snappy",
     "log",
     "logging",
     "query",

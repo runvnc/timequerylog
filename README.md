@@ -1,11 +1,11 @@
 (See also `tql-cli` command line tool.)
 
-JSONL (newline-separated JSON) (or MessagePack/Snappy) logging separated into a files per hour of day with simple query 
+JSONL (newline-separated JSON) (or JSONL compressed with Snappy) logging separated into a files per hour of day with simple query 
 between start and end time with match function.
 
 The idea is to make it more efficient to query logs for a specific time period 
 or type of data/event by breaking up the files in a consistent way.
-Using MessagePack and/or Snappy can significantly reduce the disk usage.
+Using Snappy can significantly reduce the disk usage.
 
 You may want to use sub-types to break out data to improve efficiency when the 
 sub-type data doesn't always need to be queried immediately.
@@ -38,13 +38,12 @@ query('request', new Date('01-01-1995'), new Date())
 ```
 
 ### Set directory for logging, don't repeat rows,
-### use MessagePack format and compress with Snappy
-### after 1 hour
+### compress with Snappy after 1 hour
 ```javascript
 import {config} from 'timequerylog';
 
 config({path:process.cwd()+'/datalog', noRepeat: true,
-        ext:'msp', snappy:1});
+        snappy:1});
 ```
 
 ### Log using a different time than the present
@@ -94,8 +93,8 @@ returns true. Searches JSONL files starting from directory `./[type]_GMT`.
 *config(opts)*
 
 Set configuration options.  Defaults are: `{path: process.cwd(), noRepeat: false},
-{ext:'jsonl'`}.`noRepeat:{[type]:true}` makes it ignore rows that are duplicates (besides time).
-`ext:'msp'` makes it store data in MessagePack format. To compress (and automatically decompress)
+`noRepeat:{[type]:true}` makes it ignore rows that are duplicates (besides time).
+To compress (and automatically decompress)
 with Snappy, use `snappy: 1`.
 
 *queryOpts({type, start, end, match = (d=>true), csv=false,map, timeMS=false})*
