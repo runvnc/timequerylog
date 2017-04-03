@@ -23,7 +23,7 @@ import {v4} from 'uuid';
 import timed from 'timed';
 import onExit from 'signal-exit';
 import collect from 'stream-collect';
-
+import {StringDecoder} from 'string_decoder';
 
 let opts = { max: 500000000
               , length: (n, key) => { return n.length }
@@ -91,7 +91,7 @@ export function config(conf) {
 export function whichFile(type, datetime) {
   let ext = '.jsonl';
   if (cfg.ext) ext = '.'+cfg.ext;
-  console.log('type =',type,'ext =',ext);
+  //console.log('type =',type,'ext =',ext);
   let gmt = moment(datetime).utcOffset(0);
   return `${cfg.path}/${type}_GMT/${gmt.format('YYYY-MM-DD/hhA')}${ext}`;
 }
@@ -206,7 +206,6 @@ async function snappyCompress(type,f) {
     if (f.indexOf('.snappy')>0) return false;
     if (compressing[f]) return false;
     compressing[f] = true;
-    console.log('snappyCompress reading filename is actually',f);
     const buffer = await readFilePromise(f);
     const compressed = await snappyCompressPromise(buffer);
     await writeFilePromise(f+'.snappy', compressed);
@@ -336,11 +335,9 @@ function finishGetReadStreamExt(ext, input) {
 function checkCache(fname, cb) {
   let cached = cache.get(fname);
   if (cached) {
-   console.log(fname,'returning from cache');
    cb(cached);
    return;
   }
-  console.log(fname,'not found in cache');
   fs.stat(fname, (er2, stat) => {
     const buf = new Buffer(stat.size);
     fs.open(fname, 'r', (er, fd) => {
@@ -354,16 +351,28 @@ function checkCache(fname, cb) {
   });
 }
 
+const utf8Decoder = new StringDecoder('utf8');
+
+function jsonlToArray(buffer) {
+  let jsonl = utf8Decoder.end(buffer);
+  let lines = jsonl.split("\n");
+  let arr = [];
+  for (let n=0; n<lines.length; n++)
+    arr.push(JSON.parse(lines[n]));
+  return arr;
+}
+
 function getReadStreamExt(fname, cb) {
   let ext = extname(fname), input = null;
   if (ext.indexOf('.snappy')>=0) {
     checkCache(fname, (uncompressed) => {
-      input = new ReadableStreamBuffer({frequency:1,chunkSize:256000});
-      input.put(uncompressed);
-      input.stop();
-      fname = fname.replace('.snappy','');
-      ext = extname(fname);
-      cb(finishGetReadStreamExt(ext, input));
+      cb(jsonlToArray(uncompressed));
+      //input = new ReadableStreamBuffer({frequency:1,chunkSize:16000});
+      //input.put(uncompressed);
+      //input.stop();
+      //fname = fname.replace('.snappy','');
+      //ext = extname(fname);
+      //cb(finishGetReadStreamExt(ext, input));
     });
   } else {
     input = createReadStream(fname);
@@ -371,20 +380,38 @@ function getReadStreamExt(fname, cb) {
   }
 }
 
+function matchRows({data, start, end, matchFunction}) {
+  let results = [];
+  for (let i=0; i<data.length; i++) {
+    let r = data[i];
+    r.time = new Date(r.time);
+    results.push(r);
+    //if (r.time >= start && r.time <= end &&
+    //   matchFunction(r))
+    //  results.push(r);
+  }
+  return results;
+}
+
 async function filterFile(fname, start, end, matchFunction) {
   let data = await new Promise( res => {
     try {
       let results = [];
-      getReadStreamExt(fname, (stream) => {
-        stream.pipe(mapSync( data => {
-          data.time = new Date(data.time);
-          if (data.time >= start && data.time <= end &&
-              matchFunction(data)) {
-            results.push(data)
-            return data;
-          }
-        }));
-        stream.on('end', () => { res(results);});
+      let n = 0;
+      getReadStreamExt(fname, (data) => {
+        if (data.length)
+          res(matchRows({data, start, end, matchFunction}));
+        else {
+          data.pipe(mapSync( row => {
+            row.time = new Date(row.time);
+            if (row.time >= start && row.time <= end &&
+                matchFunction(row)) {
+               results.push(row)
+             return row;
+            }
+          }));
+          data.on('end', () => { res(results);});
+        }
       });
     } catch (e) {
       console.error('Error in filterFile:');
@@ -430,7 +457,27 @@ class QueryStream extends Readable {
     this.fileNum = 0;
     this.rowNum = 0;
     this.data = null;
+    this.fileData = [];
     this.initFinished = true;
+  }
+
+  checkPreload = async () => {
+    return;
+    if (this.fileData.length > this.fileNum+8) return;
+    let preloads = [];
+    let xx = 0;
+    for (let n=this.fileNum; n<this.files.length && n<this.fileNum+3; n++) {
+      preloads.push( (async () => {
+        xx++;
+        this.fileData.push(await filterFile(this.files[n], this.start,
+                                            this.end, this.match));
+      })());
+    }
+    if (preloads.length ==0) {
+      console.log('no preloads.',{fileNum:this.fileNum,files:this.files.length});
+    } else {
+      await Promise.all(preloads);
+    }
   }
 
   loadFile = async (f) => {
@@ -447,10 +494,17 @@ class QueryStream extends Readable {
     let result = null;
     try {
       let st = Date.now();
-      result =  await filterFile(this.files[this.fileNum++], this.start,
-                                 this.end, this.match);
-      console.log('filterFile elapsed',Date.now()-st,'ms');
-      if (result.length === 0) return await this.loadFile();
+      if (this.fileData.length > this.fileNum) {
+        this.data = this.fileData[this.fileNum++];
+        if (this.data.length === 0) return await this.loadFile();
+        return this.data;
+      } else {
+        result =  await filterFile(this.files[this.fileNum++], this.start,
+                                   this.end, this.match);
+        if (this.fileData.length == 0) await this.checkPreload();
+        //console.log('filterFile elapsed',Date.now()-st,'ms');
+        if (result.length === 0) return await this.loadFile();
+      }
     } catch (e) {
       console.error('filterfile err in loadfile',e);
     }
@@ -484,7 +538,12 @@ class QueryStream extends Readable {
       let i = 0;
       do {
         try {
-          this.data = await this.loadFile();
+          if (!this.data) {
+            this.data = await this.loadFile();
+            this.row = await this.nextRow();
+          } else {
+            this.row = this.data[this.rowNum++];
+          }
         } catch (e) { console.trace(e) };
         this.row = await this.nextRow();
         if (this.row === undefined) this.row = null;
@@ -494,10 +553,13 @@ class QueryStream extends Readable {
         } else {
         }
         canPush = this.push(this.row);
+        if (this.data && (this.rowNum == this.data.length)) this.data = await this.loadFile();
       } while (this.row && canPush);
       return true;
     }).catch(console.error);
   }
+
+
 }
 
 export async function latest(type) {

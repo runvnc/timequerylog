@@ -122,46 +122,45 @@ var snappyCompress = function () {
 
           case 5:
             compressing[f] = true;
-            console.log('snappyCompress reading filename is actually', f);
-            _context3.next = 9;
+            _context3.next = 8;
             return readFilePromise(f);
 
-          case 9:
+          case 8:
             buffer = _context3.sent;
-            _context3.next = 12;
+            _context3.next = 11;
             return snappyCompressPromise(buffer);
 
-          case 12:
+          case 11:
             compressed = _context3.sent;
-            _context3.next = 15;
+            _context3.next = 14;
             return writeFilePromise(f + '.snappy', compressed);
 
-          case 15:
-            _context3.next = 17;
+          case 14:
+            _context3.next = 16;
             return unlinkPromise(f);
 
-          case 17:
-            _context3.next = 24;
+          case 16:
+            _context3.next = 23;
             break;
 
-          case 19:
-            _context3.prev = 19;
+          case 18:
+            _context3.prev = 18;
             _context3.t0 = _context3['catch'](0);
 
             console.error('Error in snappy compress:', _context3.t0);
             compressing[f] = false;
             return _context3.abrupt('return', true);
 
-          case 24:
+          case 23:
             compressing[f] = false;
             return _context3.abrupt('return', true);
 
-          case 26:
+          case 25:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[0, 19]]);
+    }, _callee3, this, [[0, 18]]);
   }));
 
   return function snappyCompress(_x3, _x4) {
@@ -288,7 +287,7 @@ var whichFiles = exports.whichFiles = function () {
   var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(type, start, end) {
     var _this = this;
 
-    var startDate, endDate, st, en, dirs, newDirs, result, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _loop, _iterator2, _step2, _ret;
+    var startDate, endDate, st, en, dirs, newDirs, result, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _loop, _iterator2, _step2, _ret2;
 
     return _regenerator2.default.wrap(function _callee5$(_context6) {
       while (1) {
@@ -389,14 +388,14 @@ var whichFiles = exports.whichFiles = function () {
             return _context6.delegateYield(_loop(), 't1', 31);
 
           case 31:
-            _ret = _context6.t1;
+            _ret2 = _context6.t1;
 
-            if (!((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object")) {
+            if (!((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object")) {
               _context6.next = 34;
               break;
             }
 
-            return _context6.abrupt('return', _ret.v);
+            return _context6.abrupt('return', _ret2.v);
 
           case 34:
             _iteratorNormalCompletion2 = true;
@@ -457,7 +456,7 @@ var whichFiles = exports.whichFiles = function () {
 }();
 
 var filterFile = function () {
-  var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(fname, start, end, matchFunction) {
+  var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(fname, start, end, matchFunction) {
     var data;
     return _regenerator2.default.wrap(function _callee6$(_context7) {
       while (1) {
@@ -466,19 +465,24 @@ var filterFile = function () {
             _context7.next = 2;
             return new Promise(function (res) {
               try {
-                var results = [];
-                getReadStreamExt(fname, function (stream) {
-                  stream.pipe((0, _eventStream.mapSync)(function (data) {
-                    data.time = new Date(data.time);
-                    if (data.time >= start && data.time <= end && matchFunction(data)) {
-                      results.push(data);
-                      return data;
+                (function () {
+                  var results = [];
+                  var n = 0;
+                  getReadStreamExt(fname, function (data) {
+                    if (data.length) res(matchRows({ data: data, start: start, end: end, matchFunction: matchFunction }));else {
+                      data.pipe((0, _eventStream.mapSync)(function (row) {
+                        row.time = new Date(row.time);
+                        if (row.time >= start && row.time <= end && matchFunction(row)) {
+                          results.push(row);
+                          return row;
+                        }
+                      }));
+                      data.on('end', function () {
+                        res(results);
+                      });
                     }
-                  }));
-                  stream.on('end', function () {
-                    res(results);
                   });
-                });
+                })();
               } catch (e) {
                 console.error('Error in filterFile:');
                 console.error((0, _util.inspect)(e));
@@ -498,12 +502,12 @@ var filterFile = function () {
   }));
 
   return function filterFile(_x10, _x11, _x12, _x13) {
-    return _ref7.apply(this, arguments);
+    return _ref8.apply(this, arguments);
   };
 }();
 
 var query = exports.query = function () {
-  var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(type, start, end) {
+  var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(type, start, end) {
     var matchFunction = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function (d) {
       return true;
     };
@@ -593,13 +597,13 @@ var query = exports.query = function () {
     }, _callee7, this, [[7, 22, 26, 34], [27,, 29, 33]]);
   }));
 
-  return function query(_x14, _x15, _x16) {
-    return _ref8.apply(this, arguments);
+  return function query(_x14, _x15, _x16, _x17) {
+    return _ref9.apply(this, arguments);
   };
 }();
 
 var queryRecent = exports.queryRecent = function () {
-  var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(type) {
+  var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(type) {
     var end, start, results;
     return _regenerator2.default.wrap(function _callee8$(_context9) {
       while (1) {
@@ -622,68 +626,68 @@ var queryRecent = exports.queryRecent = function () {
     }, _callee8, this);
   }));
 
-  return function queryRecent(_x18) {
-    return _ref9.apply(this, arguments);
+  return function queryRecent(_x19) {
+    return _ref10.apply(this, arguments);
   };
 }();
 
 var latest = exports.latest = function () {
-  var _ref14 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee13(type) {
+  var _ref17 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee15(type) {
     var start, end, files, match, data, last;
-    return _regenerator2.default.wrap(function _callee13$(_context14) {
+    return _regenerator2.default.wrap(function _callee15$(_context16) {
       while (1) {
-        switch (_context14.prev = _context14.next) {
+        switch (_context16.prev = _context16.next) {
           case 0:
             start = new Date('01-01-1980');
 
             if (lastUpdateTime[type]) start = lastUpdateTime[type];
             end = Date.now();
-            _context14.next = 5;
+            _context16.next = 5;
             return whichFiles(type, start, end);
 
           case 5:
-            files = _context14.sent;
+            files = _context16.sent;
 
             if (!(!files || files && files.length == 0)) {
-              _context14.next = 8;
+              _context16.next = 8;
               break;
             }
 
-            return _context14.abrupt('return');
+            return _context16.abrupt('return');
 
           case 8:
             match = function match(r) {
               return true;
             };
 
-            _context14.next = 11;
+            _context16.next = 11;
             return filterFile(files[files.length - 1], start, end, match);
 
           case 11:
-            data = _context14.sent;
+            data = _context16.sent;
             last = null;
 
             if (data) last = data[data.length - 1];
 
             if (!last) {
-              _context14.next = 18;
+              _context16.next = 18;
               break;
             }
 
             delete last.time;
             delete last.type;
-            return _context14.abrupt('return', last);
+            return _context16.abrupt('return', last);
 
           case 18:
           case 'end':
-            return _context14.stop();
+            return _context16.stop();
         }
       }
-    }, _callee13, this);
+    }, _callee15, this);
   }));
 
-  return function latest(_x21) {
-    return _ref14.apply(this, arguments);
+  return function latest(_x22) {
+    return _ref17.apply(this, arguments);
   };
 }();
 
@@ -766,6 +770,8 @@ var _streamCollect = require('stream-collect');
 
 var _streamCollect2 = _interopRequireDefault(_streamCollect);
 
+var _string_decoder = require('string_decoder');
+
 var _stream = require('stream');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -837,7 +843,7 @@ function config(conf) {
 function whichFile(type, datetime) {
   var ext = '.jsonl';
   if (cfg.ext) ext = '.' + cfg.ext;
-  console.log('type =', type, 'ext =', ext);
+  //console.log('type =',type,'ext =',ext);
   var gmt = (0, _momentTimezone2.default)(datetime).utcOffset(0);
   return cfg.path + '/' + type + '_GMT/' + gmt.format('YYYY-MM-DD/hhA') + ext;
 }
@@ -948,19 +954,21 @@ function dolog(type, obj) {
   var cb = arguments[3];
 
   try {
-    obj = JSON.parse(obj);
-    var fname = whichFile(type, time);
-    var toWrite = { time: time, type: type };
-    for (var key in obj) {
-      toWrite[key] = obj[key];
-    }getWriteStreamExt(fname).then(function (stream) {
-      stream.write(toWrite);
-      if (cfg.snappy) {
-        compressOld({ type: type, time: time }).then(cb);
-      } else {
-        cb(null, null);
-      }
-    });
+    (function () {
+      obj = JSON.parse(obj);
+      var fname = whichFile(type, time);
+      var toWrite = { time: time, type: type };
+      for (var key in obj) {
+        toWrite[key] = obj[key];
+      }getWriteStreamExt(fname).then(function (stream) {
+        stream.write(toWrite);
+        if (cfg.snappy) {
+          compressOld({ type: type, time: time }).then(cb);
+        } else {
+          cb(null, null);
+        }
+      });
+    })();
   } catch (e) {
     console.error(e);
   }
@@ -1002,11 +1010,9 @@ function finishGetReadStreamExt(ext, input) {
 function checkCache(fname, cb) {
   var cached = cache.get(fname);
   if (cached) {
-    console.log(fname, 'returning from cache');
     cb(cached);
     return;
   }
-  console.log(fname, 'not found in cache');
   _fs2.default.stat(fname, function (er2, stat) {
     var buf = new Buffer(stat.size);
     _fs2.default.open(fname, 'r', function (er, fd) {
@@ -1020,22 +1026,52 @@ function checkCache(fname, cb) {
   });
 }
 
+var utf8Decoder = new _string_decoder.StringDecoder('utf8');
+
+function jsonlToArray(buffer) {
+  var jsonl = utf8Decoder.end(buffer);
+  var lines = jsonl.split("\n");
+  var arr = [];
+  for (var n = 0; n < lines.length; n++) {
+    arr.push(JSON.parse(lines[n]));
+  }return arr;
+}
+
 function getReadStreamExt(fname, cb) {
   var ext = (0, _path.extname)(fname),
       input = null;
   if (ext.indexOf('.snappy') >= 0) {
     checkCache(fname, function (uncompressed) {
-      input = new _streamBuffers.ReadableStreamBuffer({ frequency: 1, chunkSize: 256000 });
-      input.put(uncompressed);
-      input.stop();
-      fname = fname.replace('.snappy', '');
-      ext = (0, _path.extname)(fname);
-      cb(finishGetReadStreamExt(ext, input));
+      cb(jsonlToArray(uncompressed));
+      //input = new ReadableStreamBuffer({frequency:1,chunkSize:16000});
+      //input.put(uncompressed);
+      //input.stop();
+      //fname = fname.replace('.snappy','');
+      //ext = extname(fname);
+      //cb(finishGetReadStreamExt(ext, input));
     });
   } else {
     input = (0, _fs3.createReadStream)(fname);
     cb(finishGetReadStreamExt(ext, input));
   }
+}
+
+function matchRows(_ref7) {
+  var data = _ref7.data,
+      start = _ref7.start,
+      end = _ref7.end,
+      matchFunction = _ref7.matchFunction;
+
+  var results = [];
+  for (var i = 0; i < data.length; i++) {
+    var r = data[i];
+    r.time = new Date(r.time);
+    results.push(r);
+    //if (r.time >= start && r.time <= end &&
+    //   matchFunction(r))
+    //  results.push(r);
+  }
+  return results;
 }
 
 function fmt(dt) {
@@ -1068,196 +1104,307 @@ var QueryStream = function (_Readable) {
               _this2.fileNum = 0;
               _this2.rowNum = 0;
               _this2.data = null;
+              _this2.fileData = [];
               _this2.initFinished = true;
 
-            case 7:
+            case 8:
             case 'end':
               return _context10.stop();
           }
         }
       }, _callee9, _this3);
     }));
+    _this2.checkPreload = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee11() {
+      var preloads, xx, _loop2, n;
+
+      return _regenerator2.default.wrap(function _callee11$(_context12) {
+        while (1) {
+          switch (_context12.prev = _context12.next) {
+            case 0:
+              return _context12.abrupt('return');
+
+            case 3:
+              preloads = [];
+              xx = 0;
+
+              _loop2 = function _loop2(n) {
+                preloads.push((0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee10() {
+                  return _regenerator2.default.wrap(function _callee10$(_context11) {
+                    while (1) {
+                      switch (_context11.prev = _context11.next) {
+                        case 0:
+                          xx++;
+                          _context11.t0 = _this2.fileData;
+                          _context11.next = 4;
+                          return filterFile(_this2.files[n], _this2.start, _this2.end, _this2.match);
+
+                        case 4:
+                          _context11.t1 = _context11.sent;
+
+                          _context11.t0.push.call(_context11.t0, _context11.t1);
+
+                        case 6:
+                        case 'end':
+                          return _context11.stop();
+                      }
+                    }
+                  }, _callee10, _this3);
+                }))());
+              };
+
+              for (n = _this2.fileNum; n < _this2.files.length && n < _this2.fileNum + 3; n++) {
+                _loop2(n);
+              }
+
+              if (!(preloads.length == 0)) {
+                _context12.next = 11;
+                break;
+              }
+
+              console.log('no preloads.', { fileNum: _this2.fileNum, files: _this2.files.length });
+              _context12.next = 13;
+              break;
+
+            case 11:
+              _context12.next = 13;
+              return Promise.all(preloads);
+
+            case 13:
+            case 'end':
+              return _context12.stop();
+          }
+        }
+      }, _callee11, _this3);
+    }));
 
     _this2.loadFile = function () {
-      var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee10(f) {
+      var _ref14 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee12(f) {
         var result, st;
-        return _regenerator2.default.wrap(function _callee10$(_context11) {
+        return _regenerator2.default.wrap(function _callee12$(_context13) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context13.prev = _context13.next) {
               case 0:
                 if (_this2.files) {
-                  _context11.next = 3;
+                  _context13.next = 3;
                   break;
                 }
 
-                _context11.next = 3;
+                _context13.next = 3;
                 return _this2.init();
 
               case 3:
                 if (!(_this2.data && _this2.rowNum < _this2.data.length)) {
-                  _context11.next = 5;
+                  _context13.next = 5;
                   break;
                 }
 
-                return _context11.abrupt('return', _this2.data);
+                return _context13.abrupt('return', _this2.data);
 
               case 5:
                 if (!(_this2.files && _this2.fileNum >= _this2.files.length)) {
-                  _context11.next = 7;
+                  _context13.next = 7;
                   break;
                 }
 
-                return _context11.abrupt('return', null);
+                return _context13.abrupt('return', null);
 
               case 7:
                 if (_this2.data) {
                   _this2.rowNum = 0;
                 }
                 result = null;
-                _context11.prev = 9;
+                _context13.prev = 9;
                 st = Date.now();
-                _context11.next = 13;
-                return filterFile(_this2.files[_this2.fileNum++], _this2.start, _this2.end, _this2.match);
 
-              case 13:
-                result = _context11.sent;
-
-                console.log('filterFile elapsed', Date.now() - st, 'ms');
-
-                if (!(result.length === 0)) {
-                  _context11.next = 19;
+                if (!(_this2.fileData.length > _this2.fileNum)) {
+                  _context13.next = 20;
                   break;
                 }
 
-                _context11.next = 18;
+                _this2.data = _this2.fileData[_this2.fileNum++];
+
+                if (!(_this2.data.length === 0)) {
+                  _context13.next = 17;
+                  break;
+                }
+
+                _context13.next = 16;
                 return _this2.loadFile();
 
-              case 18:
-                return _context11.abrupt('return', _context11.sent);
+              case 16:
+                return _context13.abrupt('return', _context13.sent);
 
-              case 19:
-                _context11.next = 24;
-                break;
+              case 17:
+                return _context13.abrupt('return', _this2.data);
 
-              case 21:
-                _context11.prev = 21;
-                _context11.t0 = _context11['catch'](9);
+              case 20:
+                _context13.next = 22;
+                return filterFile(_this2.files[_this2.fileNum++], _this2.start, _this2.end, _this2.match);
 
-                console.error('filterfile err in loadfile', _context11.t0);
+              case 22:
+                result = _context13.sent;
 
-              case 24:
-                _this2.data = result;
-                return _context11.abrupt('return', result);
+                if (!(_this2.fileData.length == 0)) {
+                  _context13.next = 26;
+                  break;
+                }
+
+                _context13.next = 26;
+                return _this2.checkPreload();
 
               case 26:
+                if (!(result.length === 0)) {
+                  _context13.next = 30;
+                  break;
+                }
+
+                _context13.next = 29;
+                return _this2.loadFile();
+
+              case 29:
+                return _context13.abrupt('return', _context13.sent);
+
+              case 30:
+                _context13.next = 35;
+                break;
+
+              case 32:
+                _context13.prev = 32;
+                _context13.t0 = _context13['catch'](9);
+
+                console.error('filterfile err in loadfile', _context13.t0);
+
+              case 35:
+                _this2.data = result;
+                return _context13.abrupt('return', result);
+
+              case 37:
               case 'end':
-                return _context11.stop();
+                return _context13.stop();
             }
           }
-        }, _callee10, _this3, [[9, 21]]);
+        }, _callee12, _this3, [[9, 32]]);
       }));
 
-      return function (_x19) {
-        return _ref11.apply(this, arguments);
+      return function (_x20) {
+        return _ref14.apply(this, arguments);
       };
     }();
 
-    _this2.nextRow = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee11() {
+    _this2.nextRow = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee13() {
       var row;
-      return _regenerator2.default.wrap(function _callee11$(_context12) {
+      return _regenerator2.default.wrap(function _callee13$(_context14) {
         while (1) {
-          switch (_context12.prev = _context12.next) {
+          switch (_context14.prev = _context14.next) {
             case 0:
-              _context12.prev = 0;
+              _context14.prev = 0;
 
               if (_this2.data) {
-                _context12.next = 3;
+                _context14.next = 3;
                 break;
               }
 
-              return _context12.abrupt('return', null);
+              return _context14.abrupt('return', null);
 
             case 3:
               if (!(_this2.rowNum >= _this2.data.length)) {
-                _context12.next = 9;
+                _context14.next = 9;
                 break;
               }
 
-              _context12.next = 6;
+              _context14.next = 6;
               return _this2.loadFile();
 
             case 6:
-              _this2.data = _context12.sent;
+              _this2.data = _context14.sent;
 
               if (_this2.data) {
-                _context12.next = 9;
+                _context14.next = 9;
                 break;
               }
 
-              return _context12.abrupt('return', null);
+              return _context14.abrupt('return', null);
 
             case 9:
               row = _this2.data[_this2.rowNum];
 
               _this2.rowNum++;
-              return _context12.abrupt('return', row);
+              return _context14.abrupt('return', row);
 
             case 14:
-              _context12.prev = 14;
-              _context12.t0 = _context12['catch'](0);
+              _context14.prev = 14;
+              _context14.t0 = _context14['catch'](0);
 
-              console.error('nextRow issue', _context12.t0);
+              console.error('nextRow issue', _context14.t0);
 
             case 17:
             case 'end':
-              return _context12.stop();
+              return _context14.stop();
           }
         }
-      }, _callee11, _this3, [[0, 14]]);
+      }, _callee13, _this3, [[0, 14]]);
     }));
 
     _this2._read = function () {
       var id = (0, _uuid.v4)();
       _this2.reading = new Promise(function () {
-        var _ref13 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee12(res) {
+        var _ref16 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee14(res) {
           var canPush, i;
-          return _regenerator2.default.wrap(function _callee12$(_context13) {
+          return _regenerator2.default.wrap(function _callee14$(_context15) {
             while (1) {
-              switch (_context13.prev = _context13.next) {
+              switch (_context15.prev = _context15.next) {
                 case 0:
                   if (!_this2.reading) {
-                    _context13.next = 4;
+                    _context15.next = 4;
                     break;
                   }
 
-                  return _context13.abrupt('return', true);
+                  return _context15.abrupt('return', true);
 
                 case 4:
                   canPush = true;
                   i = 0;
 
                 case 6:
-                  _context13.prev = 6;
-                  _context13.next = 9;
+                  _context15.prev = 6;
+
+                  if (_this2.data) {
+                    _context15.next = 16;
+                    break;
+                  }
+
+                  _context15.next = 10;
                   return _this2.loadFile();
 
-                case 9:
-                  _this2.data = _context13.sent;
-                  _context13.next = 15;
-                  break;
-
-                case 12:
-                  _context13.prev = 12;
-                  _context13.t0 = _context13['catch'](6);
-                  console.trace(_context13.t0);
-
-                case 15:
-                  ;
-                  _context13.next = 18;
+                case 10:
+                  _this2.data = _context15.sent;
+                  _context15.next = 13;
                   return _this2.nextRow();
 
-                case 18:
-                  _this2.row = _context13.sent;
+                case 13:
+                  _this2.row = _context15.sent;
+                  _context15.next = 17;
+                  break;
+
+                case 16:
+                  _this2.row = _this2.data[_this2.rowNum++];
+
+                case 17:
+                  _context15.next = 22;
+                  break;
+
+                case 19:
+                  _context15.prev = 19;
+                  _context15.t0 = _context15['catch'](6);
+                  console.trace(_context15.t0);
+
+                case 22:
+                  ;
+                  _context15.next = 25;
+                  return _this2.nextRow();
+
+                case 25:
+                  _this2.row = _context15.sent;
 
                   if (_this2.row === undefined) _this2.row = null;
                   if (!(_this2.row === null)) {
@@ -1266,25 +1413,36 @@ var QueryStream = function (_Readable) {
                   } else {}
                   canPush = _this2.push(_this2.row);
 
-                case 22:
-                  if (_this2.row && canPush) {
-                    _context13.next = 6;
+                  if (!(_this2.data && _this2.rowNum == _this2.data.length)) {
+                    _context15.next = 33;
                     break;
                   }
 
-                case 23:
-                  return _context13.abrupt('return', true);
+                  _context15.next = 32;
+                  return _this2.loadFile();
 
-                case 24:
+                case 32:
+                  _this2.data = _context15.sent;
+
+                case 33:
+                  if (_this2.row && canPush) {
+                    _context15.next = 6;
+                    break;
+                  }
+
+                case 34:
+                  return _context15.abrupt('return', true);
+
+                case 35:
                 case 'end':
-                  return _context13.stop();
+                  return _context15.stop();
               }
             }
-          }, _callee12, _this3, [[6, 12]]);
+          }, _callee14, _this3, [[6, 19]]);
         }));
 
-        return function (_x20) {
-          return _ref13.apply(this, arguments);
+        return function (_x21) {
+          return _ref16.apply(this, arguments);
         };
       }()).catch(console.error);
     };
