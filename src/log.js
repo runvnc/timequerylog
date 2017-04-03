@@ -25,7 +25,7 @@ import onExit from 'signal-exit';
 import collect from 'stream-collect';
 import {StringDecoder} from 'string_decoder';
 
-let opts = { max: 500000000
+let opts = { max: 50000000
               , length: (n, key) => { return n.length }
               , dispose: (key, n) => { true; }
               , maxAge: 1000 * 60 * 60 }
@@ -50,7 +50,6 @@ setInterval( () => {
     let now = new Date().getTime();
     if (now - lastAccessTime[file].getTime() > 900 &&
         now - lastWriteTime[file].getTime() > 15000) {
-      console.log('ending and deleting stream',file);
       streams[file].end();
       delete streams[file];
       delete lastAccessTime[file];
@@ -62,11 +61,9 @@ setInterval( () => {
 function closeStreams() {
   for (let file in streams) {
     try {
-      console.log('calling end on stream for file',file);
       streams[file].end();
     } catch (e) { }
   }
-  console.log('closed');
 }
 
 const cleanup = (code, signal) => {
@@ -474,7 +471,7 @@ class QueryStream extends Readable {
       })());
     }
     if (preloads.length ==0) {
-      console.log('no preloads.',{fileNum:this.fileNum,files:this.files.length});
+      //console.log('no preloads.',{fileNum:this.fileNum,files:this.files.length});
     } else {
       await Promise.all(preloads);
     }
