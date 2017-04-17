@@ -13,7 +13,6 @@ import moment from 'moment-timezone';
 import queue from 'queue';
 import equal from 'deep-equal';
 import cloneDeep from 'lodash.clonedeep';
-import msgpack from 'msgpack-lite';
 import pify from 'pify';
 import snappy from 'snappy';
 import delay from 'delay';
@@ -24,6 +23,20 @@ import timed from 'timed';
 import onExit from 'signal-exit';
 import collect from 'stream-collect';
 import {StringDecoder} from 'string_decoder';
+import timestring from 'timestring';
+import {remove} from 'fs-promise';
+
+async function deleteOldFiles() {
+  if (!cfg.deleteOldDays) return;
+  for (let [type, olderThan] of Object.entries(cfg.deleteOldDays)) { 
+    const end = moment().subtract(olderThan, 'days');
+    const start = new Date('1980-01-01');
+    const files = await whichFiles(type, start, end);
+    for (let file of files) {
+      await remove(file);
+    }
+  }
+}
 
 let opts = { max: 50000000
               , length: (n, key) => { return n.length }
@@ -39,11 +52,16 @@ const dologPromise = pify(dolog);
 
 let started = false;
 let cfg = {path:process.cwd(), ext:'jsonl'};
+
 let streams = {};
 let lastAccessTime = {};
 let lastWriteTime = {};
 let lastUpdateTime = {};
 let q = queue({concurrency:1});
+
+const checkDelete = () => deleteOldFiles().catch(console.error);
+checkDelete();
+setInterval(checkDelete, timestring('1 day'));
 
 setInterval( () => {
   for (let file in lastAccessTime) {
@@ -83,6 +101,7 @@ process.on('SIGINT', cleanup);
 
 export function config(conf) {
   Object.assign(cfg,conf);
+  checkDelete();
 }
 
 export function whichFile(type, datetime) {

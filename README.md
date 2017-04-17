@@ -96,6 +96,10 @@ Set configuration options.  Defaults are: `{path: process.cwd(), noRepeat: false
 To compress (and automatically decompress)
 with Snappy, use `snappy: 1`.
 
+To delete files older than X days, specify 
+`config({path:'datalog'}, deleteOldDays: {event: 100}}`) -- 
+deletes old 'event' type files 100 days or older.
+
 *queryOpts({type, start, end, match = (d=>true), csv=false,map, timeMS=false})*
 
 This query function takes an options object and returns either an objectMode stream or a CSV stream.
