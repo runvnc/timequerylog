@@ -25,6 +25,10 @@ import collect from 'stream-collect';
 import {StringDecoder} from 'string_decoder';
 import timestring from 'timestring';
 import {remove} from 'fs-promise';
+import glob from 'glob';
+import performanceNow from "performance-now";
+
+const glob_ = pify(glob);
 
 async function deleteOldFiles() {
   if (!cfg.deleteOldDays) return;
@@ -611,5 +615,46 @@ export function queryOpts(options) {
   } else {
     return qs;
   }
+}
+
+export async function getTypes(globPat) {
+  let matchDirs = [];
+  try {
+    matchDirs = await glob_(`${cfg.path}/${globPat}`);
+  } catch (e) {
+    throw new Error('timequerylog error globbing for '+glob);
+  }
+  return matchDirs.map( dir => {
+    dir = dir.replace(cfg.path,'');
+    return dir.substr(1, dir.length-5);
+  }); 
+}
+
+export function hrms() {
+  const loadTimeInMS = Date.now()
+  return (loadTimeInMS + performanceNow()) * 1000;
+}
+
+function byJSDate(a, b){
+  let prop = 'time';
+  if (a.hrtime && b.hrtime) {
+    prop = 'hrtime';
+  }
+  if (a[prop] < b[prop]) return -1;
+  if (a[prop] > b[prop]) return 1;
+  return 0;
+}
+
+export async function queryMultiArray({typeGlob, start, end, match}) {
+  const types = await getTypes(typeGlob);
+  let all = [], calls = [];
+  for (let type of types) {
+    calls.push(query(type, start, end, match));
+  }
+  let results = await Promise.all(calls);
+  for (let result of results)
+    all = all.concat(result);
+  all.sort(byJSDate);
+  return all;
 }
 

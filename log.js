@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.latest = exports.queryRecent = exports.query = exports.whichFiles = undefined;
+exports.queryMultiArray = exports.getTypes = exports.latest = exports.queryRecent = exports.query = exports.whichFiles = undefined;
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -836,10 +836,179 @@ var latest = exports.latest = function () {
   };
 }();
 
+var getTypes = exports.getTypes = function () {
+  var _ref19 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee17(globPat) {
+    var matchDirs;
+    return _regenerator2.default.wrap(function _callee17$(_context18) {
+      while (1) {
+        switch (_context18.prev = _context18.next) {
+          case 0:
+            matchDirs = [];
+            _context18.prev = 1;
+            _context18.next = 4;
+            return glob_(cfg.path + '/' + globPat);
+
+          case 4:
+            matchDirs = _context18.sent;
+            _context18.next = 10;
+            break;
+
+          case 7:
+            _context18.prev = 7;
+            _context18.t0 = _context18['catch'](1);
+            throw new Error('timequerylog error globbing for ' + _glob2.default);
+
+          case 10:
+            return _context18.abrupt('return', matchDirs.map(function (dir) {
+              dir = dir.replace(cfg.path, '');
+              return dir.substr(1, dir.length - 5);
+            }));
+
+          case 11:
+          case 'end':
+            return _context18.stop();
+        }
+      }
+    }, _callee17, this, [[1, 7]]);
+  }));
+
+  return function getTypes(_x22) {
+    return _ref19.apply(this, arguments);
+  };
+}();
+
+var queryMultiArray = exports.queryMultiArray = function () {
+  var _ref20 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee18(_ref21) {
+    var typeGlob = _ref21.typeGlob,
+        start = _ref21.start,
+        end = _ref21.end,
+        match = _ref21.match;
+
+    var types, all, calls, _iteratorNormalCompletion6, _didIteratorError6, _iteratorError6, _iterator6, _step6, type, results, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, result;
+
+    return _regenerator2.default.wrap(function _callee18$(_context19) {
+      while (1) {
+        switch (_context19.prev = _context19.next) {
+          case 0:
+            _context19.next = 2;
+            return getTypes(typeGlob);
+
+          case 2:
+            types = _context19.sent;
+            all = [], calls = [];
+            _iteratorNormalCompletion6 = true;
+            _didIteratorError6 = false;
+            _iteratorError6 = undefined;
+            _context19.prev = 7;
+
+            for (_iterator6 = types[Symbol.iterator](); !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+              type = _step6.value;
+
+              calls.push(query(type, start, end, match));
+            }
+            _context19.next = 15;
+            break;
+
+          case 11:
+            _context19.prev = 11;
+            _context19.t0 = _context19['catch'](7);
+            _didIteratorError6 = true;
+            _iteratorError6 = _context19.t0;
+
+          case 15:
+            _context19.prev = 15;
+            _context19.prev = 16;
+
+            if (!_iteratorNormalCompletion6 && _iterator6.return) {
+              _iterator6.return();
+            }
+
+          case 18:
+            _context19.prev = 18;
+
+            if (!_didIteratorError6) {
+              _context19.next = 21;
+              break;
+            }
+
+            throw _iteratorError6;
+
+          case 21:
+            return _context19.finish(18);
+
+          case 22:
+            return _context19.finish(15);
+
+          case 23:
+            _context19.next = 25;
+            return Promise.all(calls);
+
+          case 25:
+            results = _context19.sent;
+            _iteratorNormalCompletion7 = true;
+            _didIteratorError7 = false;
+            _iteratorError7 = undefined;
+            _context19.prev = 29;
+
+            for (_iterator7 = results[Symbol.iterator](); !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+              result = _step7.value;
+
+              all = all.concat(result);
+            }_context19.next = 37;
+            break;
+
+          case 33:
+            _context19.prev = 33;
+            _context19.t1 = _context19['catch'](29);
+            _didIteratorError7 = true;
+            _iteratorError7 = _context19.t1;
+
+          case 37:
+            _context19.prev = 37;
+            _context19.prev = 38;
+
+            if (!_iteratorNormalCompletion7 && _iterator7.return) {
+              _iterator7.return();
+            }
+
+          case 40:
+            _context19.prev = 40;
+
+            if (!_didIteratorError7) {
+              _context19.next = 43;
+              break;
+            }
+
+            throw _iteratorError7;
+
+          case 43:
+            return _context19.finish(40);
+
+          case 44:
+            return _context19.finish(37);
+
+          case 45:
+            all.sort(byJSDate);
+            return _context19.abrupt('return', all);
+
+          case 47:
+          case 'end':
+            return _context19.stop();
+        }
+      }
+    }, _callee18, this, [[7, 11, 15, 23], [16,, 18, 22], [29, 33, 37, 45], [38,, 40, 44]]);
+  }));
+
+  return function queryMultiArray(_x23) {
+    return _ref20.apply(this, arguments);
+  };
+}();
+
 exports.config = config;
 exports.whichFile = whichFile;
 exports.log = log;
 exports.queryOpts = queryOpts;
+exports.hrms = hrms;
 
 var _fs = require('mz/fs');
 
@@ -919,9 +1088,19 @@ var _timestring2 = _interopRequireDefault(_timestring);
 
 var _fsPromise = require('fs-promise');
 
+var _glob = require('glob');
+
+var _glob2 = _interopRequireDefault(_glob);
+
+var _performanceNow = require('performance-now');
+
+var _performanceNow2 = _interopRequireDefault(_performanceNow);
+
 var _stream = require('stream');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var glob_ = (0, _pify2.default)(_glob2.default);
 
 var opts = { max: 50000000,
   length: function length(n, key) {
@@ -1627,4 +1806,19 @@ function queryOpts(options) {
   } else {
     return qs;
   }
+}
+
+function hrms() {
+  var loadTimeInMS = Date.now();
+  return (loadTimeInMS + (0, _performanceNow2.default)()) * 1000;
+}
+
+function byJSDate(a, b) {
+  var prop = 'time';
+  if (a.hrtime && b.hrtime) {
+    prop = 'hrtime';
+  }
+  if (a[prop] < b[prop]) return -1;
+  if (a[prop] > b[prop]) return 1;
+  return 0;
 }
