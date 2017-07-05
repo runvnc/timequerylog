@@ -1,6 +1,6 @@
 {
   "name": "timequerylog",
-  "version": "19.0.0",
+  "version": "20.0.0",
   "description": "Structured (JSON) logging separated into files per hour of day, with query.",
   "main": "log.js",
   "scripts": {
