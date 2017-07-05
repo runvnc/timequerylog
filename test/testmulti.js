@@ -32,17 +32,23 @@ var test = function () {
 
             console.log(req);
 
+            (0, _log.log)('testhr', { n: 'tom', hrtime: (0, _log.hrms)() });
+            (0, _log.log)('testhr', { n: 'bob', hrtime: (0, _log.hrms)() });
+            _context.next = 13;
+            return (0, _delay2.default)(10);
+
+          case 13:
             args = { typeGlob: '*', start: new Date('1980-01-01'),
               end: Date.now() };
-            _context.next = 12;
+            _context.next = 16;
             return (0, _log.queryMultiArray)(args);
 
-          case 12:
+          case 16:
             results = _context.sent;
 
             console.log(results);
 
-          case 14:
+          case 18:
           case 'end':
             return _context.stop();
         }
@@ -56,6 +62,10 @@ var test = function () {
 }();
 
 var _log = require('../log');
+
+var _delay = require('delay');
+
+var _delay2 = _interopRequireDefault(_delay);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 

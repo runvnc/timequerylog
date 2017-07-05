@@ -1809,16 +1809,16 @@ function queryOpts(options) {
 }
 
 function hrms() {
-  var loadTimeInMS = Date.now();
-  return (loadTimeInMS + (0, _performanceNow2.default)()) * 1000;
+  return (0, _performanceNow2.default)() * 1000;
 }
 
 function byJSDate(a, b) {
-  var prop = 'time';
+  if (a.time < b.time) return -1;
+  if (a.time > b.time) return 1;
   if (a.hrtime && b.hrtime) {
-    prop = 'hrtime';
+    if (a.hrtime < b.hrtime) return -1;
+    if (a.hrtime > b.hrtime) return 1;
+    return 0;
   }
-  if (a[prop] < b[prop]) return -1;
-  if (a[prop] > b[prop]) return 1;
   return 0;
 }

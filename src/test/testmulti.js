@@ -1,5 +1,6 @@
-import {config, getTypes, hrms,
+import {log,config, getTypes, hrms,
         queryMultiArray} from '../log';
+import delay from 'delay';
 
 config({path:'datalog'});
 
@@ -11,6 +12,9 @@ async function test() {
   const req = await getTypes('r*');
   console.log(req);
  
+  log('testhr', {n:'tom',hrtime:hrms()});
+  log('testhr', {n:'bob',hrtime:hrms()});
+  await delay(10);
   const args = { typeGlob: '*', start: new Date('1980-01-01'),
                  end: Date.now() };
   const results = await queryMultiArray(args);
