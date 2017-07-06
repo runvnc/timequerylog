@@ -646,6 +646,9 @@ function byJSDate(a, b){
 }
 
 export async function queryMultiArray({typeGlob, start, end, match}) {
+  if (!match) match = (d=>true);
+  if (!end) end = new Date();
+  if (!start) start = moment(end).subtract(30, 'minutes').toDate();
   const types = await getTypes(typeGlob);
   let all = [], calls = [];
   for (let type of types) {

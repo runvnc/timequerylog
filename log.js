@@ -890,113 +890,118 @@ var queryMultiArray = exports.queryMultiArray = function () {
       while (1) {
         switch (_context19.prev = _context19.next) {
           case 0:
-            _context19.next = 2;
+            if (!match) match = function match(d) {
+              return true;
+            };
+            if (!end) end = new Date();
+            if (!start) start = (0, _momentTimezone2.default)(end).subtract(30, 'minutes').toDate();
+            _context19.next = 5;
             return getTypes(typeGlob);
 
-          case 2:
+          case 5:
             types = _context19.sent;
             all = [], calls = [];
             _iteratorNormalCompletion6 = true;
             _didIteratorError6 = false;
             _iteratorError6 = undefined;
-            _context19.prev = 7;
+            _context19.prev = 10;
 
             for (_iterator6 = types[Symbol.iterator](); !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
               type = _step6.value;
 
               calls.push(query(type, start, end, match));
             }
-            _context19.next = 15;
+            _context19.next = 18;
             break;
 
-          case 11:
-            _context19.prev = 11;
-            _context19.t0 = _context19['catch'](7);
+          case 14:
+            _context19.prev = 14;
+            _context19.t0 = _context19['catch'](10);
             _didIteratorError6 = true;
             _iteratorError6 = _context19.t0;
 
-          case 15:
-            _context19.prev = 15;
-            _context19.prev = 16;
+          case 18:
+            _context19.prev = 18;
+            _context19.prev = 19;
 
             if (!_iteratorNormalCompletion6 && _iterator6.return) {
               _iterator6.return();
             }
 
-          case 18:
-            _context19.prev = 18;
+          case 21:
+            _context19.prev = 21;
 
             if (!_didIteratorError6) {
-              _context19.next = 21;
+              _context19.next = 24;
               break;
             }
 
             throw _iteratorError6;
 
-          case 21:
-            return _context19.finish(18);
-
-          case 22:
-            return _context19.finish(15);
-
-          case 23:
-            _context19.next = 25;
-            return Promise.all(calls);
+          case 24:
+            return _context19.finish(21);
 
           case 25:
+            return _context19.finish(18);
+
+          case 26:
+            _context19.next = 28;
+            return Promise.all(calls);
+
+          case 28:
             results = _context19.sent;
             _iteratorNormalCompletion7 = true;
             _didIteratorError7 = false;
             _iteratorError7 = undefined;
-            _context19.prev = 29;
+            _context19.prev = 32;
 
             for (_iterator7 = results[Symbol.iterator](); !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
               result = _step7.value;
 
               all = all.concat(result);
-            }_context19.next = 37;
+            }_context19.next = 40;
             break;
 
-          case 33:
-            _context19.prev = 33;
-            _context19.t1 = _context19['catch'](29);
+          case 36:
+            _context19.prev = 36;
+            _context19.t1 = _context19['catch'](32);
             _didIteratorError7 = true;
             _iteratorError7 = _context19.t1;
 
-          case 37:
-            _context19.prev = 37;
-            _context19.prev = 38;
+          case 40:
+            _context19.prev = 40;
+            _context19.prev = 41;
 
             if (!_iteratorNormalCompletion7 && _iterator7.return) {
               _iterator7.return();
             }
 
-          case 40:
-            _context19.prev = 40;
+          case 43:
+            _context19.prev = 43;
 
             if (!_didIteratorError7) {
-              _context19.next = 43;
+              _context19.next = 46;
               break;
             }
 
             throw _iteratorError7;
 
-          case 43:
+          case 46:
+            return _context19.finish(43);
+
+          case 47:
             return _context19.finish(40);
 
-          case 44:
-            return _context19.finish(37);
-
-          case 45:
+          case 48:
             all.sort(byJSDate);
             return _context19.abrupt('return', all);
 
-          case 47:
+          case 50:
           case 'end':
             return _context19.stop();
         }
       }
-    }, _callee18, this, [[7, 11, 15, 23], [16,, 18, 22], [29, 33, 37, 45], [38,, 40, 44]]);
+    }, _callee18, this, [[10, 14, 18, 26], [19,, 21, 25], [32, 36, 40, 48], [41,, 43, 47]]);
   }));
 
   return function queryMultiArray(_x23) {
