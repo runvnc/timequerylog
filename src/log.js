@@ -661,3 +661,27 @@ export async function queryMultiArray({typeGlob, start, end, match}) {
   return all;
 }
 
+const incrs = {};
+
+export async function incr(key, init = 0) {
+  const fname = `${cfg.path}/${key}_INCR`;
+  if (incrs[key]) {
+    incrs[key]++;
+    await writeFilePromise(fname, incrs[key]);
+    return incrs[key];
+  } else {
+    const exists = await pathExists(fname);
+    if (!exists) {
+      incrs[key] = init;
+      await writeFilePromise(fname, init+"");
+      return incrs[key];
+    } else {
+      let curr = 1*(await readFilePromise(fname));
+      curr += 1;
+      incrs[key] = curr;
+      await writeFilePromise(fname, curr+"");
+      return curr;
+    }
+  }
+}
+

@@ -72,6 +72,17 @@ matched.on('data', console.log);
   csvStream.pipe(process.stdout);
 ```
 
+### Increment
+```javascript
+  let n = incr('test'); // n = 1
+  n = incr('test'); // n = 2
+  let m = incr('test2',Date.now()) 
+  // if m was not previously incremented
+  // then m is Date.now()
+  // otherwise previous m + 1
+```
+
+
 # Functions/Options
 
 *log(type, object, time = current time)*
@@ -106,3 +117,6 @@ This query function takes an options object and returns either an objectMode str
 If `end` is not specified the current time is used.  If `start` is not specified then `end`-30 minutes is
 used. `map` is an optional function to modify rows. `timeMS` will return time as MS since epoch.
 
+*incr(key, init=0)*
+
+Increment `key` and return new value. Stored in file `key_INCR`. Optionally init at some number.

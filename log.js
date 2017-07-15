@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.queryMultiArray = exports.getTypes = exports.latest = exports.queryRecent = exports.query = exports.whichFiles = undefined;
+exports.incr = exports.queryMultiArray = exports.getTypes = exports.latest = exports.queryRecent = exports.query = exports.whichFiles = undefined;
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -1009,6 +1009,76 @@ var queryMultiArray = exports.queryMultiArray = function () {
   };
 }();
 
+var incr = exports.incr = function () {
+  var _ref22 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee19(key) {
+    var init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var fname, exists, curr;
+    return _regenerator2.default.wrap(function _callee19$(_context20) {
+      while (1) {
+        switch (_context20.prev = _context20.next) {
+          case 0:
+            fname = cfg.path + '/' + key + '_INCR';
+
+            if (!incrs[key]) {
+              _context20.next = 8;
+              break;
+            }
+
+            incrs[key]++;
+            _context20.next = 5;
+            return writeFilePromise(fname, incrs[key]);
+
+          case 5:
+            return _context20.abrupt('return', incrs[key]);
+
+          case 8:
+            _context20.next = 10;
+            return (0, _pathExists2.default)(fname);
+
+          case 10:
+            exists = _context20.sent;
+
+            if (exists) {
+              _context20.next = 18;
+              break;
+            }
+
+            incrs[key] = init;
+            _context20.next = 15;
+            return writeFilePromise(fname, init + "");
+
+          case 15:
+            return _context20.abrupt('return', incrs[key]);
+
+          case 18:
+            _context20.next = 20;
+            return readFilePromise(fname);
+
+          case 20:
+            _context20.t0 = _context20.sent;
+            curr = 1 * _context20.t0;
+
+            curr += 1;
+            incrs[key] = curr;
+            _context20.next = 26;
+            return writeFilePromise(fname, curr + "");
+
+          case 26:
+            return _context20.abrupt('return', curr);
+
+          case 27:
+          case 'end':
+            return _context20.stop();
+        }
+      }
+    }, _callee19, this);
+  }));
+
+  return function incr(_x24) {
+    return _ref22.apply(this, arguments);
+  };
+}();
+
 exports.config = config;
 exports.whichFile = whichFile;
 exports.log = log;
@@ -1827,3 +1897,5 @@ function byJSDate(a, b) {
   }
   return 0;
 }
+
+var incrs = {};
