@@ -1,6 +1,7 @@
 import fs from 'mz/fs';
 import {inspect} from 'util';
 import {stringify, parse} from 'JSONStream';
+import safeStringify from 'json-stringify-safe';
 import {createWriteStream, unlink,
         readFile, writeFile, createReadStream} from 'fs';
 import {mapSync} from 'event-stream';
@@ -176,8 +177,8 @@ export function log(type,obj,time = new Date()) {
   //  memlog.push(obj);
   //  return;
   //}
-
-  const currentState = JSON.stringify(obj);
+  const currentState = safeStringify(obj);
+  //const currentState = JSON.stringify(obj);
   q.push(cb => { dolog(type, currentState, time, cb);});
   //out.push({type, currentState, time});
   //process.emit('tql');

@@ -1093,6 +1093,10 @@ var _util = require('util');
 
 var _JSONStream = require('JSONStream');
 
+var _jsonStringifySafe = require('json-stringify-safe');
+
+var _jsonStringifySafe2 = _interopRequireDefault(_jsonStringifySafe);
+
 var _fs3 = require('fs');
 
 var _eventStream = require('event-stream');
@@ -1334,8 +1338,8 @@ function log(type, obj) {
   //  memlog.push(obj);
   //  return;
   //}
-
-  var currentState = JSON.stringify(obj);
+  var currentState = (0, _jsonStringifySafe2.default)(obj);
+  //const currentState = JSON.stringify(obj);
   q.push(function (cb) {
     dolog(type, currentState, time, cb);
   });
