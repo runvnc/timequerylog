@@ -1232,23 +1232,27 @@ var lastWriteTime = {};
 var lastUpdateTime = {};
 var q = (0, _queue2.default)({ concurrency: 1 });
 
-var checkDelete = function checkDelete() {
-  return deleteOldFiles().catch(console.error);
+var checkDelete = function checkDelete(cb) {
+  deleteOldFiles().catch(console.error);
+  if (cb) cb();
 };
-checkDelete();
-setInterval(checkDelete, (0, _timestring2.default)('1 day'));
 
-setInterval(function () {
+checkDelete();
+
+var lastCheckDelCall = 'never';
+
+var chkaccess = function chkaccess(cb) {
   for (var file in lastAccessTime) {
     var now = new Date().getTime();
-    if (now - lastAccessTime[file].getTime() > 900 && now - lastWriteTime[file].getTime() > 15000) {
+    if (now - lastAccessTime[file].getTime() > 900 && now - lastWriteTime[file].getTime() > 1000) {
       streams[file].end();
       delete streams[file];
       delete lastAccessTime[file];
       lastWriteTime[file] = new Date();
     }
   }
-}, 1000); //15000
+  if (cb) cb();
+};
 
 function closeStreams() {
   for (var file in streams) {
@@ -1267,6 +1271,19 @@ var cleanup = function cleanup(code, signal) {
     process.exit();
   }
 };
+
+q.on('end', function () {
+  setTimeout(function () {
+    (0, _nowOrAgain.nowOrAgain)(chkaccess, 'G');
+    if (lastCheckDelCall == 'never') {
+      lastCheckDelCall = Date.now();
+      (0, _nowOrAgain.nowOrAgain)(checkDelete, 'G');
+    } else if (Date.now() - lastCheckDelCall > 60 * 1000 * 60 * 20) {
+      lastCheckDelCall = Date.now();
+      (0, _nowOrAgain.nowOrAgain)(checkDelete, 'G');
+    }
+  }, 1500);
+});
 
 //onExit(cleanup);
 process.on('SIGINT', cleanup);

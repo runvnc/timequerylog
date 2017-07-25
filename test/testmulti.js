@@ -48,7 +48,14 @@ var test = function () {
 
             console.log(results);
 
-          case 18:
+            _context.next = 20;
+            return (0, _delay2.default)(1000);
+
+          case 20:
+            console.log('active requests:', process._getActiveRequests());
+            console.log('active handles:', process._getActiveHandles());
+
+          case 22:
           case 'end':
             return _context.stop();
         }

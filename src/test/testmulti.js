@@ -19,6 +19,10 @@ async function test() {
                  end: Date.now() };
   const results = await queryMultiArray(args);
   console.log(results);
+
+  await delay(1000);
+  console.log('active requests:', process._getActiveRequests());
+  console.log('active handles:', process._getActiveHandles());
 }
 
 test().catch(console.error);

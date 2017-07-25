@@ -18,7 +18,7 @@ import pify from 'pify';
 import snappy from 'snappy';
 import delay from 'delay';
 import {ReadableStreamBuffer} from 'stream-buffers';
-import {nowOrAgainPromise} from 'now-or-again';
+import {nowOrAgain,nowOrAgainPromise} from 'now-or-again';
 import {v4} from 'uuid';
 import timed from 'timed';
 import onExit from 'signal-exit';
@@ -64,22 +64,29 @@ let lastWriteTime = {};
 let lastUpdateTime = {};
 let q = queue({concurrency:1});
 
-const checkDelete = () => deleteOldFiles().catch(console.error);
-checkDelete();
-setInterval(checkDelete, timestring('1 day'));
+let checkDelete = (cb) => {
+  deleteOldFiles().catch(console.error);
+  if (cb) cb();
+}
 
-setInterval( () => {
+checkDelete();
+
+let lastCheckDelCall = 'never';
+
+const chkaccess = (cb) => {
   for (let file in lastAccessTime) {
     let now = new Date().getTime();
     if (now - lastAccessTime[file].getTime() > 900 &&
-        now - lastWriteTime[file].getTime() > 15000) {
+        now - lastWriteTime[file].getTime() > 1000) {
       streams[file].end();
       delete streams[file];
       delete lastAccessTime[file];
       lastWriteTime[file] = new Date();
     }
   }
-}, 1000); //15000
+  if (cb) cb();
+}
+
 
 function closeStreams() {
   for (let file in streams) {
@@ -100,6 +107,19 @@ const cleanup = (code, signal) => {
     process.exit();
   }
 };
+
+q.on('end', () => {
+  setTimeout( () => {    
+    nowOrAgain(chkaccess,'G');
+    if (lastCheckDelCall == 'never') {
+      lastCheckDelCall = Date.now();
+      nowOrAgain(checkDelete,'G');
+    } else if (Date.now()-lastCheckDelCall>60*1000*60*20) {
+      lastCheckDelCall = Date.now();
+      nowOrAgain(checkDelete,'G');
+    }
+  }, 1500);
+});
 
 //onExit(cleanup);
 process.on('SIGINT', cleanup);

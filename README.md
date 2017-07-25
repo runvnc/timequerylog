@@ -88,6 +88,27 @@ matched.on('data', console.log);
   // n == unixTime
 ```
 
+### getTypes, queryMultiArray, high res time (hrms)
+```javascript
+async function testMulti() {
+  console.log("Current high-res time:", hrms());
+
+  const types = await getTypes('*');
+  console.log(types);
+  const req = await getTypes('r*');
+  console.log(req);
+ 
+  log('testhr', {n:'tom',hrtime:hrms()});
+  log('testhr', {n:'bob',hrtime:hrms()});
+  await delay(10);
+  const args = { typeGlob: '*', start: new Date('1980-01-01'),
+                 end: Date.now() };
+  const results = await queryMultiArray(args);
+  console.log(results);
+}
+```
+
+
 
 # Functions/Options
 
