@@ -74,17 +74,17 @@ matched.on('data', console.log);
 
 ### Increment
 ```javascript
-  let n = incr('test'); // n = 1
-  n = incr('test'); // n = 2
-  let m = incr('test2',Date.now()) 
+  let n = await incr('test'); // n = 1
+  n = await incr('test'); // n = 2
+  let m = await incr('test2',Date.now()) 
   // if m was not previously incremented
   // then m is Date.now()
   // otherwise previous m + 1
 
   const unixTime = Math.round(Date.now()/1000));
   // actually saves unixTime - 1
-  setIncr('test2', unixTime);
-  n = incr('test2');
+  await setIncr('test2', unixTime);
+  n = await incr('test2');
   // n == unixTime
 ```
 
