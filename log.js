@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.incr = exports.queryMultiArray = exports.getTypes = exports.latest = exports.queryRecent = exports.query = exports.whichFiles = undefined;
+exports.setIncr = exports.incr = exports.queryMultiArray = exports.getTypes = exports.latest = exports.queryRecent = exports.query = exports.whichFiles = undefined;
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -846,7 +846,7 @@ var getTypes = exports.getTypes = function () {
             matchDirs = [];
             _context18.prev = 1;
             _context18.next = 4;
-            return glob_(cfg.path + '/' + globPat);
+            return glob_(cfg.path + '/' + globPat + '_GMT');
 
           case 4:
             matchDirs = _context18.sent;
@@ -1076,6 +1076,32 @@ var incr = exports.incr = function () {
 
   return function incr(_x24) {
     return _ref22.apply(this, arguments);
+  };
+}();
+
+var setIncr = exports.setIncr = function () {
+  var _ref23 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee20(key, val) {
+    var fname;
+    return _regenerator2.default.wrap(function _callee20$(_context21) {
+      while (1) {
+        switch (_context21.prev = _context21.next) {
+          case 0:
+            fname = cfg.path + '/' + key + '_INCR';
+
+            incrs[key] = val - 1;
+            _context21.next = 4;
+            return writeFilePromise(fname, incrs[key]);
+
+          case 4:
+          case 'end':
+            return _context21.stop();
+        }
+      }
+    }, _callee20, this);
+  }));
+
+  return function setIncr(_x26, _x27) {
+    return _ref23.apply(this, arguments);
   };
 }();
 

@@ -80,6 +80,12 @@ matched.on('data', console.log);
   // if m was not previously incremented
   // then m is Date.now()
   // otherwise previous m + 1
+
+  const unixTime = Math.round(Date.now()/1000));
+  // actually saves unixTime - 1
+  setIncr('test2', unixTime);
+  n = incr('test2');
+  // n == unixTime
 ```
 
 
@@ -120,3 +126,7 @@ used. `map` is an optional function to modify rows. `timeMS` will return time as
 *incr(key, init=0)*
 
 Increment `key` and return new value. Stored in file `key_INCR`. Optionally init at some number.
+
+*setIncr(key, val)*
+
+Set counter for `key` to `val-1` so next call to `incr(key)` returns `val`.

@@ -621,7 +621,7 @@ export function queryOpts(options) {
 export async function getTypes(globPat) {
   let matchDirs = [];
   try {
-    matchDirs = await glob_(`${cfg.path}/${globPat}`);
+    matchDirs = await glob_(`${cfg.path}/${globPat}_GMT`);
   } catch (e) {
     throw new Error('timequerylog error globbing for '+glob);
   }
@@ -685,4 +685,11 @@ export async function incr(key, init = 0) {
     }
   }
 }
+
+export async function setIncr(key, val) {
+  const fname = `${cfg.path}/${key}_INCR`;
+  incrs[key] = val - 1;
+  await writeFilePromise(fname, incrs[key]);
+}
+
 
