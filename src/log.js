@@ -684,10 +684,11 @@ export async function queryMultiArray({typeGlob, start, end, match}) {
 
 const incrs = {};
 
-export async function incr(key, init = 0) {
+export async function incr(key, init = 0, load = false) {
   const fname = `${cfg.path}/${key}_INCR`;
   if (incrs[key]) {
-    incrs[key]++;
+    incrs[key];
+    if (!load) incrs[key]++;
     await writeFilePromise(fname, incrs[key]);
     return incrs[key];
   } else {
@@ -698,7 +699,7 @@ export async function incr(key, init = 0) {
       return incrs[key];
     } else {
       let curr = 1*(await readFilePromise(fname));
-      curr += 1;
+      if (!load) curr += 1;
       incrs[key] = curr;
       await writeFilePromise(fname, curr+"");
       return curr;
@@ -712,4 +713,17 @@ export async function setIncr(key, val) {
   await writeFilePromise(fname, incrs[key]);
 }
 
+export function incrNow(key, init = 0) {
+  if (incrs[key]) {
+    const result = incrs[key]+1;
+
+    incr(key, init)
+    .catch( (e) => {
+      throw new Error("incrNow error: "+key+" "+e.message) 
+    });
+    return result;
+  } else {
+    throw new Error("incrNow error: not loaded. Call incr first. "+key);
+  }
+}
 

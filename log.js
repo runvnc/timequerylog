@@ -1012,6 +1012,7 @@ var queryMultiArray = exports.queryMultiArray = function () {
 var incr = exports.incr = function () {
   var _ref22 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee19(key) {
     var init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var load = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var fname, exists, curr;
     return _regenerator2.default.wrap(function _callee19$(_context20) {
       while (1) {
@@ -1020,53 +1021,54 @@ var incr = exports.incr = function () {
             fname = cfg.path + '/' + key + '_INCR';
 
             if (!incrs[key]) {
-              _context20.next = 8;
+              _context20.next = 9;
               break;
             }
 
-            incrs[key]++;
-            _context20.next = 5;
+            incrs[key];
+            if (!load) incrs[key]++;
+            _context20.next = 6;
             return writeFilePromise(fname, incrs[key]);
 
-          case 5:
+          case 6:
             return _context20.abrupt('return', incrs[key]);
 
-          case 8:
-            _context20.next = 10;
+          case 9:
+            _context20.next = 11;
             return (0, _pathExists2.default)(fname);
 
-          case 10:
+          case 11:
             exists = _context20.sent;
 
             if (exists) {
-              _context20.next = 18;
+              _context20.next = 19;
               break;
             }
 
             incrs[key] = init;
-            _context20.next = 15;
+            _context20.next = 16;
             return writeFilePromise(fname, init + "");
 
-          case 15:
+          case 16:
             return _context20.abrupt('return', incrs[key]);
 
-          case 18:
-            _context20.next = 20;
+          case 19:
+            _context20.next = 21;
             return readFilePromise(fname);
 
-          case 20:
+          case 21:
             _context20.t0 = _context20.sent;
             curr = 1 * _context20.t0;
 
-            curr += 1;
+            if (!load) curr += 1;
             incrs[key] = curr;
-            _context20.next = 26;
+            _context20.next = 27;
             return writeFilePromise(fname, curr + "");
 
-          case 26:
+          case 27:
             return _context20.abrupt('return', curr);
 
-          case 27:
+          case 28:
           case 'end':
             return _context20.stop();
         }
@@ -1100,7 +1102,7 @@ var setIncr = exports.setIncr = function () {
     }, _callee20, this);
   }));
 
-  return function setIncr(_x26, _x27) {
+  return function setIncr(_x27, _x28) {
     return _ref23.apply(this, arguments);
   };
 }();
@@ -1110,6 +1112,7 @@ exports.whichFile = whichFile;
 exports.log = log;
 exports.queryOpts = queryOpts;
 exports.hrms = hrms;
+exports.incrNow = incrNow;
 
 var _fs = require('mz/fs');
 
@@ -1946,3 +1949,18 @@ function byJSDate(a, b) {
 }
 
 var incrs = {};
+
+function incrNow(key) {
+  var init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+  if (incrs[key]) {
+    var result = incrs[key] + 1;
+
+    incr(key, init).catch(function (e) {
+      throw new Error("incrNow error: " + key + " " + e.message);
+    });
+    return result;
+  } else {
+    throw new Error("incrNow error: not loaded. Call incr first. " + key);
+  }
+}

@@ -86,6 +86,16 @@ matched.on('data', console.log);
   await setIncr('test2', unixTime);
   n = await incr('test2');
   // n == unixTime
+
+  // just load counter from file dont increment
+  let load = incr('test3',undefined,true);
+  // loaded into memory, can now incr in memory
+  // and save after immediate return
+  let imm = incrNow('test3');
+  // if the process is killed suddenly
+  // without Node.js events completing, may not save
+  // updated value..
+
 ```
 
 ### getTypes, queryMultiArray, high res time (hrms)
@@ -144,9 +154,10 @@ This query function takes an options object and returns either an objectMode str
 If `end` is not specified the current time is used.  If `start` is not specified then `end`-30 minutes is
 used. `map` is an optional function to modify rows. `timeMS` will return time as MS since epoch.
 
-*incr(key, init=0)*
+*incr(key, init=0)* or *incrNow(key, init) (non-promise version)*
 
 Increment `key` and return new value. Stored in file `key_INCR`. Optionally init at some number.
+If you await`incr(key,undefined,true)` first to load you can use the immediate (non-async) `incrNow` to update the value in memory without waiting for the file save to complete storing the new number.
 
 *setIncr(key, val)*
 
