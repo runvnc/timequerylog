@@ -1045,7 +1045,7 @@ var incr = exports.incr = function () {
               break;
             }
 
-            incrs[key] = init;
+            incrs[key] = init * 1;
             _context20.next = 16;
             return writeFilePromise(fname, init + "");
 
@@ -1953,7 +1953,7 @@ var incrs = {};
 function incrNow(key) {
   var init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
-  if (incrs[key]) {
+  if (incrs.hasOwnProperty(key)) {
     var result = incrs[key] + 1;
 
     incr(key, init).catch(function (e) {

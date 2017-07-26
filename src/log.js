@@ -694,7 +694,7 @@ export async function incr(key, init = 0, load = false) {
   } else {
     const exists = await pathExists(fname);
     if (!exists) {
-      incrs[key] = init;
+      incrs[key] = init*1;
       await writeFilePromise(fname, init+"");
       return incrs[key];
     } else {
@@ -714,7 +714,7 @@ export async function setIncr(key, val) {
 }
 
 export function incrNow(key, init = 0) {
-  if (incrs[key]) {
+  if (incrs.hasOwnProperty(key)) {
     const result = incrs[key]+1;
 
     incr(key, init)

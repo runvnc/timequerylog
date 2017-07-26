@@ -87,8 +87,8 @@ matched.on('data', console.log);
   n = await incr('test2');
   // n == unixTime
 
-  // just load counter from file dont increment
-  let load = incr('test3',undefined,true);
+  // need to load first with async call
+  let load = incr('test3',Date.now());
   // loaded into memory, can now incr in memory
   // and save after immediate return
   let imm = incrNow('test3');
