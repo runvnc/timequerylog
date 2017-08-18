@@ -586,7 +586,6 @@ class QueryStream extends Readable {
             this.row = this.data[this.rowNum++];
           }
         } catch (e) { console.trace(e) };
-        this.row = await this.nextRow();
         if (this.row === undefined) this.row = null;
         if (!(this.row===null)) {
           if (this.timeMS && this.row.time.getTime) this.row.time = this.row.time.getTime();

@@ -34,7 +34,7 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var deleteOldFiles = function () {
-  var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
+  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
     var _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _step$value, type, olderThan, end, start, files, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, file;
 
     return _regenerator2.default.wrap(function _callee$(_context) {
@@ -177,7 +177,7 @@ var deleteOldFiles = function () {
 }();
 
 var getWriteStreamExt = function () {
-  var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(fname) {
+  var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(fname) {
     var exists, fexists, encodeStream, fileStream;
     return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
@@ -244,7 +244,7 @@ var getWriteStreamExt = function () {
 }();
 
 var snappyCompress = function () {
-  var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(type, f) {
+  var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(type, f) {
     var buffer, compressed;
     return _regenerator2.default.wrap(function _callee4$(_context4) {
       while (1) {
@@ -316,7 +316,7 @@ var snappyCompress = function () {
 }();
 
 var compressOld = function () {
-  var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(_ref6) {
+  var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(_ref6) {
     var type = _ref6.type,
         time = _ref6.time;
 
@@ -431,7 +431,7 @@ var compressOld = function () {
 }();
 
 var whichFiles = exports.whichFiles = function () {
-  var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(type, start, end) {
+  var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(type, start, end) {
     var _this = this;
 
     var startDate, endDate, st, en, dirs, newDirs, result, _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _loop, _iterator4, _step4, _ret;
@@ -483,7 +483,7 @@ var whichFiles = exports.whichFiles = function () {
             _didIteratorError4 = false;
             _iteratorError4 = undefined;
             _context7.prev = 26;
-            _loop = _regenerator2.default.mark(function _loop() {
+            _loop = /*#__PURE__*/_regenerator2.default.mark(function _loop() {
               var dir, files, paths;
               return _regenerator2.default.wrap(function _loop$(_context6) {
                 while (1) {
@@ -603,7 +603,7 @@ var whichFiles = exports.whichFiles = function () {
 }();
 
 var filterFile = function () {
-  var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(fname, start, end, matchFunction) {
+  var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(fname, start, end, matchFunction) {
     var data;
     return _regenerator2.default.wrap(function _callee7$(_context8) {
       while (1) {
@@ -652,7 +652,7 @@ var filterFile = function () {
 }();
 
 var query = exports.query = function () {
-  var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(type, start, end) {
+  var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(type, start, end) {
     var matchFunction = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function (d) {
       return true;
     };
@@ -748,7 +748,7 @@ var query = exports.query = function () {
 }();
 
 var queryRecent = exports.queryRecent = function () {
-  var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee9(type) {
+  var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(type) {
     var end, start, results;
     return _regenerator2.default.wrap(function _callee9$(_context10) {
       while (1) {
@@ -777,7 +777,7 @@ var queryRecent = exports.queryRecent = function () {
 }();
 
 var latest = exports.latest = function () {
-  var _ref18 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee16(type) {
+  var _ref18 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee16(type) {
     var start, end, files, match, data, last;
     return _regenerator2.default.wrap(function _callee16$(_context17) {
       while (1) {
@@ -837,7 +837,7 @@ var latest = exports.latest = function () {
 }();
 
 var getTypes = exports.getTypes = function () {
-  var _ref19 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee17(globPat) {
+  var _ref19 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee17(globPat) {
     var matchDirs;
     return _regenerator2.default.wrap(function _callee17$(_context18) {
       while (1) {
@@ -878,7 +878,7 @@ var getTypes = exports.getTypes = function () {
 }();
 
 var queryMultiArray = exports.queryMultiArray = function () {
-  var _ref20 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee18(_ref21) {
+  var _ref20 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee18(_ref21) {
     var typeGlob = _ref21.typeGlob,
         start = _ref21.start,
         end = _ref21.end,
@@ -1010,7 +1010,7 @@ var queryMultiArray = exports.queryMultiArray = function () {
 }();
 
 var incr = exports.incr = function () {
-  var _ref22 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee19(key) {
+  var _ref22 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee19(key) {
     var init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
     var load = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var fname, exists, curr;
@@ -1082,7 +1082,7 @@ var incr = exports.incr = function () {
 }();
 
 var setIncr = exports.setIncr = function () {
-  var _ref23 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee20(key, val) {
+  var _ref23 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee20(key, val) {
     var fname;
     return _regenerator2.default.wrap(function _callee20$(_context21) {
       while (1) {
@@ -1332,7 +1332,7 @@ var out = [];
 var currentLogging = null;
 var memlog = [];
 
-process.on('tql', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2() {
+process.on('tql', (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
   var _out$pop, type, currentState, time, cstr, newLogging;
 
   return _regenerator2.default.wrap(function _callee2$(_context2) {
@@ -1544,7 +1544,7 @@ var QueryStream = function (_Readable) {
 
     var _this2 = (0, _possibleConstructorReturn3.default)(this, (QueryStream.__proto__ || Object.getPrototypeOf(QueryStream)).call(this, options));
 
-    _this2.init = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee10() {
+    _this2.init = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10() {
       return _regenerator2.default.wrap(function _callee10$(_context11) {
         while (1) {
           switch (_context11.prev = _context11.next) {
@@ -1568,7 +1568,7 @@ var QueryStream = function (_Readable) {
         }
       }, _callee10, _this3);
     }));
-    _this2.checkPreload = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee12() {
+    _this2.checkPreload = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12() {
       var preloads, xx, _loop2, n;
 
       return _regenerator2.default.wrap(function _callee12$(_context13) {
@@ -1582,7 +1582,7 @@ var QueryStream = function (_Readable) {
               xx = 0;
 
               _loop2 = function _loop2(n) {
-                preloads.push((0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee11() {
+                preloads.push((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11() {
                   return _regenerator2.default.wrap(function _callee11$(_context12) {
                     while (1) {
                       switch (_context12.prev = _context12.next) {
@@ -1631,7 +1631,7 @@ var QueryStream = function (_Readable) {
     }));
 
     _this2.loadFile = function () {
-      var _ref15 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee13(f) {
+      var _ref15 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13(f) {
         var result, st;
         return _regenerator2.default.wrap(function _callee13$(_context14) {
           while (1) {
@@ -1744,7 +1744,7 @@ var QueryStream = function (_Readable) {
       };
     }();
 
-    _this2.nextRow = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee14() {
+    _this2.nextRow = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee14() {
       var row;
       return _regenerator2.default.wrap(function _callee14$(_context15) {
         while (1) {
@@ -1801,7 +1801,7 @@ var QueryStream = function (_Readable) {
     _this2._read = function () {
       var id = (0, _uuid.v4)();
       _this2.reading = new Promise(function () {
-        var _ref17 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee15(res) {
+        var _ref17 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee15(res) {
           var canPush, i;
           return _regenerator2.default.wrap(function _callee15$(_context16) {
             while (1) {
@@ -1853,12 +1853,6 @@ var QueryStream = function (_Readable) {
 
                 case 22:
                   ;
-                  _context16.next = 25;
-                  return _this2.nextRow();
-
-                case 25:
-                  _this2.row = _context16.sent;
-
                   if (_this2.row === undefined) _this2.row = null;
                   if (!(_this2.row === null)) {
                     if (_this2.timeMS && _this2.row.time.getTime) _this2.row.time = _this2.row.time.getTime();
@@ -1867,26 +1861,26 @@ var QueryStream = function (_Readable) {
                   canPush = _this2.push(_this2.row);
 
                   if (!(_this2.data && _this2.rowNum == _this2.data.length)) {
-                    _context16.next = 33;
+                    _context16.next = 30;
                     break;
                   }
 
-                  _context16.next = 32;
+                  _context16.next = 29;
                   return _this2.loadFile();
 
-                case 32:
+                case 29:
                   _this2.data = _context16.sent;
 
-                case 33:
+                case 30:
                   if (_this2.row && canPush) {
                     _context16.next = 6;
                     break;
                   }
 
-                case 34:
+                case 31:
                   return _context16.abrupt('return', true);
 
-                case 35:
+                case 32:
                 case 'end':
                   return _context16.stop();
               }
