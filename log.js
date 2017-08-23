@@ -1265,13 +1265,18 @@ function closeStreams() {
   }
 }
 
+function exitIfNoListeners() {
+  console.log("timequerylog: SIGINT: trying to clean up fast.");
+  if (process.listeners('SIGINT').length == 1) process.exit();
+}
+
 var cleanup = function cleanup(code, signal) {
   if (q.length > 0) q.on('end', function () {
     closeStreams();
-    process.exit();
+    exitIfNoListeners();
   });else {
     closeStreams();
-    process.exit();
+    exitIfNoListeners();
   }
 };
 
