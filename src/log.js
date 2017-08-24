@@ -102,14 +102,30 @@ function exitIfNoListeners() {
     process.exit();
 }
 
+let _resExit = null;
+let resolveCanExit = (resolveExit) => { _resExit = resolveExit; return _resExit; };
+const _readyToExit = new Promise(resolveCanExit);
+
+export function queueLength() {
+  return q.length;
+}
+
+export function readyToExit() {
+  return _readyToExit;
+}
+
 const cleanup = (code, signal) => {
-  if (q.length>0)
+  if (q.length>0) {
+    console.log("timequerylog: queue length:",q.length);
     q.on('end', ()=> {
+      console.log("timequerylog: closing streams");
       closeStreams();
+      _resExit();
       exitIfNoListeners();
     });
-  else {
+  } else {
     closeStreams();
+    _resExit();
     exitIfNoListeners();
   }
 };
@@ -310,6 +326,7 @@ function dolog(type, obj, time = new Date(), cb) {
     });
   } catch (e) {
     console.error(e);
+    cb(null,null);
   }
 }
 

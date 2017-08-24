@@ -1107,6 +1107,8 @@ var setIncr = exports.setIncr = function () {
   };
 }();
 
+exports.queueLength = queueLength;
+exports.readyToExit = readyToExit;
 exports.config = config;
 exports.whichFile = whichFile;
 exports.log = log;
@@ -1270,12 +1272,32 @@ function exitIfNoListeners() {
   if (process.listeners('SIGINT').length == 1) process.exit();
 }
 
+var _resExit = null;
+var resolveCanExit = function resolveCanExit(resolveExit) {
+  _resExit = resolveExit;return _resExit;
+};
+var _readyToExit = new Promise(resolveCanExit);
+
+function queueLength() {
+  return q.length;
+}
+
+function readyToExit() {
+  return _readyToExit;
+}
+
 var cleanup = function cleanup(code, signal) {
-  if (q.length > 0) q.on('end', function () {
+  if (q.length > 0) {
+    console.log("timequerylog: queue length:", q.length);
+    q.on('end', function () {
+      console.log("timequerylog: closing streams");
+      closeStreams();
+      _resExit();
+      exitIfNoListeners();
+    });
+  } else {
     closeStreams();
-    exitIfNoListeners();
-  });else {
-    closeStreams();
+    _resExit();
     exitIfNoListeners();
   }
 };
@@ -1430,6 +1452,7 @@ function dolog(type, obj) {
     });
   } catch (e) {
     console.error(e);
+    cb(null, null);
   }
 }
 
