@@ -1401,7 +1401,7 @@ function log(type, obj) {
     copyTime = new Date(obj.time.getTime());
     delete obj['time'];
     if (lastData.hasOwnProperty(type) && (0, _deepEqual2.default)(lastData[type], obj)) {
-      obj.time = copyTime;
+      //obj.time = copyTime;      
       return;
     }
     lastData[type] = (0, _lodash2.default)(obj);
@@ -1412,6 +1412,7 @@ function log(type, obj) {
   //  return;
   //}
   var currentState = (0, _jsonStringifySafe2.default)(obj);
+  delete obj['time'];
   //const currentState = JSON.stringify(obj);
   q.push(function (cb) {
     dolog(type, currentState, time, cb);

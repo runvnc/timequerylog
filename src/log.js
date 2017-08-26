@@ -209,7 +209,7 @@ export function log(type,obj,time = new Date()) {
     copyTime = new Date(obj.time.getTime());
     delete obj['time'];
     if (lastData.hasOwnProperty(type) && equal(lastData[type], obj)) {
-      obj.time = copyTime;
+      //obj.time = copyTime;      
       return;
     }
     lastData[type] = cloneDeep(obj);
@@ -220,6 +220,7 @@ export function log(type,obj,time = new Date()) {
   //  return;
   //}
   const currentState = safeStringify(obj);
+  delete obj['time'];
   //const currentState = JSON.stringify(obj);
   q.push(cb => { dolog(type, currentState, time, cb);});
   //out.push({type, currentState, time});
