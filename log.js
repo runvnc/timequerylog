@@ -1395,7 +1395,7 @@ function log(type, obj) {
 
   //if (cfg.ignore && cfg.ignore == true) return;
   lastUpdateTime[type] = time;
-  obj.time = time;
+  if (!obj.hasOwnProperty('time')) obj.time = time;else time = obj.time;
   if (noRepeat(type)) {
     var copyTime = null;
     copyTime = new Date(obj.time.getTime());
