@@ -657,7 +657,7 @@ var query = exports.query = function () {
       return true;
     };
 
-    var files, results, _iteratorNormalCompletion5, _didIteratorError5, _iteratorError5, _iterator5, _step5, fname;
+    var files, results, _iteratorNormalCompletion5, _didIteratorError5, _iteratorError5, _iterator5, _step5, fname, filtered, _iteratorNormalCompletion6, _didIteratorError6, _iteratorError6, _iterator6, _step6, item;
 
     return _regenerator2.default.wrap(function _callee8$(_context9) {
       while (1) {
@@ -677,53 +677,53 @@ var query = exports.query = function () {
 
           case 9:
             if (_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done) {
-              _context9.next = 20;
+              _context9.next = 43;
               break;
             }
 
             fname = _step5.value;
-            _context9.t0 = Array.prototype.push;
-            _context9.t1 = results;
-            _context9.next = 15;
+            _context9.prev = 11;
+            _context9.next = 14;
             return filterFile(fname, start, end, matchFunction);
 
-          case 15:
-            _context9.t2 = _context9.sent;
+          case 14:
+            filtered = _context9.sent;
+            _iteratorNormalCompletion6 = true;
+            _didIteratorError6 = false;
+            _iteratorError6 = undefined;
+            _context9.prev = 18;
 
-            _context9.t0.apply.call(_context9.t0, _context9.t1, _context9.t2);
+            for (_iterator6 = filtered[Symbol.iterator](); !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+              item = _step6.value;
 
-          case 17:
-            _iteratorNormalCompletion5 = true;
-            _context9.next = 9;
-            break;
-
-          case 20:
+              results.push(item);
+            }
             _context9.next = 26;
             break;
 
           case 22:
             _context9.prev = 22;
-            _context9.t3 = _context9['catch'](7);
-            _didIteratorError5 = true;
-            _iteratorError5 = _context9.t3;
+            _context9.t0 = _context9['catch'](18);
+            _didIteratorError6 = true;
+            _iteratorError6 = _context9.t0;
 
           case 26:
             _context9.prev = 26;
             _context9.prev = 27;
 
-            if (!_iteratorNormalCompletion5 && _iterator5.return) {
-              _iterator5.return();
+            if (!_iteratorNormalCompletion6 && _iterator6.return) {
+              _iterator6.return();
             }
 
           case 29:
             _context9.prev = 29;
 
-            if (!_didIteratorError5) {
+            if (!_didIteratorError6) {
               _context9.next = 32;
               break;
             }
 
-            throw _iteratorError5;
+            throw _iteratorError6;
 
           case 32:
             return _context9.finish(29);
@@ -732,14 +732,64 @@ var query = exports.query = function () {
             return _context9.finish(26);
 
           case 34:
+            _context9.next = 40;
+            break;
+
+          case 36:
+            _context9.prev = 36;
+            _context9.t1 = _context9['catch'](11);
+
+            console.trace(_context9.t1);
+            throw _context9.t1;
+
+          case 40:
+            _iteratorNormalCompletion5 = true;
+            _context9.next = 9;
+            break;
+
+          case 43:
+            _context9.next = 49;
+            break;
+
+          case 45:
+            _context9.prev = 45;
+            _context9.t2 = _context9['catch'](7);
+            _didIteratorError5 = true;
+            _iteratorError5 = _context9.t2;
+
+          case 49:
+            _context9.prev = 49;
+            _context9.prev = 50;
+
+            if (!_iteratorNormalCompletion5 && _iterator5.return) {
+              _iterator5.return();
+            }
+
+          case 52:
+            _context9.prev = 52;
+
+            if (!_didIteratorError5) {
+              _context9.next = 55;
+              break;
+            }
+
+            throw _iteratorError5;
+
+          case 55:
+            return _context9.finish(52);
+
+          case 56:
+            return _context9.finish(49);
+
+          case 57:
             return _context9.abrupt('return', results);
 
-          case 35:
+          case 58:
           case 'end':
             return _context9.stop();
         }
       }
-    }, _callee8, this, [[7, 22, 26, 34], [27,, 29, 33]]);
+    }, _callee8, this, [[7, 45, 49, 57], [11, 36], [18, 22, 26, 34], [27,, 29, 33], [50,, 52, 56]]);
   }));
 
   return function query(_x14, _x15, _x16) {
@@ -884,7 +934,7 @@ var queryMultiArray = exports.queryMultiArray = function () {
         end = _ref21.end,
         match = _ref21.match;
 
-    var types, all, calls, _iteratorNormalCompletion6, _didIteratorError6, _iteratorError6, _iterator6, _step6, type, results, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, result;
+    var types, all, calls, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, type, results, _iteratorNormalCompletion8, _didIteratorError8, _iteratorError8, _iterator8, _step8, result;
 
     return _regenerator2.default.wrap(function _callee18$(_context19) {
       while (1) {
@@ -901,13 +951,13 @@ var queryMultiArray = exports.queryMultiArray = function () {
           case 5:
             types = _context19.sent;
             all = [], calls = [];
-            _iteratorNormalCompletion6 = true;
-            _didIteratorError6 = false;
-            _iteratorError6 = undefined;
+            _iteratorNormalCompletion7 = true;
+            _didIteratorError7 = false;
+            _iteratorError7 = undefined;
             _context19.prev = 10;
 
-            for (_iterator6 = types[Symbol.iterator](); !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-              type = _step6.value;
+            for (_iterator7 = types[Symbol.iterator](); !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+              type = _step7.value;
 
               calls.push(query(type, start, end, match));
             }
@@ -917,26 +967,26 @@ var queryMultiArray = exports.queryMultiArray = function () {
           case 14:
             _context19.prev = 14;
             _context19.t0 = _context19['catch'](10);
-            _didIteratorError6 = true;
-            _iteratorError6 = _context19.t0;
+            _didIteratorError7 = true;
+            _iteratorError7 = _context19.t0;
 
           case 18:
             _context19.prev = 18;
             _context19.prev = 19;
 
-            if (!_iteratorNormalCompletion6 && _iterator6.return) {
-              _iterator6.return();
+            if (!_iteratorNormalCompletion7 && _iterator7.return) {
+              _iterator7.return();
             }
 
           case 21:
             _context19.prev = 21;
 
-            if (!_didIteratorError6) {
+            if (!_didIteratorError7) {
               _context19.next = 24;
               break;
             }
 
-            throw _iteratorError6;
+            throw _iteratorError7;
 
           case 24:
             return _context19.finish(21);
@@ -950,13 +1000,13 @@ var queryMultiArray = exports.queryMultiArray = function () {
 
           case 28:
             results = _context19.sent;
-            _iteratorNormalCompletion7 = true;
-            _didIteratorError7 = false;
-            _iteratorError7 = undefined;
+            _iteratorNormalCompletion8 = true;
+            _didIteratorError8 = false;
+            _iteratorError8 = undefined;
             _context19.prev = 32;
 
-            for (_iterator7 = results[Symbol.iterator](); !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-              result = _step7.value;
+            for (_iterator8 = results[Symbol.iterator](); !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+              result = _step8.value;
 
               all = all.concat(result);
             }_context19.next = 40;
@@ -965,26 +1015,26 @@ var queryMultiArray = exports.queryMultiArray = function () {
           case 36:
             _context19.prev = 36;
             _context19.t1 = _context19['catch'](32);
-            _didIteratorError7 = true;
-            _iteratorError7 = _context19.t1;
+            _didIteratorError8 = true;
+            _iteratorError8 = _context19.t1;
 
           case 40:
             _context19.prev = 40;
             _context19.prev = 41;
 
-            if (!_iteratorNormalCompletion7 && _iterator7.return) {
-              _iterator7.return();
+            if (!_iteratorNormalCompletion8 && _iterator8.return) {
+              _iterator8.return();
             }
 
           case 43:
             _context19.prev = 43;
 
-            if (!_didIteratorError7) {
+            if (!_didIteratorError8) {
               _context19.next = 46;
               break;
             }
 
-            throw _iteratorError7;
+            throw _iteratorError8;
 
           case 46:
             return _context19.finish(43);

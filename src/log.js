@@ -493,7 +493,15 @@ export async function query(type, start, end, matchFunction = (d => true)) {
   let files = await whichFiles(type, start, end);
   let results = [];
   for (let fname of files) {
-    Array.prototype.push.apply(results, await filterFile(fname, start, end, matchFunction));
+    try {
+      let filtered = await filterFile(fname, start, end, matchFunction);
+      for (let item of filtered) {
+        results.push(item);
+      }
+    } catch (e) {
+      console.trace(e);
+      throw e;
+    }
   }
   return results;
 }
