@@ -453,10 +453,9 @@ function matchRows({data, start, end, matchFunction}) {
   for (let i=0; i<data.length; i++) {
     let r = data[i];
     r.time = new Date(r.time);
-    results.push(r);
-    //if (r.time >= start && r.time <= end &&
-    //   matchFunction(r))
-    //  results.push(r);
+    if (r.time >= start && r.time <= end &&
+       matchFunction(r))
+      results.push(r);
   }
   return results;
 }

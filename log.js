@@ -1599,10 +1599,7 @@ function matchRows(_ref8) {
   for (var i = 0; i < data.length; i++) {
     var r = data[i];
     r.time = new Date(r.time);
-    results.push(r);
-    //if (r.time >= start && r.time <= end &&
-    //   matchFunction(r))
-    //  results.push(r);
+    if (r.time >= start && r.time <= end && matchFunction(r)) results.push(r);
   }
   return results;
 }
