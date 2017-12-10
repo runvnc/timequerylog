@@ -106,6 +106,25 @@ let _resExit = null;
 let resolveCanExit = (resolveExit) => { _resExit = resolveExit; return _resExit; };
 const _readyToExit = new Promise(resolveCanExit);
 
+export function resetQueue() {
+  q = queue({concurrency:1});
+  started = false;
+}
+
+export async function drainQueue() {
+  let len = 100;
+  do {
+    len = queueLength();
+    await delay(10);
+  } while (len > 0);
+  for (let i=0; i<30;i++) {
+    await delay(1);
+  }
+  await delay(10);
+  resetQueue(); 
+}
+
+
 export function queueLength() {
   return q.length;
 }
@@ -200,8 +219,15 @@ process.on('tql', async () => {
   completed++;
 });
 
+//setInterval( () => {
+//  if (q && q.length == 0) {
+//    resetQueue();
+//  }
+//}, 100);
+
 export function log(type,obj,time = new Date()) {
   //if (cfg.ignore && cfg.ignore == true) return;
+
   lastUpdateTime[type] = time;
   if (!obj.hasOwnProperty('time')) 
     obj.time = time;
@@ -225,7 +251,9 @@ export function log(type,obj,time = new Date()) {
   const currentState = safeStringify(obj);
   delete obj['time'];
   //const currentState = JSON.stringify(obj);
-  q.push(cb => { dolog(type, currentState, time, cb);});
+  q.push(cb => { 
+    dolog(type, currentState, time, cb);
+  });
   //out.push({type, currentState, time});
   //process.emit('tql');
   if (!started) {
