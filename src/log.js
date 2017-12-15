@@ -43,6 +43,8 @@ async function deleteOldFiles() {
   }
 }
 
+const DBG = process.env.DEBUG_TQL;
+
 let opts = { max: 50000000
               , length: (n, key) => { return n.length }
               , dispose: (key, n) => { true; }
@@ -165,6 +167,10 @@ q.on('end', () => {
 //onExit(cleanup);
 process.on('SIGINT', cleanup);
 
+function dbg(m) {
+  console.log(m);
+}
+
 export function config(conf) {
   Object.assign(cfg,conf);
   checkDelete();
@@ -219,12 +225,6 @@ process.on('tql', async () => {
   completed++;
 });
 
-//setInterval( () => {
-//  if (q && q.length == 0) {
-//    resetQueue();
-//  }
-//}, 100);
-
 export function log(type,obj,time = new Date()) {
   //if (cfg.ignore && cfg.ignore == true) return;
 
@@ -244,18 +244,11 @@ export function log(type,obj,time = new Date()) {
     lastData[type] = cloneDeep(obj);
     obj.time = copyTime;
   }
-  //if (cfg.memory && cfg.memory == true) {
-  //  memlog.push(obj);
-  //  return;
-  //}
   const currentState = safeStringify(obj);
   delete obj['time'];
-  //const currentState = JSON.stringify(obj);
   q.push(cb => { 
     dolog(type, currentState, time, cb);
   });
-  //out.push({type, currentState, time});
-  //process.emit('tql');
   if (!started) {
     started = true;
     q.start(e=> {

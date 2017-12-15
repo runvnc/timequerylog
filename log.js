@@ -1320,6 +1320,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var glob_ = (0, _pify2.default)(_glob2.default);
 
+var DBG = process.env.DEBUG_TQL;
+
 var opts = { max: 50000000,
   length: function length(n, key) {
     return n.length;
@@ -1431,6 +1433,10 @@ q.on('end', function () {
 //onExit(cleanup);
 process.on('SIGINT', cleanup);
 
+function dbg(m) {
+  console.log(m);
+}
+
 function config(conf) {
   Object.assign(cfg, conf);
   checkDelete();
@@ -1503,12 +1509,6 @@ process.on('tql', (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.de
   }, _callee3, undefined);
 })));
 
-//setInterval( () => {
-//  if (q && q.length == 0) {
-//    resetQueue();
-//  }
-//}, 100);
-
 function log(type, obj) {
   var time = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date();
 
@@ -1527,18 +1527,11 @@ function log(type, obj) {
     lastData[type] = (0, _lodash2.default)(obj);
     obj.time = copyTime;
   }
-  //if (cfg.memory && cfg.memory == true) {
-  //  memlog.push(obj);
-  //  return;
-  //}
   var currentState = (0, _jsonStringifySafe2.default)(obj);
   delete obj['time'];
-  //const currentState = JSON.stringify(obj);
   q.push(function (cb) {
     dolog(type, currentState, time, cb);
   });
-  //out.push({type, currentState, time});
-  //process.emit('tql');
   if (!started) {
     started = true;
     q.start(function (e) {
