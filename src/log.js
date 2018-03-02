@@ -668,7 +668,7 @@ export async function latest(type) {
   let last = null;
   if (data) last = data[data.length-1];
   if (last) {
-   delete last.time;
+   //delete last.time;
    delete last.type;
    return last;
   }

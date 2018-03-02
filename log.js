@@ -922,15 +922,15 @@ var latest = exports.latest = function () {
             if (data) last = data[data.length - 1];
 
             if (!last) {
-              _context18.next = 18;
+              _context18.next = 17;
               break;
             }
 
-            delete last.time;
+            //delete last.time;
             delete last.type;
             return _context18.abrupt('return', last);
 
-          case 18:
+          case 17:
           case 'end':
             return _context18.stop();
         }
