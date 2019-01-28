@@ -1,6 +1,6 @@
 {
   "name": "timequerylog",
-  "version": "39.0.0",
+  "version": "40.0.0",
   "description": "Structured (JSON) logging separated into files per hour of day, with query.",
   "main": "log.js",
   "scripts": {
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "JSONStream": "^1.0.7",
-    "babel-core": "^6.3.26",
+    "babel-core": "^6.26.3",
     "babel-polyfill": "^6.3.14",
     "babel-runtime": "^6.11.6",
     "csv-write-stream": "^2.0.0",
@@ -32,7 +32,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lru-cache": "^4.0.2",
     "mkdirp": "^0.5.1",
-    "moment": "^2.11.1",
+    "moment": "^2.24.0",
     "moment-timezone": "^0.5.9",
     "msgpack-lite": "^0.1.26",
     "mz": "^2.1.0",

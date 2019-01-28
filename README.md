@@ -1,11 +1,10 @@
 (See also `tql-cli` command line tool.)
 
-JSONL (newline-separated JSON) (or JSONL compressed with Snappy) logging separated into a files per hour of day with simple query 
+JSONL (newline-separated JSON) logging separated into a files per hour of day with simple query 
 between start and end time with match function.
 
 The idea is to make it more efficient to query logs for a specific time period 
 or type of data/event by breaking up the files in a consistent way.
-Using Snappy can significantly reduce the disk usage.
 
 You may want to use sub-types to break out data to improve efficiency when the 
 sub-type data doesn't always need to be queried immediately.
@@ -37,12 +36,11 @@ query('request', new Date('01-01-1995'), new Date())
 .then(rows => console.log(rows));
 ```
 
-### Set directory for logging, don't repeat rows, compress with Snappy after 1 hour
+### Set directory for logging, don't repeat rows
 ```javascript
 import {config} from 'timequerylog';
 
-config({path:process.cwd()+'/datalog', noRepeat: true,
-        snappy:1});
+config({path:process.cwd()+'/datalog', noRepeat: true});
 ```
 
 ### Log using a different time than the present
@@ -141,8 +139,6 @@ returns true. Searches JSONL files starting from directory `./[type]_GMT`.
 
 Set configuration options.  Defaults are: `{path: process.cwd(), noRepeat: false},`
 `noRepeat:{[type]:true}` makes it ignore rows that are duplicates (besides time).
-To compress (and automatically decompress)
-with Snappy, use `snappy: 1`.
 
 To delete files older than X days, specify 
 `config({path:'datalog'}, deleteOldDays: {event: 100}}`) -- 
