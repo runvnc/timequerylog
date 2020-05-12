@@ -15,7 +15,7 @@ import queue from 'queue';
 import equal from 'deep-equal';
 import cloneDeep from 'lodash.clonedeep';
 import pify from 'pify';
-import snappy from 'snappy';
+//import snappy from 'snappy';
 import delay from 'delay';
 import {ReadableStreamBuffer} from 'stream-buffers';
 import {nowOrAgain,nowOrAgainPromise} from 'now-or-again';
@@ -51,7 +51,7 @@ let opts = { max: 50000000
               , maxAge: 1000 * 60 * 60 }
 const cache = LRU();
 
-const snappyCompressPromise = pify(snappy.compress);
+//const snappyCompressPromise = pify(snappy.compress);
 const readFilePromise = pify(readFile);
 const writeFilePromise = pify(writeFile);
 const unlinkPromise = pify(unlink);
@@ -344,7 +344,9 @@ function dolog(type, obj, time = new Date(), cb) {
     getWriteStreamExt(fname).then(stream => {
       stream.write(toWrite);
       if (cfg.snappy) {
-        compressOld({type, time}).then(cb);
+        console.error("Snappy compression no longer supported, sorry (did not work correctly)" +
+		      "Please remove 'snappy' config option from timequerylog and retry");
+        //compressOld({type, time}).then(cb);
       } else {
         cb(null,null);
       }

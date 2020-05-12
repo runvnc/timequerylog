@@ -1272,10 +1272,6 @@ var _pify = require('pify');
 
 var _pify2 = _interopRequireDefault(_pify);
 
-var _snappy = require('snappy');
-
-var _snappy2 = _interopRequireDefault(_snappy);
-
 var _delay = require('delay');
 
 var _delay2 = _interopRequireDefault(_delay);
@@ -1318,6 +1314,7 @@ var _stream = require('stream');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//import snappy from 'snappy';
 var glob_ = (0, _pify2.default)(_glob2.default);
 
 var DBG = process.env.DEBUG_TQL;
@@ -1332,7 +1329,7 @@ var opts = { max: 50000000,
   maxAge: 1000 * 60 * 60 };
 var cache = (0, _lruCache2.default)();
 
-var snappyCompressPromise = (0, _pify2.default)(_snappy2.default.compress);
+//const snappyCompressPromise = pify(snappy.compress);
 var readFilePromise = (0, _pify2.default)(_fs3.readFile);
 var writeFilePromise = (0, _pify2.default)(_fs3.writeFile);
 var unlinkPromise = (0, _pify2.default)(_fs3.unlink);
@@ -1559,7 +1556,8 @@ function dolog(type, obj) {
     }getWriteStreamExt(fname).then(function (stream) {
       stream.write(toWrite);
       if (cfg.snappy) {
-        compressOld({ type: type, time: time }).then(cb);
+        console.error("Snappy compression no longer supported, sorry (did not work correctly)" + "Please remove 'snappy' config option from timequerylog and retry");
+        //compressOld({type, time}).then(cb);
       } else {
         cb(null, null);
       }
@@ -1613,7 +1611,7 @@ function checkCache(fname, cb) {
     var buf = new Buffer(stat.size);
     _fs2.default.open(fname, 'r', function (er, fd) {
       _fs2.default.read(fd, buf, 0, stat.size, 0, function (e, bytes, buf2) {
-        _snappy2.default.uncompress(buf2, function (err, uncompressed) {
+        snappy.uncompress(buf2, function (err, uncompressed) {
           cache.set(fname, uncompressed);
           cb(uncompressed);
         });
