@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.setIncr = exports.incr = exports.queryMultiArray = exports.getTypes = exports.latest = exports.queryRecent = exports.query = exports.whichFiles = exports.drainQueue = undefined;
+exports.setIncr = exports.incr = exports.queryMultiArray = exports.getTypes = exports.queryOpts = exports.latest = exports.queryRecent = exports.query = exports.whichFiles = exports.drainQueue = undefined;
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -708,474 +708,325 @@ var filterFile = function () {
   };
 }();
 
+var fastFilterFile = function () {
+  var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(fname, start, end, matchFunction) {
+    var data, l, res, i, row;
+    return _regenerator2.default.wrap(function _callee9$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            _context10.next = 2;
+            return _fsNdjson2.default.readFile(fname);
+
+          case 2:
+            data = _context10.sent;
+
+            if (!(matchFunction == -1)) {
+              _context10.next = 5;
+              break;
+            }
+
+            return _context10.abrupt('return', data);
+
+          case 5:
+            l = data.length;
+            res = [];
+
+
+            for (i = 0; i < l; i++) {
+              row = data[i];
+
+              row.time = new Date(row.time);
+              if (row.time >= start && row.time <= end && matchFunction(row)) res.push(row);
+            }
+            return _context10.abrupt('return', res);
+
+          case 9:
+          case 'end':
+            return _context10.stop();
+        }
+      }
+    }, _callee9, this);
+  }));
+
+  return function fastFilterFile(_x14, _x15, _x16, _x17) {
+    return _ref11.apply(this, arguments);
+  };
+}();
+
 var query = exports.query = function () {
-  var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(type, start, end) {
+  var _ref12 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10(type, start, end) {
     var matchFunction = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function (d) {
       return true;
     };
 
     var files, results, _iteratorNormalCompletion5, _didIteratorError5, _iteratorError5, _iterator5, _step5, fname, filtered, _iteratorNormalCompletion6, _didIteratorError6, _iteratorError6, _iterator6, _step6, item;
 
-    return _regenerator2.default.wrap(function _callee9$(_context10) {
+    return _regenerator2.default.wrap(function _callee10$(_context11) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context11.prev = _context11.next) {
           case 0:
-            _context10.next = 2;
+            _context11.next = 2;
             return whichFiles(type, start, end);
 
           case 2:
-            files = _context10.sent;
+            files = _context11.sent;
             results = [];
             _iteratorNormalCompletion5 = true;
             _didIteratorError5 = false;
             _iteratorError5 = undefined;
-            _context10.prev = 7;
+            _context11.prev = 7;
             _iterator5 = files[Symbol.iterator]();
 
           case 9:
             if (_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done) {
-              _context10.next = 43;
+              _context11.next = 43;
               break;
             }
 
             fname = _step5.value;
-            _context10.prev = 11;
-            _context10.next = 14;
+            _context11.prev = 11;
+            _context11.next = 14;
             return filterFile(fname, start, end, matchFunction);
 
           case 14:
-            filtered = _context10.sent;
+            filtered = _context11.sent;
             _iteratorNormalCompletion6 = true;
             _didIteratorError6 = false;
             _iteratorError6 = undefined;
-            _context10.prev = 18;
+            _context11.prev = 18;
 
             for (_iterator6 = filtered[Symbol.iterator](); !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
               item = _step6.value;
 
               results.push(item);
             }
-            _context10.next = 26;
+            _context11.next = 26;
             break;
 
           case 22:
-            _context10.prev = 22;
-            _context10.t0 = _context10['catch'](18);
+            _context11.prev = 22;
+            _context11.t0 = _context11['catch'](18);
             _didIteratorError6 = true;
-            _iteratorError6 = _context10.t0;
+            _iteratorError6 = _context11.t0;
 
           case 26:
-            _context10.prev = 26;
-            _context10.prev = 27;
+            _context11.prev = 26;
+            _context11.prev = 27;
 
             if (!_iteratorNormalCompletion6 && _iterator6.return) {
               _iterator6.return();
             }
 
           case 29:
-            _context10.prev = 29;
+            _context11.prev = 29;
 
             if (!_didIteratorError6) {
-              _context10.next = 32;
+              _context11.next = 32;
               break;
             }
 
             throw _iteratorError6;
 
           case 32:
-            return _context10.finish(29);
+            return _context11.finish(29);
 
           case 33:
-            return _context10.finish(26);
+            return _context11.finish(26);
 
           case 34:
-            _context10.next = 40;
+            _context11.next = 40;
             break;
 
           case 36:
-            _context10.prev = 36;
-            _context10.t1 = _context10['catch'](11);
+            _context11.prev = 36;
+            _context11.t1 = _context11['catch'](11);
 
-            console.trace(_context10.t1);
-            throw _context10.t1;
+            console.trace(_context11.t1);
+            throw _context11.t1;
 
           case 40:
             _iteratorNormalCompletion5 = true;
-            _context10.next = 9;
+            _context11.next = 9;
             break;
 
           case 43:
-            _context10.next = 49;
+            _context11.next = 49;
             break;
 
           case 45:
-            _context10.prev = 45;
-            _context10.t2 = _context10['catch'](7);
+            _context11.prev = 45;
+            _context11.t2 = _context11['catch'](7);
             _didIteratorError5 = true;
-            _iteratorError5 = _context10.t2;
+            _iteratorError5 = _context11.t2;
 
           case 49:
-            _context10.prev = 49;
-            _context10.prev = 50;
+            _context11.prev = 49;
+            _context11.prev = 50;
 
             if (!_iteratorNormalCompletion5 && _iterator5.return) {
               _iterator5.return();
             }
 
           case 52:
-            _context10.prev = 52;
+            _context11.prev = 52;
 
             if (!_didIteratorError5) {
-              _context10.next = 55;
+              _context11.next = 55;
               break;
             }
 
             throw _iteratorError5;
 
           case 55:
-            return _context10.finish(52);
+            return _context11.finish(52);
 
           case 56:
-            return _context10.finish(49);
+            return _context11.finish(49);
 
           case 57:
-            return _context10.abrupt('return', results);
-
-          case 58:
-          case 'end':
-            return _context10.stop();
-        }
-      }
-    }, _callee9, this, [[7, 45, 49, 57], [11, 36], [18, 22, 26, 34], [27,, 29, 33], [50,, 52, 56]]);
-  }));
-
-  return function query(_x14, _x15, _x16) {
-    return _ref11.apply(this, arguments);
-  };
-}();
-
-var queryRecent = exports.queryRecent = function () {
-  var _ref12 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10(type) {
-    var end, start, results;
-    return _regenerator2.default.wrap(function _callee10$(_context11) {
-      while (1) {
-        switch (_context11.prev = _context11.next) {
-          case 0:
-            end = new Date();
-            start = (0, _momentTimezone2.default)(end).subtract(30, 'minutes').toDate();
-            _context11.next = 4;
-            return query(type, start, end);
-
-          case 4:
-            results = _context11.sent;
             return _context11.abrupt('return', results);
 
-          case 6:
+          case 58:
           case 'end':
             return _context11.stop();
         }
       }
-    }, _callee10, this);
+    }, _callee10, this, [[7, 45, 49, 57], [11, 36], [18, 22, 26, 34], [27,, 29, 33], [50,, 52, 56]]);
   }));
 
-  return function queryRecent(_x18) {
+  return function query(_x18, _x19, _x20) {
     return _ref12.apply(this, arguments);
   };
 }();
 
-var latest = exports.latest = function () {
-  var _ref19 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee17(type) {
-    var start, end, files, match, data, last;
-    return _regenerator2.default.wrap(function _callee17$(_context18) {
+var queryRecent = exports.queryRecent = function () {
+  var _ref14 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12(type) {
+    var end, start, results;
+    return _regenerator2.default.wrap(function _callee12$(_context13) {
       while (1) {
-        switch (_context18.prev = _context18.next) {
+        switch (_context13.prev = _context13.next) {
+          case 0:
+            end = new Date();
+            start = (0, _momentTimezone2.default)(end).subtract(30, 'minutes').toDate();
+            _context13.next = 4;
+            return query(type, start, end);
+
+          case 4:
+            results = _context13.sent;
+            return _context13.abrupt('return', results);
+
+          case 6:
+          case 'end':
+            return _context13.stop();
+        }
+      }
+    }, _callee12, this);
+  }));
+
+  return function queryRecent(_x22) {
+    return _ref14.apply(this, arguments);
+  };
+}();
+
+var latest = exports.latest = function () {
+  var _ref21 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee19(type) {
+    var start, end, files, match, data, last;
+    return _regenerator2.default.wrap(function _callee19$(_context20) {
+      while (1) {
+        switch (_context20.prev = _context20.next) {
           case 0:
             start = new Date('01-01-1980');
 
             if (lastUpdateTime[type]) start = lastUpdateTime[type];
             end = Date.now();
-            _context18.next = 5;
+            _context20.next = 5;
             return whichFiles(type, start, end);
 
           case 5:
-            files = _context18.sent;
+            files = _context20.sent;
 
             if (!(!files || files && files.length == 0)) {
-              _context18.next = 8;
+              _context20.next = 8;
               break;
             }
 
-            return _context18.abrupt('return');
+            return _context20.abrupt('return');
 
           case 8:
             match = function match(r) {
               return true;
             };
 
-            _context18.next = 11;
+            _context20.next = 11;
             return filterFile(files[files.length - 1], start, end, match);
 
           case 11:
-            data = _context18.sent;
+            data = _context20.sent;
             last = null;
 
             if (data) last = data[data.length - 1];
 
             if (!last) {
-              _context18.next = 17;
+              _context20.next = 17;
               break;
             }
 
             //delete last.time;
             delete last.type;
-            return _context18.abrupt('return', last);
+            return _context20.abrupt('return', last);
 
           case 17:
-          case 'end':
-            return _context18.stop();
-        }
-      }
-    }, _callee17, this);
-  }));
-
-  return function latest(_x21) {
-    return _ref19.apply(this, arguments);
-  };
-}();
-
-var getTypes = exports.getTypes = function () {
-  var _ref20 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee18(globPat) {
-    var matchDirs;
-    return _regenerator2.default.wrap(function _callee18$(_context19) {
-      while (1) {
-        switch (_context19.prev = _context19.next) {
-          case 0:
-            matchDirs = [];
-            _context19.prev = 1;
-            _context19.next = 4;
-            return glob_(cfg.path + '/' + globPat + '_GMT');
-
-          case 4:
-            matchDirs = _context19.sent;
-            _context19.next = 10;
-            break;
-
-          case 7:
-            _context19.prev = 7;
-            _context19.t0 = _context19['catch'](1);
-            throw new Error('timequerylog error globbing for ' + _glob2.default);
-
-          case 10:
-            return _context19.abrupt('return', matchDirs.map(function (dir) {
-              dir = dir.replace(cfg.path, '');
-              return dir.substr(1, dir.length - 5);
-            }));
-
-          case 11:
-          case 'end':
-            return _context19.stop();
-        }
-      }
-    }, _callee18, this, [[1, 7]]);
-  }));
-
-  return function getTypes(_x22) {
-    return _ref20.apply(this, arguments);
-  };
-}();
-
-var queryMultiArray = exports.queryMultiArray = function () {
-  var _ref21 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee19(_ref22) {
-    var typeGlob = _ref22.typeGlob,
-        start = _ref22.start,
-        end = _ref22.end,
-        match = _ref22.match;
-
-    var types, all, calls, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, type, results, _iteratorNormalCompletion8, _didIteratorError8, _iteratorError8, _iterator8, _step8, result;
-
-    return _regenerator2.default.wrap(function _callee19$(_context20) {
-      while (1) {
-        switch (_context20.prev = _context20.next) {
-          case 0:
-            if (!match) match = function match(d) {
-              return true;
-            };
-            if (!end) end = new Date();
-            if (!start) start = (0, _momentTimezone2.default)(end).subtract(30, 'minutes').toDate();
-            _context20.next = 5;
-            return getTypes(typeGlob);
-
-          case 5:
-            types = _context20.sent;
-            all = [], calls = [];
-            _iteratorNormalCompletion7 = true;
-            _didIteratorError7 = false;
-            _iteratorError7 = undefined;
-            _context20.prev = 10;
-
-            for (_iterator7 = types[Symbol.iterator](); !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-              type = _step7.value;
-
-              calls.push(query(type, start, end, match));
-            }
-            _context20.next = 18;
-            break;
-
-          case 14:
-            _context20.prev = 14;
-            _context20.t0 = _context20['catch'](10);
-            _didIteratorError7 = true;
-            _iteratorError7 = _context20.t0;
-
-          case 18:
-            _context20.prev = 18;
-            _context20.prev = 19;
-
-            if (!_iteratorNormalCompletion7 && _iterator7.return) {
-              _iterator7.return();
-            }
-
-          case 21:
-            _context20.prev = 21;
-
-            if (!_didIteratorError7) {
-              _context20.next = 24;
-              break;
-            }
-
-            throw _iteratorError7;
-
-          case 24:
-            return _context20.finish(21);
-
-          case 25:
-            return _context20.finish(18);
-
-          case 26:
-            _context20.next = 28;
-            return Promise.all(calls);
-
-          case 28:
-            results = _context20.sent;
-            _iteratorNormalCompletion8 = true;
-            _didIteratorError8 = false;
-            _iteratorError8 = undefined;
-            _context20.prev = 32;
-
-            for (_iterator8 = results[Symbol.iterator](); !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-              result = _step8.value;
-
-              all = all.concat(result);
-            }_context20.next = 40;
-            break;
-
-          case 36:
-            _context20.prev = 36;
-            _context20.t1 = _context20['catch'](32);
-            _didIteratorError8 = true;
-            _iteratorError8 = _context20.t1;
-
-          case 40:
-            _context20.prev = 40;
-            _context20.prev = 41;
-
-            if (!_iteratorNormalCompletion8 && _iterator8.return) {
-              _iterator8.return();
-            }
-
-          case 43:
-            _context20.prev = 43;
-
-            if (!_didIteratorError8) {
-              _context20.next = 46;
-              break;
-            }
-
-            throw _iteratorError8;
-
-          case 46:
-            return _context20.finish(43);
-
-          case 47:
-            return _context20.finish(40);
-
-          case 48:
-            all.sort(byJSDate);
-            return _context20.abrupt('return', all);
-
-          case 50:
           case 'end':
             return _context20.stop();
         }
       }
-    }, _callee19, this, [[10, 14, 18, 26], [19,, 21, 25], [32, 36, 40, 48], [41,, 43, 47]]);
+    }, _callee19, this);
   }));
 
-  return function queryMultiArray(_x23) {
+  return function latest(_x25) {
     return _ref21.apply(this, arguments);
   };
 }();
 
-var incr = exports.incr = function () {
-  var _ref23 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee20(key) {
-    var init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var load = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    var fname, exists, curr;
+var queryOpts = exports.queryOpts = function () {
+  var _ref22 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee20(options) {
+    var type, start, end, match, qs, csvWriter, obj2csv;
     return _regenerator2.default.wrap(function _callee20$(_context21) {
       while (1) {
         switch (_context21.prev = _context21.next) {
           case 0:
-            fname = cfg.path + '/' + key + '_INCR';
+            type = options.type, start = options.start, end = options.end, match = options.match;
 
-            if (!incrs[key]) {
-              _context21.next = 9;
+            if (!match) options.match = function (d) {
+              return true;
+            };
+            options.matchFunction = options.match;
+            if (!end) options.end = new Date();
+            if (!start) options.start = (0, _momentTimezone2.default)(end).subtract(30, 'minutes').toDate();
+            _context21.next = 7;
+            return whichFiles(type, start, end);
+
+          case 7:
+            options.files = _context21.sent;
+            qs = new ChunkStream(options);
+
+            if (!options.csv) {
+              _context21.next = 16;
               break;
             }
 
-            incrs[key];
-            if (!load) incrs[key]++;
-            _context21.next = 6;
-            return writeFilePromise(fname, incrs[key]);
+            csvWriter = require('csv-write-stream');
+            obj2csv = csvWriter();
 
-          case 6:
-            return _context21.abrupt('return', incrs[key]);
-
-          case 9:
-            _context21.next = 11;
-            return (0, _pathExists2.default)(fname);
-
-          case 11:
-            exists = _context21.sent;
-
-            if (exists) {
-              _context21.next = 19;
-              break;
-            }
-
-            incrs[key] = init * 1;
-            _context21.next = 16;
-            return writeFilePromise(fname, init + "");
+            qs.pipe(obj2csv);
+            return _context21.abrupt('return', obj2csv);
 
           case 16:
-            return _context21.abrupt('return', incrs[key]);
+            console.log('E');
+            return _context21.abrupt('return', qs);
 
-          case 19:
-            _context21.next = 21;
-            return readFilePromise(fname);
-
-          case 21:
-            _context21.t0 = _context21.sent;
-            curr = 1 * _context21.t0;
-
-            if (!load) curr += 1;
-            incrs[key] = curr;
-            _context21.next = 27;
-            return writeFilePromise(fname, curr + "");
-
-          case 27:
-            return _context21.abrupt('return', curr);
-
-          case 28:
+          case 18:
           case 'end':
             return _context21.stop();
         }
@@ -1183,34 +1034,279 @@ var incr = exports.incr = function () {
     }, _callee20, this);
   }));
 
-  return function incr(_x24) {
-    return _ref23.apply(this, arguments);
+  return function queryOpts(_x26) {
+    return _ref22.apply(this, arguments);
   };
 }();
 
-var setIncr = exports.setIncr = function () {
-  var _ref24 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee21(key, val) {
-    var fname;
+var getTypes = exports.getTypes = function () {
+  var _ref23 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee21(globPat) {
+    var matchDirs;
     return _regenerator2.default.wrap(function _callee21$(_context22) {
       while (1) {
         switch (_context22.prev = _context22.next) {
           case 0:
-            fname = cfg.path + '/' + key + '_INCR';
-
-            incrs[key] = val - 1;
+            matchDirs = [];
+            _context22.prev = 1;
             _context22.next = 4;
-            return writeFilePromise(fname, incrs[key]);
+            return glob_(cfg.path + '/' + globPat + '_GMT');
 
           case 4:
+            matchDirs = _context22.sent;
+            _context22.next = 10;
+            break;
+
+          case 7:
+            _context22.prev = 7;
+            _context22.t0 = _context22['catch'](1);
+            throw new Error('timequerylog error globbing for ' + _glob2.default);
+
+          case 10:
+            return _context22.abrupt('return', matchDirs.map(function (dir) {
+              dir = dir.replace(cfg.path, '');
+              return dir.substr(1, dir.length - 5);
+            }));
+
+          case 11:
           case 'end':
             return _context22.stop();
         }
       }
-    }, _callee21, this);
+    }, _callee21, this, [[1, 7]]);
   }));
 
-  return function setIncr(_x27, _x28) {
+  return function getTypes(_x27) {
+    return _ref23.apply(this, arguments);
+  };
+}();
+
+var queryMultiArray = exports.queryMultiArray = function () {
+  var _ref24 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee22(_ref25) {
+    var typeGlob = _ref25.typeGlob,
+        start = _ref25.start,
+        end = _ref25.end,
+        match = _ref25.match;
+
+    var types, all, calls, _iteratorNormalCompletion8, _didIteratorError8, _iteratorError8, _iterator8, _step8, type, results, _iteratorNormalCompletion9, _didIteratorError9, _iteratorError9, _iterator9, _step9, result;
+
+    return _regenerator2.default.wrap(function _callee22$(_context23) {
+      while (1) {
+        switch (_context23.prev = _context23.next) {
+          case 0:
+            if (!match) match = function match(d) {
+              return true;
+            };
+            if (!end) end = new Date();
+            if (!start) start = (0, _momentTimezone2.default)(end).subtract(30, 'minutes').toDate();
+            _context23.next = 5;
+            return getTypes(typeGlob);
+
+          case 5:
+            types = _context23.sent;
+            all = [], calls = [];
+            _iteratorNormalCompletion8 = true;
+            _didIteratorError8 = false;
+            _iteratorError8 = undefined;
+            _context23.prev = 10;
+
+            for (_iterator8 = types[Symbol.iterator](); !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+              type = _step8.value;
+
+              calls.push(query(type, start, end, match));
+            }
+            _context23.next = 18;
+            break;
+
+          case 14:
+            _context23.prev = 14;
+            _context23.t0 = _context23['catch'](10);
+            _didIteratorError8 = true;
+            _iteratorError8 = _context23.t0;
+
+          case 18:
+            _context23.prev = 18;
+            _context23.prev = 19;
+
+            if (!_iteratorNormalCompletion8 && _iterator8.return) {
+              _iterator8.return();
+            }
+
+          case 21:
+            _context23.prev = 21;
+
+            if (!_didIteratorError8) {
+              _context23.next = 24;
+              break;
+            }
+
+            throw _iteratorError8;
+
+          case 24:
+            return _context23.finish(21);
+
+          case 25:
+            return _context23.finish(18);
+
+          case 26:
+            _context23.next = 28;
+            return Promise.all(calls);
+
+          case 28:
+            results = _context23.sent;
+            _iteratorNormalCompletion9 = true;
+            _didIteratorError9 = false;
+            _iteratorError9 = undefined;
+            _context23.prev = 32;
+
+            for (_iterator9 = results[Symbol.iterator](); !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+              result = _step9.value;
+
+              all = all.concat(result);
+            }_context23.next = 40;
+            break;
+
+          case 36:
+            _context23.prev = 36;
+            _context23.t1 = _context23['catch'](32);
+            _didIteratorError9 = true;
+            _iteratorError9 = _context23.t1;
+
+          case 40:
+            _context23.prev = 40;
+            _context23.prev = 41;
+
+            if (!_iteratorNormalCompletion9 && _iterator9.return) {
+              _iterator9.return();
+            }
+
+          case 43:
+            _context23.prev = 43;
+
+            if (!_didIteratorError9) {
+              _context23.next = 46;
+              break;
+            }
+
+            throw _iteratorError9;
+
+          case 46:
+            return _context23.finish(43);
+
+          case 47:
+            return _context23.finish(40);
+
+          case 48:
+            all.sort(byJSDate);
+            return _context23.abrupt('return', all);
+
+          case 50:
+          case 'end':
+            return _context23.stop();
+        }
+      }
+    }, _callee22, this, [[10, 14, 18, 26], [19,, 21, 25], [32, 36, 40, 48], [41,, 43, 47]]);
+  }));
+
+  return function queryMultiArray(_x28) {
     return _ref24.apply(this, arguments);
+  };
+}();
+
+var incr = exports.incr = function () {
+  var _ref26 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee23(key) {
+    var init = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var load = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var fname, exists, curr;
+    return _regenerator2.default.wrap(function _callee23$(_context24) {
+      while (1) {
+        switch (_context24.prev = _context24.next) {
+          case 0:
+            fname = cfg.path + '/' + key + '_INCR';
+
+            if (!incrs[key]) {
+              _context24.next = 9;
+              break;
+            }
+
+            incrs[key];
+            if (!load) incrs[key]++;
+            _context24.next = 6;
+            return writeFilePromise(fname, incrs[key]);
+
+          case 6:
+            return _context24.abrupt('return', incrs[key]);
+
+          case 9:
+            _context24.next = 11;
+            return (0, _pathExists2.default)(fname);
+
+          case 11:
+            exists = _context24.sent;
+
+            if (exists) {
+              _context24.next = 19;
+              break;
+            }
+
+            incrs[key] = init * 1;
+            _context24.next = 16;
+            return writeFilePromise(fname, init + "");
+
+          case 16:
+            return _context24.abrupt('return', incrs[key]);
+
+          case 19:
+            _context24.next = 21;
+            return readFilePromise(fname);
+
+          case 21:
+            _context24.t0 = _context24.sent;
+            curr = 1 * _context24.t0;
+
+            if (!load) curr += 1;
+            incrs[key] = curr;
+            _context24.next = 27;
+            return writeFilePromise(fname, curr + "");
+
+          case 27:
+            return _context24.abrupt('return', curr);
+
+          case 28:
+          case 'end':
+            return _context24.stop();
+        }
+      }
+    }, _callee23, this);
+  }));
+
+  return function incr(_x29) {
+    return _ref26.apply(this, arguments);
+  };
+}();
+
+var setIncr = exports.setIncr = function () {
+  var _ref27 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee24(key, val) {
+    var fname;
+    return _regenerator2.default.wrap(function _callee24$(_context25) {
+      while (1) {
+        switch (_context25.prev = _context25.next) {
+          case 0:
+            fname = cfg.path + '/' + key + '_INCR';
+
+            incrs[key] = val - 1;
+            _context25.next = 4;
+            return writeFilePromise(fname, incrs[key]);
+
+          case 4:
+          case 'end':
+            return _context25.stop();
+        }
+      }
+    }, _callee24, this);
+  }));
+
+  return function setIncr(_x32, _x33) {
+    return _ref27.apply(this, arguments);
   };
 }();
 
@@ -1220,7 +1316,6 @@ exports.readyToExit = readyToExit;
 exports.config = config;
 exports.whichFile = whichFile;
 exports.log = log;
-exports.queryOpts = queryOpts;
 exports.hrms = hrms;
 exports.incrNow = incrNow;
 
@@ -1310,12 +1405,17 @@ var _performanceNow = require('performance-now');
 
 var _performanceNow2 = _interopRequireDefault(_performanceNow);
 
+var _fsNdjson = require('fs-ndjson');
+
+var _fsNdjson2 = _interopRequireDefault(_fsNdjson);
+
 var _stream = require('stream');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//import snappy from 'snappy';
 var glob_ = (0, _pify2.default)(_glob2.default);
+//import snappy from 'snappy';
+
 
 var DBG = process.env.DEBUG_TQL;
 
@@ -1665,404 +1765,479 @@ function matchRows(_ref9) {
   return results;
 }
 
+var ChunkStream = function (_Readable) {
+  (0, _inherits3.default)(ChunkStream, _Readable);
+
+  function ChunkStream(options) {
+    var _this3 = this;
+
+    (0, _classCallCheck3.default)(this, ChunkStream);
+
+    options.objectMode = true;
+
+    var _this2 = (0, _possibleConstructorReturn3.default)(this, (ChunkStream.__proto__ || Object.getPrototypeOf(ChunkStream)).call(this, options));
+
+    _this2.next = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11() {
+      var fname, start, end, matchFunction, filtered, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, item;
+
+      return _regenerator2.default.wrap(function _callee11$(_context12) {
+        while (1) {
+          switch (_context12.prev = _context12.next) {
+            case 0:
+              if (!(_this2.files.length == 0)) {
+                _context12.next = 3;
+                break;
+              }
+
+              _this2.push(null);
+              return _context12.abrupt('return');
+
+            case 3:
+              fname = _this2.files.pop();
+              start = _this2.start, end = _this2.end, matchFunction = _this2.matchFunction;
+              _context12.next = 7;
+              return fastFilterFile(fname, start, end, matchFunction);
+
+            case 7:
+              filtered = _context12.sent;
+              _iteratorNormalCompletion7 = true;
+              _didIteratorError7 = false;
+              _iteratorError7 = undefined;
+              _context12.prev = 11;
+
+              for (_iterator7 = filtered[Symbol.iterator](); !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                item = _step7.value;
+
+                _this2.push(item);
+              }
+              _context12.next = 19;
+              break;
+
+            case 15:
+              _context12.prev = 15;
+              _context12.t0 = _context12['catch'](11);
+              _didIteratorError7 = true;
+              _iteratorError7 = _context12.t0;
+
+            case 19:
+              _context12.prev = 19;
+              _context12.prev = 20;
+
+              if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                _iterator7.return();
+              }
+
+            case 22:
+              _context12.prev = 22;
+
+              if (!_didIteratorError7) {
+                _context12.next = 25;
+                break;
+              }
+
+              throw _iteratorError7;
+
+            case 25:
+              return _context12.finish(22);
+
+            case 26:
+              return _context12.finish(19);
+
+            case 27:
+            case 'end':
+              return _context12.stop();
+          }
+        }
+      }, _callee11, _this3, [[11, 15, 19, 27], [20,, 22, 26]]);
+    }));
+
+    _this2._read = function () {
+      _this2.next().catch(console.error);
+    };
+
+    Object.assign(_this2, options);
+    _this2.done = 0;
+    _this2.r = 0;
+    return _this2;
+  }
+
+  return ChunkStream;
+}(_stream.Readable);
+
 function fmt(dt) {
   return (0, _momentTimezone2.default)(dt).format('YYYY-MM-DD hh:mm:ss A');
 }
 
-var QueryStream = function (_Readable) {
-  (0, _inherits3.default)(QueryStream, _Readable);
+var QueryStream = function (_Readable2) {
+  (0, _inherits3.default)(QueryStream, _Readable2);
 
   function QueryStream(options) {
-    var _this3 = this;
+    var _this5 = this;
 
     (0, _classCallCheck3.default)(this, QueryStream);
 
     options.objectMode = true;
 
-    var _this2 = (0, _possibleConstructorReturn3.default)(this, (QueryStream.__proto__ || Object.getPrototypeOf(QueryStream)).call(this, options));
+    var _this4 = (0, _possibleConstructorReturn3.default)(this, (QueryStream.__proto__ || Object.getPrototypeOf(QueryStream)).call(this, options));
 
-    _this2.init = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11() {
-      return _regenerator2.default.wrap(function _callee11$(_context12) {
-        while (1) {
-          switch (_context12.prev = _context12.next) {
-            case 0:
-              _context12.next = 2;
-              return whichFiles(_this2.type, _this2.start, _this2.end);
-
-            case 2:
-              _this2.files = _context12.sent;
-
-              _this2.fileNum = 0;
-              _this2.rowNum = 0;
-              _this2.data = null;
-              _this2.fileData = [];
-              _this2.initFinished = true;
-
-            case 8:
-            case 'end':
-              return _context12.stop();
-          }
-        }
-      }, _callee11, _this3);
-    }));
-    _this2.checkPreload = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13() {
-      var preloads, xx, _loop2, n;
-
+    _this4.init = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13() {
       return _regenerator2.default.wrap(function _callee13$(_context14) {
         while (1) {
           switch (_context14.prev = _context14.next) {
             case 0:
-              return _context14.abrupt('return');
+              _context14.next = 2;
+              return whichFiles(_this4.type, _this4.start, _this4.end);
+
+            case 2:
+              _this4.files = _context14.sent;
+
+              _this4.fileNum = 0;
+              _this4.rowNum = 0;
+              _this4.data = null;
+              _this4.fileData = [];
+              _this4.initFinished = true;
+
+            case 8:
+            case 'end':
+              return _context14.stop();
+          }
+        }
+      }, _callee13, _this5);
+    }));
+    _this4.checkPreload = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee15() {
+      var preloads, xx, _loop2, n;
+
+      return _regenerator2.default.wrap(function _callee15$(_context16) {
+        while (1) {
+          switch (_context16.prev = _context16.next) {
+            case 0:
+              return _context16.abrupt('return');
 
             case 3:
               preloads = [];
               xx = 0;
 
               _loop2 = function _loop2(n) {
-                preloads.push((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12() {
-                  return _regenerator2.default.wrap(function _callee12$(_context13) {
+                preloads.push((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee14() {
+                  return _regenerator2.default.wrap(function _callee14$(_context15) {
                     while (1) {
-                      switch (_context13.prev = _context13.next) {
+                      switch (_context15.prev = _context15.next) {
                         case 0:
                           xx++;
-                          _context13.t0 = _this2.fileData;
-                          _context13.next = 4;
-                          return filterFile(_this2.files[n], _this2.start, _this2.end, _this2.match);
+                          _context15.t0 = _this4.fileData;
+                          _context15.next = 4;
+                          return filterFile(_this4.files[n], _this4.start, _this4.end, _this4.match);
 
                         case 4:
-                          _context13.t1 = _context13.sent;
+                          _context15.t1 = _context15.sent;
 
-                          _context13.t0.push.call(_context13.t0, _context13.t1);
+                          _context15.t0.push.call(_context15.t0, _context15.t1);
 
                         case 6:
                         case 'end':
-                          return _context13.stop();
+                          return _context15.stop();
                       }
                     }
-                  }, _callee12, _this3);
+                  }, _callee14, _this5);
                 }))());
               };
 
-              for (n = _this2.fileNum; n < _this2.files.length && n < _this2.fileNum + 3; n++) {
+              for (n = _this4.fileNum; n < _this4.files.length && n < _this4.fileNum + 3; n++) {
                 _loop2(n);
               }
 
               if (!(preloads.length == 0)) {
-                _context14.next = 10;
+                _context16.next = 10;
                 break;
               }
 
-              _context14.next = 12;
+              _context16.next = 12;
               break;
 
             case 10:
-              _context14.next = 12;
+              _context16.next = 12;
               return Promise.all(preloads);
 
             case 12:
             case 'end':
-              return _context14.stop();
-          }
-        }
-      }, _callee13, _this3);
-    }));
-
-    _this2.loadFile = function () {
-      var _ref16 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee14(f) {
-        var result, st;
-        return _regenerator2.default.wrap(function _callee14$(_context15) {
-          while (1) {
-            switch (_context15.prev = _context15.next) {
-              case 0:
-                if (_this2.files) {
-                  _context15.next = 3;
-                  break;
-                }
-
-                _context15.next = 3;
-                return _this2.init();
-
-              case 3:
-                if (!(_this2.data && _this2.rowNum < _this2.data.length)) {
-                  _context15.next = 5;
-                  break;
-                }
-
-                return _context15.abrupt('return', _this2.data);
-
-              case 5:
-                if (!(_this2.files && _this2.fileNum >= _this2.files.length)) {
-                  _context15.next = 7;
-                  break;
-                }
-
-                return _context15.abrupt('return', null);
-
-              case 7:
-                if (_this2.data) {
-                  _this2.rowNum = 0;
-                }
-                result = null;
-                _context15.prev = 9;
-                st = Date.now();
-
-                if (!(_this2.fileData.length > _this2.fileNum)) {
-                  _context15.next = 20;
-                  break;
-                }
-
-                _this2.data = _this2.fileData[_this2.fileNum++];
-
-                if (!(_this2.data.length === 0)) {
-                  _context15.next = 17;
-                  break;
-                }
-
-                _context15.next = 16;
-                return _this2.loadFile();
-
-              case 16:
-                return _context15.abrupt('return', _context15.sent);
-
-              case 17:
-                return _context15.abrupt('return', _this2.data);
-
-              case 20:
-                _context15.next = 22;
-                return filterFile(_this2.files[_this2.fileNum++], _this2.start, _this2.end, _this2.match);
-
-              case 22:
-                result = _context15.sent;
-
-                if (!(_this2.fileData.length == 0)) {
-                  _context15.next = 26;
-                  break;
-                }
-
-                _context15.next = 26;
-                return _this2.checkPreload();
-
-              case 26:
-                if (!(result.length === 0)) {
-                  _context15.next = 30;
-                  break;
-                }
-
-                _context15.next = 29;
-                return _this2.loadFile();
-
-              case 29:
-                return _context15.abrupt('return', _context15.sent);
-
-              case 30:
-                _context15.next = 35;
-                break;
-
-              case 32:
-                _context15.prev = 32;
-                _context15.t0 = _context15['catch'](9);
-
-                console.error('filterfile err in loadfile', _context15.t0);
-
-              case 35:
-                _this2.data = result;
-                return _context15.abrupt('return', result);
-
-              case 37:
-              case 'end':
-                return _context15.stop();
-            }
-          }
-        }, _callee14, _this3, [[9, 32]]);
-      }));
-
-      return function (_x19) {
-        return _ref16.apply(this, arguments);
-      };
-    }();
-
-    _this2.nextRow = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee15() {
-      var row;
-      return _regenerator2.default.wrap(function _callee15$(_context16) {
-        while (1) {
-          switch (_context16.prev = _context16.next) {
-            case 0:
-              _context16.prev = 0;
-
-              if (_this2.data) {
-                _context16.next = 3;
-                break;
-              }
-
-              return _context16.abrupt('return', null);
-
-            case 3:
-              if (!(_this2.rowNum >= _this2.data.length)) {
-                _context16.next = 9;
-                break;
-              }
-
-              _context16.next = 6;
-              return _this2.loadFile();
-
-            case 6:
-              _this2.data = _context16.sent;
-
-              if (_this2.data) {
-                _context16.next = 9;
-                break;
-              }
-
-              return _context16.abrupt('return', null);
-
-            case 9:
-              row = _this2.data[_this2.rowNum];
-
-              _this2.rowNum++;
-              return _context16.abrupt('return', row);
-
-            case 14:
-              _context16.prev = 14;
-              _context16.t0 = _context16['catch'](0);
-
-              console.error('nextRow issue', _context16.t0);
-
-            case 17:
-            case 'end':
               return _context16.stop();
           }
         }
-      }, _callee15, _this3, [[0, 14]]);
+      }, _callee15, _this5);
     }));
 
-    _this2._read = function () {
+    _this4.loadFile = function () {
+      var _ref18 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee16(f) {
+        var result, st;
+        return _regenerator2.default.wrap(function _callee16$(_context17) {
+          while (1) {
+            switch (_context17.prev = _context17.next) {
+              case 0:
+                if (_this4.files) {
+                  _context17.next = 3;
+                  break;
+                }
+
+                _context17.next = 3;
+                return _this4.init();
+
+              case 3:
+                if (!(_this4.data && _this4.rowNum < _this4.data.length)) {
+                  _context17.next = 5;
+                  break;
+                }
+
+                return _context17.abrupt('return', _this4.data);
+
+              case 5:
+                if (!(_this4.files && _this4.fileNum >= _this4.files.length)) {
+                  _context17.next = 7;
+                  break;
+                }
+
+                return _context17.abrupt('return', null);
+
+              case 7:
+                if (_this4.data) {
+                  _this4.rowNum = 0;
+                }
+                result = null;
+                _context17.prev = 9;
+                st = Date.now();
+
+                if (!(_this4.fileData.length > _this4.fileNum)) {
+                  _context17.next = 20;
+                  break;
+                }
+
+                _this4.data = _this4.fileData[_this4.fileNum++];
+
+                if (!(_this4.data.length === 0)) {
+                  _context17.next = 17;
+                  break;
+                }
+
+                _context17.next = 16;
+                return _this4.loadFile();
+
+              case 16:
+                return _context17.abrupt('return', _context17.sent);
+
+              case 17:
+                return _context17.abrupt('return', _this4.data);
+
+              case 20:
+                _context17.next = 22;
+                return filterFile(_this4.files[_this4.fileNum++], _this4.start, _this4.end, _this4.match);
+
+              case 22:
+                result = _context17.sent;
+
+                if (!(_this4.fileData.length == 0)) {
+                  _context17.next = 26;
+                  break;
+                }
+
+                _context17.next = 26;
+                return _this4.checkPreload();
+
+              case 26:
+                if (!(result.length === 0)) {
+                  _context17.next = 30;
+                  break;
+                }
+
+                _context17.next = 29;
+                return _this4.loadFile();
+
+              case 29:
+                return _context17.abrupt('return', _context17.sent);
+
+              case 30:
+                _context17.next = 35;
+                break;
+
+              case 32:
+                _context17.prev = 32;
+                _context17.t0 = _context17['catch'](9);
+
+                console.error('filterfile err in loadfile', _context17.t0);
+
+              case 35:
+                _this4.data = result;
+                return _context17.abrupt('return', result);
+
+              case 37:
+              case 'end':
+                return _context17.stop();
+            }
+          }
+        }, _callee16, _this5, [[9, 32]]);
+      }));
+
+      return function (_x23) {
+        return _ref18.apply(this, arguments);
+      };
+    }();
+
+    _this4.nextRow = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee17() {
+      var row;
+      return _regenerator2.default.wrap(function _callee17$(_context18) {
+        while (1) {
+          switch (_context18.prev = _context18.next) {
+            case 0:
+              _context18.prev = 0;
+
+              if (_this4.data) {
+                _context18.next = 3;
+                break;
+              }
+
+              return _context18.abrupt('return', null);
+
+            case 3:
+              if (!(_this4.rowNum >= _this4.data.length)) {
+                _context18.next = 9;
+                break;
+              }
+
+              _context18.next = 6;
+              return _this4.loadFile();
+
+            case 6:
+              _this4.data = _context18.sent;
+
+              if (_this4.data) {
+                _context18.next = 9;
+                break;
+              }
+
+              return _context18.abrupt('return', null);
+
+            case 9:
+              row = _this4.data[_this4.rowNum];
+
+              _this4.rowNum++;
+              return _context18.abrupt('return', row);
+
+            case 14:
+              _context18.prev = 14;
+              _context18.t0 = _context18['catch'](0);
+
+              console.error('nextRow issue', _context18.t0);
+
+            case 17:
+            case 'end':
+              return _context18.stop();
+          }
+        }
+      }, _callee17, _this5, [[0, 14]]);
+    }));
+
+    _this4._read = function () {
       var id = (0, _uuid.v4)();
-      _this2.reading = new Promise(function () {
-        var _ref18 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee16(res) {
+      _this4.reading = new Promise(function () {
+        var _ref20 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee18(res) {
           var canPush, i;
-          return _regenerator2.default.wrap(function _callee16$(_context17) {
+          return _regenerator2.default.wrap(function _callee18$(_context19) {
             while (1) {
-              switch (_context17.prev = _context17.next) {
+              switch (_context19.prev = _context19.next) {
                 case 0:
-                  if (!_this2.reading) {
-                    _context17.next = 4;
+                  if (!_this4.reading) {
+                    _context19.next = 4;
                     break;
                   }
 
-                  return _context17.abrupt('return', true);
+                  return _context19.abrupt('return', true);
 
                 case 4:
                   canPush = true;
                   i = 0;
 
                 case 6:
-                  _context17.prev = 6;
+                  _context19.prev = 6;
 
-                  if (_this2.data) {
-                    _context17.next = 16;
+                  if (_this4.data) {
+                    _context19.next = 16;
                     break;
                   }
 
-                  _context17.next = 10;
-                  return _this2.loadFile();
+                  _context19.next = 10;
+                  return _this4.loadFile();
 
                 case 10:
-                  _this2.data = _context17.sent;
-                  _context17.next = 13;
-                  return _this2.nextRow();
+                  _this4.data = _context19.sent;
+                  _context19.next = 13;
+                  return _this4.nextRow();
 
                 case 13:
-                  _this2.row = _context17.sent;
-                  _context17.next = 17;
+                  _this4.row = _context19.sent;
+                  _context19.next = 17;
                   break;
 
                 case 16:
-                  _this2.row = _this2.data[_this2.rowNum++];
+                  _this4.row = _this4.data[_this4.rowNum++];
 
                 case 17:
-                  _context17.next = 22;
+                  _context19.next = 22;
                   break;
 
                 case 19:
-                  _context17.prev = 19;
-                  _context17.t0 = _context17['catch'](6);
-                  console.trace(_context17.t0);
+                  _context19.prev = 19;
+                  _context19.t0 = _context19['catch'](6);
+                  console.trace(_context19.t0);
 
                 case 22:
                   ;
-                  if (_this2.row === undefined) _this2.row = null;
-                  if (!(_this2.row === null)) {
-                    if (_this2.timeMS && _this2.row.time.getTime) _this2.row.time = _this2.row.time.getTime();
-                    if (_this2.map) _this2.row = _this2.map(_this2.row);
+                  if (_this4.row === undefined) _this4.row = null;
+                  if (!(_this4.row === null)) {
+                    if (_this4.timeMS && _this4.row.time.getTime) _this4.row.time = _this4.row.time.getTime();
+                    if (_this4.map) _this4.row = _this4.map(_this4.row);
                   } else {}
-                  canPush = _this2.push(_this2.row);
+                  canPush = _this4.push(_this4.row);
 
-                  if (!(_this2.data && _this2.rowNum == _this2.data.length)) {
-                    _context17.next = 30;
+                  if (!(_this4.data && _this4.rowNum == _this4.data.length)) {
+                    _context19.next = 30;
                     break;
                   }
 
-                  _context17.next = 29;
-                  return _this2.loadFile();
+                  _context19.next = 29;
+                  return _this4.loadFile();
 
                 case 29:
-                  _this2.data = _context17.sent;
+                  _this4.data = _context19.sent;
 
                 case 30:
-                  if (_this2.row && canPush) {
-                    _context17.next = 6;
+                  if (_this4.row && canPush) {
+                    _context19.next = 6;
                     break;
                   }
 
                 case 31:
-                  return _context17.abrupt('return', true);
+                  return _context19.abrupt('return', true);
 
                 case 32:
                 case 'end':
-                  return _context17.stop();
+                  return _context19.stop();
               }
             }
-          }, _callee16, _this3, [[6, 19]]);
+          }, _callee18, _this5, [[6, 19]]);
         }));
 
-        return function (_x20) {
-          return _ref18.apply(this, arguments);
+        return function (_x24) {
+          return _ref20.apply(this, arguments);
         };
       }()).catch(console.error);
     };
 
-    Object.assign(_this2, options);
-    _this2.initFinished = false;
-    _this2.fileNum = 0;
-    return _this2;
+    Object.assign(_this4, options);
+    _this4.initFinished = false;
+    _this4.fileNum = 0;
+    return _this4;
   }
 
   return QueryStream;
 }(_stream.Readable);
-
-function queryOpts(options) {
-  var type = options.type,
-      start = options.start,
-      end = options.end,
-      match = options.match;
-
-  if (!match) options.match = function (d) {
-    return true;
-  };
-  if (!end) options.end = new Date();
-  if (!start) options.start = (0, _momentTimezone2.default)(end).subtract(30, 'minutes').toDate();
-
-  var qs = new QueryStream(options);
-
-  if (options.csv) {
-    var csvWriter = require('csv-write-stream');
-    var obj2csv = csvWriter();
-    qs.pipe(obj2csv);
-    return obj2csv;
-  } else {
-    return qs;
-  }
-}
 
 function hrms() {
   return (0, _performanceNow2.default)() * 1000;

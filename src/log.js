@@ -28,6 +28,7 @@ import timestring from 'timestring';
 import {remove} from 'fs-promise';
 import glob from 'glob';
 import performanceNow from "performance-now";
+import fsndjson from 'fs-ndjson'
 
 const glob_ = pify(glob);
 
@@ -511,6 +512,24 @@ async function filterFile(fname, start, end, matchFunction) {
   return data;
 }
 
+async function fastFilterFile(fname, start, end, matchFunction) {
+  let data = await fsndjson.readFile(fname)
+  if (matchFunction == -1) return data
+  let l = data.length
+
+  let res = []
+
+  for (let i=0; i<l; i++) {
+    const row = data[i]
+    row.time = new Date(row.time)
+    if (row.time >= start && row.time <= end &&
+        matchFunction(row))
+      res.push(row)   
+  }
+  return res
+}
+
+
 export async function query(type, start, end, matchFunction = (d => true)) {
   let files = await whichFiles(type, start, end);
   let results = [];
@@ -528,6 +547,37 @@ export async function query(type, start, end, matchFunction = (d => true)) {
   return results;
 }
 
+import {Readable} from 'stream';
+
+class ChunkStream extends Readable {
+  constructor(options) {
+    options.objectMode = true;
+    super(options);
+    Object.assign(this, options);
+    this.done = 0
+    this.r = 0
+  }
+  
+  next = async () => {
+    if (this.files.length == 0) {
+      this.push(null)
+      return
+    }
+    let fname = this.files.pop()
+    let {start, end, matchFunction} = this 
+    let filtered = await fastFilterFile(fname, start, end, matchFunction);
+    for (let item of filtered) {
+      this.push(item)
+    }
+  } 
+ 
+  _read = () => {
+    this.next().catch(console.error)
+  }  
+
+}
+
+
 function fmt(dt) {
   return moment(dt).format('YYYY-MM-DD hh:mm:ss A');
 }
@@ -539,7 +589,6 @@ export async function queryRecent(type) {
   return results;
 }
 
-import {Readable} from 'stream';
 
 class QueryStream extends Readable {
   constructor(options) {
@@ -676,20 +725,21 @@ export async function latest(type) {
   }
 }
 
-export function queryOpts(options) {
+export async function queryOpts(options) {
   let {type, start, end, match} = options;
   if (!match) options.match = (d=>true);
+  options.matchFunction = options.match
   if (!end) options.end = new Date();
   if (!start) options.start = moment(end).subtract(30, 'minutes').toDate();
-
-  const qs = new QueryStream(options);
-
+  options.files = await whichFiles(type, start, end);
+  const qs = new ChunkStream(options)
   if (options.csv) {
     const csvWriter = require('csv-write-stream');
     const obj2csv = csvWriter();
     qs.pipe(obj2csv);
     return obj2csv;
   } else {
+    console.log('E')
     return qs;
   }
 }
