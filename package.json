@@ -40,7 +40,7 @@
     "now-or-again": "^3.2.0",
     "path-exists": "^2.1.0",
     "performance-now": "^2.1.0",
-    "pify": "^2.3.0",
+    "pify": "^5.0.0",
     "queue": "^3.1.0",
     "signal-exit": "^3.0.2",
     "stream-buffers": "^3.0.1",
