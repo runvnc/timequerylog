@@ -563,7 +563,7 @@ class ChunkStream extends Readable {
       this.push(null)
       return
     }
-    let fname = this.files.pop()
+    let fname = this.files.shift()
     let {start, end, matchFunction} = this 
     let filtered = await fastFilterFile(fname, start, end, matchFunction);
     for (let item of filtered) {
@@ -732,6 +732,7 @@ export async function queryOpts(options) {
   if (!end) options.end = new Date();
   if (!start) options.start = moment(end).subtract(30, 'minutes').toDate();
   options.files = await whichFiles(type, start, end);
+  console.log({whichFiles:JSON.stringify(options.files)})
   const qs = new ChunkStream(options)
   if (options.csv) {
     const csvWriter = require('csv-write-stream');

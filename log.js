@@ -1009,10 +1009,12 @@ var queryOpts = exports.queryOpts = function () {
 
           case 7:
             options.files = _context21.sent;
+
+            console.log({ whichFiles: JSON.stringify(options.files) });
             qs = new ChunkStream(options);
 
             if (!options.csv) {
-              _context21.next = 16;
+              _context21.next = 17;
               break;
             }
 
@@ -1022,11 +1024,11 @@ var queryOpts = exports.queryOpts = function () {
             qs.pipe(obj2csv);
             return _context21.abrupt('return', obj2csv);
 
-          case 16:
+          case 17:
             console.log('E');
             return _context21.abrupt('return', qs);
 
-          case 18:
+          case 19:
           case 'end':
             return _context21.stop();
         }
@@ -1793,7 +1795,7 @@ var ChunkStream = function (_Readable) {
               return _context12.abrupt('return');
 
             case 3:
-              fname = _this2.files.pop();
+              fname = _this2.files.shift();
               start = _this2.start, end = _this2.end, matchFunction = _this2.matchFunction;
               _context12.next = 7;
               return fastFilterFile(fname, start, end, matchFunction);
