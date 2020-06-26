@@ -1009,12 +1009,10 @@ var queryOpts = exports.queryOpts = function () {
 
           case 7:
             options.files = _context21.sent;
-
-            console.log({ whichFiles: JSON.stringify(options.files) });
             qs = new ChunkStream(options);
 
             if (!options.csv) {
-              _context21.next = 17;
+              _context21.next = 16;
               break;
             }
 
@@ -1024,11 +1022,11 @@ var queryOpts = exports.queryOpts = function () {
             qs.pipe(obj2csv);
             return _context21.abrupt('return', obj2csv);
 
-          case 17:
+          case 16:
             console.log('E');
             return _context21.abrupt('return', qs);
 
-          case 19:
+          case 18:
           case 'end':
             return _context21.stop();
         }

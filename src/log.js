@@ -732,7 +732,6 @@ export async function queryOpts(options) {
   if (!end) options.end = new Date();
   if (!start) options.start = moment(end).subtract(30, 'minutes').toDate();
   options.files = await whichFiles(type, start, end);
-  console.log({whichFiles:JSON.stringify(options.files)})
   const qs = new ChunkStream(options)
   if (options.csv) {
     const csvWriter = require('csv-write-stream');
